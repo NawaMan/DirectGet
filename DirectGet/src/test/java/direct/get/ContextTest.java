@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class ContextText {
+public class ContextTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test

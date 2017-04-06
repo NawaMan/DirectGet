@@ -16,11 +16,11 @@ public class Get {
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
-	private static final Provider defaultProvider = clzz -> {
+	private static final Provider defaultProvider = ref -> {
 		try {
-			return ((Class) clzz).newInstance();
+			return ((Ref) ref).getTargetClass().newInstance();
 		} catch (Exception e) {
-			throw new ProvidingException((Class)clzz, e);
+			throw new ProvidingException((Ref)ref, e);
 		}
 	};
 	@SuppressWarnings("rawtypes")
@@ -30,20 +30,20 @@ public class Get {
 	// Return null for not known.
 	// Return Optional.empty() for known to be null.
 	@SuppressWarnings("rawtypes")
-	static Optional<Provider> getProvider(Class clzz) {
+	static Optional<Provider> getProvider(Ref ref) {
 		Get get = Get.get;
-		Optional<Provider> provider = getProviderFromGet(clzz, get);
+		Optional<Provider> provider = getProviderFromGet(ref, get);
 		return provider;
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static Optional<Provider> getProviderFromGet(Class clzz, Get get) {
+	private static Optional<Provider> getProviderFromGet(Ref ref, Get get) {
 		Stack<Context> contexts = get.contexts;
 		if (!contexts.isEmpty()) {
 			for (int i = contexts.size() - 1; i >= 0; i--) {
 				Context context = contexts.get(i);
 				@SuppressWarnings("unchecked")
-				Optional<Provider> provider = context.getProviders(clzz);
+				Optional<Provider> provider = context.getProviders(ref);
 				if (provider != null) {
 					return provider;
 				}
@@ -54,14 +54,14 @@ public class Get {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static <T> void ensureProvider(Class<T> clzz, Optional<Provider> provider)
+	private static <T> void ensureProvider(Ref<T> ref, Optional<Provider> provider)
 			throws UnknownProviderException {
 		if (provider == null) {
-			throw new UnknownProviderException(clzz);
+			throw new UnknownProviderException(ref);
 		}
 		
 		if (!provider.isPresent()) {
-			throw new UnknownProviderException(clzz);
+			throw new UnknownProviderException(ref);
 		}
 	}
 	
@@ -69,23 +69,27 @@ public class Get {
 		return this.contexts.peek();
 	}
 	
+	public static <T, V extends T> V a(Class<T> targetClass) {
+		return a(Ref.of(targetClass));
+	}
+	
 	@SuppressWarnings("unchecked")
-	public static <T, V extends T> V a(Class<T> clzz) {
-		if (clzz == Get.class) {
+	public static <T, V extends T> V a(Ref<T> ref) {
+		if (ref.getTargetClass() == Get.class) {
 			return (V)Get.get;
 		}
 		
 		@SuppressWarnings("rawtypes")
-		Optional<Provider> provider = getProvider(clzz);
+		Optional<Provider> provider = getProvider(ref);
 		if (provider == null) {
 			provider = defaultProviderOptional;
 		}
 		
-		ensureProvider(clzz, provider);
+		ensureProvider(ref, provider);
 		
-		Object object = provider.get().apply(clzz);
+		Object object = provider.get().apply(ref);
 		if ((object != null)
-		 && !clzz.isInstance(object)) {
+		 && !ref.getTargetClass().isInstance(object)) {
 			throw new ProvideWrongTypeException();
 		}
 		return (V)object;

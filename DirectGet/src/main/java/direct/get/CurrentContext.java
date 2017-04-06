@@ -8,10 +8,10 @@ public class CurrentContext {
 
 	public final class Providing<T> {
 		
-		private final Class<T> clzz;
+		private final Ref<T> ref;
 		
-		Providing(Class<T> clzz) {
-			this.clzz = clzz;
+		Providing(Ref<T> ref) {
+			this.ref = ref;
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -25,7 +25,7 @@ public class CurrentContext {
 		private void putProviding(Optional optValue) {
 			Get get = Get.a(Get.class);
 			Context context = get.getContext();
-			context.providers.put(clzz, optValue);
+			context.providers.put(ref, optValue);
 		}
 		
 		public <V extends T> CurrentContext with(V instance) {
@@ -34,7 +34,11 @@ public class CurrentContext {
 		}
 		
 		public <V extends T> CurrentContext withA(Class<V> targetClass) {
-			putProviding(optValue(c->Get.a(targetClass)));
+			return withA(Ref.of(targetClass));
+		}
+		
+		public <V extends T> CurrentContext withA(Ref<V> targetRef) {
+			putProviding(optValue(c->Get.a(targetRef)));
 			return CurrentContext.this;
 		}
 		
@@ -43,17 +47,23 @@ public class CurrentContext {
 			return CurrentContext.this;
 		}
 		
-		public <V extends T> CurrentContext by(Function<Class<T>, V> function) {
-			putProviding(optValue(c->function.apply(clzz)));
+		public <V extends T> CurrentContext by(Function<Ref<T>, V> function) {
+			putProviding(optValue(c->function.apply(ref)));
 			return CurrentContext.this;
 		}
 		
 	}
 
-	public <T> Providing<T> provide(Class<T> clzz) {
+	public <T> Providing<T> provide(Class<T> targetClass) {
 		
+		return new Providing<>(Ref.of(targetClass));
 		
-		return new Providing<>(clzz);
+	}
+
+	public <T> Providing<T> provide(Ref<T> ref) {
+		
+		return new Providing<>(ref);
+		
 	}
 	
 }

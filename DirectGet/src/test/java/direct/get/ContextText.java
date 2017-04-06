@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -18,6 +19,21 @@ public class ContextText {
 		
 		List<String> list = Get.a(List.class);
 		assertTrue(list instanceof List);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testProvidedWithAnotherRef() {
+		Ref<List> EmptyList = ()->List.class;
+		List emptyList = Collections.emptyList();
+		
+		Get.a(CurrentContext.class)
+			.provide(EmptyList).with(emptyList);
+		
+		List<String> list = Get.a(EmptyList);
+		assertTrue(list instanceof List);
+		assertEquals(emptyList, list);
+		assertSame(emptyList, list);
 	}
 	
 	@SuppressWarnings("unchecked")

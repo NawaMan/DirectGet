@@ -47,12 +47,12 @@ public class GetTest {
 	
 	@Test
 	public void testGlobalGetAreSameEveryThread() throws InterruptedException {
-		Get thisGlobalGet = Get.a(Get.$GLOBAL_GET);
+		Get thisGlobalGet = Get.a(Get.GLOBAL);
 		AtomicReference<Get> globalGetRef = new AtomicReference<>();
 		CountDownLatch latch = new CountDownLatch(1);
 		
 		new Thread(()->{
-			globalGetRef.set(Get.a(Get.$GLOBAL_GET));
+			globalGetRef.set(Get.a(Get.GLOBAL));
 			latch.countDown();
 		}).start();
 		
@@ -73,7 +73,7 @@ public class GetTest {
 		
 		latch.await();
 		
-		Get globalGet = Get.a(Get.$GLOBAL_GET);
+		Get globalGet = Get.a(Get.GLOBAL);
 		Assert.assertSame(thisParentGet,          globalGet);
 		Assert.assertSame(thatParentGetRef.get(), globalGet);
 	}

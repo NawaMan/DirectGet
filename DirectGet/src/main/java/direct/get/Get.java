@@ -9,7 +9,8 @@ import direct.get.exceptions.UnknownProviderException;
 
 public class Get {
 	
-	public static final Ref<Get> $GLOBAL_GET = ()->Get.class;
+	public static final Ref<Get> GLOBAL = ()->Get.class;
+	public static final Ref<Get> CURRENT = Ref.of(Get.class);
 	
 	private static final Get globalGet = new Get();
 	
@@ -93,7 +94,7 @@ public class Get {
 	
 	@SuppressWarnings("unchecked")
 	public static <T, V extends T> V a(Ref<T> ref) {
-		if (ref == $GLOBAL_GET) {
+		if (ref == GLOBAL) {
 			return (V)Get.globalGet;
 		}
 		

@@ -59,5 +59,23 @@ public class GetTest {
 		latch.await();
 		Assert.assertSame(thisGlobalGet,  globalGetRef.get());
 	}
+	
+	@Test
+	public void testByDefaultGlobalGetIsParentOfEveryGet() throws InterruptedException {
+		Get thisParentGet = Get.a(Get.class).getParentGet().get();
+		AtomicReference<Get> thatParentGetRef = new AtomicReference<>();
+		CountDownLatch latch = new CountDownLatch(1);
+		
+		new Thread(()->{
+			thatParentGetRef.set(Get.a(Get.class).getParentGet().get());
+			latch.countDown();
+		}).start();
+		
+		latch.await();
+		
+		Get globalGet = Get.a(Get.$GLOBAL_GET);
+		Assert.assertSame(thisParentGet,          globalGet);
+		Assert.assertSame(thatParentGetRef.get(), globalGet);
+	}
 
 }

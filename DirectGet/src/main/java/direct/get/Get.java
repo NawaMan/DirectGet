@@ -9,7 +9,25 @@ import direct.get.exceptions.UnknownProviderException;
 
 public class Get {
 	
-	private static final ThreadLocal<Get> localGet = ThreadLocal.withInitial(()->new Get());
+	public static final Ref<Get> $GLOBAL_GET = ()->Get.class;
+	
+	private static final Get globalGet = new Get();
+	
+	private static final ThreadLocal<Get> localGet = ThreadLocal.withInitial(()->new Get(globalGet));
+	
+	private Optional<Get> parent;
+	
+	public Get() {
+		this(null);
+	}
+	
+	public Get(Get parent) {
+		this.parent = Optional.ofNullable(parent);
+	}
+	
+	public Optional<Get> getParentGet() {
+		return this.parent;
+	}
 	
 	final Stack<Context> contexts = new Stack<>(); {
 		contexts.push(new Context());
@@ -75,6 +93,10 @@ public class Get {
 	
 	@SuppressWarnings("unchecked")
 	public static <T, V extends T> V a(Ref<T> ref) {
+		if (ref == $GLOBAL_GET) {
+			return (V)Get.globalGet;
+		}
+		
 		if (ref.getTargetClass() == Get.class) {
 			return (V)Get.localGet.get();
 		}

@@ -9,7 +9,7 @@ import direct.get.exceptions.UnknownProviderException;
 
 public class Get {
 	
-	private static final Get get = new Get();
+	private static final ThreadLocal<Get> localGet = ThreadLocal.withInitial(()->new Get());
 	
 	final Stack<Context> contexts = new Stack<>(); {
 		contexts.push(new Context());
@@ -31,7 +31,7 @@ public class Get {
 	// Return Optional.empty() for known to be null.
 	@SuppressWarnings("rawtypes")
 	static Optional<Provider> getProvider(Ref ref) {
-		Get get = Get.get;
+		Get get = Get.localGet.get();
 		Optional<Provider> provider = getProviderFromGet(ref, get);
 		return provider;
 	}
@@ -76,7 +76,7 @@ public class Get {
 	@SuppressWarnings("unchecked")
 	public static <T, V extends T> V a(Ref<T> ref) {
 		if (ref.getTargetClass() == Get.class) {
-			return (V)Get.get;
+			return (V)Get.localGet.get();
 		}
 		
 		@SuppressWarnings("rawtypes")

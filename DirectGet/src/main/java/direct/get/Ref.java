@@ -14,26 +14,16 @@ public interface Ref<T> {
 		return new Direct<>(targetClass);
 	}
 	
-	public static class Direct<T> implements Ref<T> {
-		
-		private final Class<T> targetClass;
-		
-		private final String targetClassName;
+	public static class Direct<T> extends RefWithDefaultProvider<T> implements Ref<T> {
 		
 		public Direct(Class<T> targetClass) {
-			this.targetClass = targetClass;
-			this.targetClassName = this.targetClass.getCanonicalName();
-		}
-		
-		@Override
-		public Class<T> getTargetClass() {
-			return this.targetClass;
+			super(targetClass, null);
 		}
 		
 		public String toString() {
-			return "Ref<" + this.targetClassName + ">";
+			return "Ref<" + this.getTargetClassName() + ">";
 		}
-		
+
 		@SuppressWarnings("rawtypes")
 		public boolean equals(Object obj) {
 			if (!(obj instanceof Ref.Direct)) {
@@ -52,43 +42,24 @@ public interface Ref<T> {
 	//== With Default provider =========================================================================================
 	
 	static class RefWithDefaultProvider<T> implements Ref<T> {
-
-		private final Class<T> targetClass;
-		private final Provider<T> provider;
+		
+		final Class<T> targetClass;
+		final String targetClassName;
+		final Provider<T> provider;
 		
 		RefWithDefaultProvider(final Class<T> targetClass, Provider<T> provider) {
 			this.targetClass = Objects.requireNonNull(targetClass);
-			this.provider = Objects.requireNonNull(provider);
+			this.targetClassName = this.targetClass.getCanonicalName();
+			this.provider = provider;
 		}
 		
-		public Provider<T> getProvider() {
-			return this.provider;
-		}
-
 		@Override
 		public Class<T> getTargetClass() {
 			return this.targetClass;
 		}
 		
-	}
-	
-	static class DirectWithDefaultProvider<T> implements Ref<T> {
-
-		private final Class<T> targetClass;
-		private final Provider<T> provider;
-		
-		DirectWithDefaultProvider(final Class<T> targetClass, Provider<T> provider) {
-			this.targetClass = Objects.requireNonNull(targetClass);
-			this.provider = Objects.requireNonNull(provider);
-		}
-		
-		public Provider<T> getProvider() {
-			return this.provider;
-		}
-
-		@Override
-		public Class<T> getTargetClass() {
-			return this.targetClass;
+		public String getTargetClassName() {
+			return this.targetClassName;
 		}
 		
 	}

@@ -3,6 +3,7 @@ package direct.get;
 import java.util.Optional;
 import java.util.Stack;
 
+import direct.get.Ref.RefWithDefaultProvider;
 import direct.get.exceptions.ProvideWrongTypeException;
 import direct.get.exceptions.ProvidingException;
 import direct.get.exceptions.UnknownProviderException;
@@ -105,7 +106,7 @@ public class Get {
 		@SuppressWarnings("rawtypes")
 		Optional<Provider> provider = getProvider(ref);
 		if (provider == null) {
-			provider = defaultProviderOptional;
+			provider = getDefaultProvider(ref, provider);
 		}
 		
 		ensureProvider(ref, provider);
@@ -116,6 +117,18 @@ public class Get {
 			throw new ProvideWrongTypeException();
 		}
 		return (V)object;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static <T> Optional<Provider> getDefaultProvider(Ref<T> ref, Optional<Provider> provider) {
+		if (ref instanceof RefWithDefaultProvider) {
+			Provider refProvider = ((RefWithDefaultProvider)ref).provider;
+			provider = (refProvider != null) ? Optional.ofNullable(refProvider) : null;
+		}
+		if (provider == null) {
+			provider = defaultProviderOptional;
+		}
+		return provider;
 	}
 	
 }

@@ -55,13 +55,13 @@ public class CurrentContext {
 	}
 
 	public <T> Providing<T> provide(Class<T> targetClass) {
-		
+		// Use ProvidingWrapper to hide plug this current context leak
 		return new Providing<>(Ref.of(targetClass));
 		
 	}
 
 	public <T> Providing<T> provide(Ref<T> ref) {
-		
+		// Use ProvidingWrapper to hide plug this current context leak
 		return new Providing<>(ref);
 		
 	}

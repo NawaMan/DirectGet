@@ -1,5 +1,7 @@
 package direct.get;
 
+import java.util.Objects;
+
 @FunctionalInterface
 public interface Ref<T> {
 	
@@ -43,6 +45,50 @@ public interface Ref<T> {
 		@Override
 		public int hashCode() {
 			return this.targetClass.hashCode();
+		}
+		
+	}
+	
+	//== With Default provider =========================================================================================
+	
+	static class RefWithDefaultProvider<T> implements Ref<T> {
+
+		private final Class<T> targetClass;
+		private final Provider<T> provider;
+		
+		RefWithDefaultProvider(final Class<T> targetClass, Provider<T> provider) {
+			this.targetClass = Objects.requireNonNull(targetClass);
+			this.provider = Objects.requireNonNull(provider);
+		}
+		
+		public Provider<T> getProvider() {
+			return this.provider;
+		}
+
+		@Override
+		public Class<T> getTargetClass() {
+			return this.targetClass;
+		}
+		
+	}
+	
+	static class DirectWithDefaultProvider<T> implements Ref<T> {
+
+		private final Class<T> targetClass;
+		private final Provider<T> provider;
+		
+		DirectWithDefaultProvider(final Class<T> targetClass, Provider<T> provider) {
+			this.targetClass = Objects.requireNonNull(targetClass);
+			this.provider = Objects.requireNonNull(provider);
+		}
+		
+		public Provider<T> getProvider() {
+			return this.provider;
+		}
+
+		@Override
+		public Class<T> getTargetClass() {
+			return this.targetClass;
 		}
 		
 	}

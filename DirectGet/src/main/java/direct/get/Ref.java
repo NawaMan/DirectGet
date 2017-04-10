@@ -7,47 +7,40 @@ public interface Ref<T> {
 	
 	public Class<T> getTargetClass();
 	
-	
-	// == Basic implementation =========================================================================================
-	
-	public static <T> Ref<T> of(Class<T> targetClass) {
-		return new Direct<>(targetClass);
+	public default Provider<T> getDefaultProvider() {
+		return null;
 	}
-	
-	public static class Direct<T> extends RefWithDefaultProvider<T> implements Ref<T> {
-		
-		public Direct(Class<T> targetClass) {
-			super(targetClass, null);
-		}
-		
-		public String toString() {
-			return "Ref<" + this.getTargetClassName() + ">";
-		}
 
-		@SuppressWarnings("rawtypes")
-		public boolean equals(Object obj) {
-			if (!(obj instanceof Ref.Direct)) {
-				return false;
+	public static <T> Ref<T> of(Class<T> targetClass, Provider<T> provider) {
+		return new Ref<T>() {
+			@Override
+			public Class<T> getTargetClass() {
+				return targetClass;
 			}
-			return this.targetClass == ((Ref.Direct)obj).targetClass;
-		}
-		
-		@Override
-		public int hashCode() {
-			return this.targetClass.hashCode();
-		}
-		
+			@Override
+			public Provider<T> getDefaultProvider() {
+				return provider;
+			}
+		};
 	}
 	
-	//== With Default provider =========================================================================================
+	// == Class base implementation =========================================================================================
 	
-	static class RefWithDefaultProvider<T> implements Ref<T> {
+	public static <T> Ref<T> ofClass(Class<T> targetClass) {
+		return new OfClass<>(targetClass, null);
+	}
+	
+	public static <T> Ref<T> ofClass(Class<T> targetClass, Provider<T> provider) {
+		return new OfClass<>(targetClass, provider);
+	}
+	
+	public static class OfClass<T> implements Ref<T> {
 		
 		final Class<T> targetClass;
 		final String targetClassName;
 		final Provider<T> provider;
 		
-		RefWithDefaultProvider(final Class<T> targetClass, Provider<T> provider) {
+		public OfClass(final Class<T> targetClass, Provider<T> provider) {
 			this.targetClass = Objects.requireNonNull(targetClass);
 			this.targetClassName = this.targetClass.getCanonicalName();
 			this.provider = provider;
@@ -60,6 +53,24 @@ public interface Ref<T> {
 		
 		public String getTargetClassName() {
 			return this.targetClassName;
+		}
+		
+		
+		public String toString() {
+			return "Ref<" + this.getTargetClassName() + ">";
+		}
+
+		@SuppressWarnings("rawtypes")
+		public boolean equals(Object obj) {
+			if (!(obj instanceof Ref.OfClass)) {
+				return false;
+			}
+			return this.targetClass == ((Ref.OfClass)obj).targetClass;
+		}
+		
+		@Override
+		public int hashCode() {
+			return this.targetClass.hashCode();
 		}
 		
 	}

@@ -12,8 +12,8 @@ public class RefTest {
 
 	@Test
 	public void testDirectRef_mustEqualsForTargetClass() {
-		Ref<List> ref1 = Ref.of(List.class);
-		Ref<List> ref2 = Ref.of(List.class);
+		Ref<List> ref1 = Ref.ofClass(List.class);
+		Ref<List> ref2 = Ref.ofClass(List.class);
 		assertEquals(ref1, ref2);
 		assertEquals(ref1.toString(), ref2.toString());
 		assertEquals(ref1.hashCode(), ref2.hashCode());
@@ -23,7 +23,7 @@ public class RefTest {
 		set.add(ref1);
 		assertEquals(1, set.size());
 		set.add(ref2);
-		assertEquals(2, set.size());
+		assertEquals(1, set.size());
 	}
 
 }

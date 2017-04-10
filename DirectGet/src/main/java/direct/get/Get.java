@@ -3,7 +3,6 @@ package direct.get;
 import java.util.Optional;
 import java.util.Stack;
 
-import direct.get.Ref.RefWithDefaultProvider;
 import direct.get.exceptions.ProvideWrongTypeException;
 import direct.get.exceptions.ProvidingException;
 import direct.get.exceptions.UnknownProviderException;
@@ -11,7 +10,7 @@ import direct.get.exceptions.UnknownProviderException;
 public class Get {
 	
 	public static final Ref<Get> GLOBAL = ()->Get.class;
-	public static final Ref<Get> CURRENT = Ref.of(Get.class);
+	public static final Ref<Get> CURRENT = Ref.ofClass(Get.class);
 	
 	private static final Get globalGet = new Get();
 	
@@ -90,7 +89,7 @@ public class Get {
 	}
 	
 	public static <T, V extends T> V a(Class<T> targetClass) {
-		return a(Ref.of(targetClass));
+		return a(Ref.ofClass(targetClass));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -121,9 +120,9 @@ public class Get {
 
 	@SuppressWarnings("rawtypes")
 	private static <T> Optional<Provider> getDefaultProvider(Ref<T> ref, Optional<Provider> provider) {
-		if (ref instanceof RefWithDefaultProvider) {
-			Provider refProvider = ((RefWithDefaultProvider)ref).provider;
-			provider = (refProvider != null) ? Optional.ofNullable(refProvider) : null;
+		Provider<T> defaultProvider = ref.getDefaultProvider();
+		if (defaultProvider != null) {
+			provider = Optional.of(clss -> defaultProvider.apply(ref));
 		}
 		if (provider == null) {
 			provider = defaultProviderOptional;

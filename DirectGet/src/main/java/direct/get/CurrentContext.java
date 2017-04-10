@@ -34,7 +34,7 @@ public class CurrentContext {
 		}
 		
 		public <V extends T> CurrentContext withA(Class<V> targetClass) {
-			return withA(Ref.of(targetClass));
+			return withA(Ref.ofClass(targetClass));
 		}
 		
 		public <V extends T> CurrentContext withA(Ref<V> targetRef) {
@@ -56,7 +56,7 @@ public class CurrentContext {
 
 	public <T> Providing<T> provide(Class<T> targetClass) {
 		// Use ProvidingWrapper to hide plug this current context leak
-		return new Providing<>(Ref.of(targetClass));
+		return new Providing<>(Ref.ofClass(targetClass));
 		
 	}
 

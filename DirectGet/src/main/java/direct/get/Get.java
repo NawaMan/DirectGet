@@ -9,7 +9,7 @@ import direct.get.exceptions.UnknownProviderException;
 
 public class Get {
 	
-	public static final Ref<Get> GLOBAL = ()->Get.class;
+	public static final Ref<Get> GLOBAL = Ref.of(Get.class, ref->Get.globalGet);
 	public static final Ref<Get> CURRENT = Ref.ofClass(Get.class);
 	
 	private static final Get globalGet = new Get();

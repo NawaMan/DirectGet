@@ -26,7 +26,7 @@ public class RefSpace {
 	
 	private volatile Configuration config;
 	
-	private final ThreadLocal<GetInstance> threadGet;
+	private final ThreadLocal<Get.Instance> threadGet;
 	
 	private volatile List<StackTraceElement> stackTrace;
 	
@@ -35,7 +35,7 @@ public class RefSpace {
 		this.name        = APP_SPACE_NAME;
 		this.parentSpace = null;
 		this.config      = DEF_CONFIG;
-		this.threadGet   = ThreadLocal.withInitial(()->new GetInstance(null, this));
+		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(null, this));
 	}
 	
 	// For other space.
@@ -43,7 +43,7 @@ public class RefSpace {
 		this.name        = Optional.ofNullable(name).orElse("Space:" + this.getClass().getName());
 		this.parentSpace = parentSpace;
 		this.config      = Optional.ofNullable(config).orElseGet(Configuration::new);
-		this.threadGet   = ThreadLocal.withInitial(()->new GetInstance(null, this));
+		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(null, this));
 	}
 	
 	// -- For AppSpace only ---------------------------------------------------
@@ -127,7 +127,7 @@ public class RefSpace {
 		return null;
 	}
 	
-	GetInstance get() {
+	Get.Instance get() {
 		return threadGet.get();
 	}
 	
@@ -158,8 +158,8 @@ public class RefSpace {
 	}
 	
 	public Thread newSubThread(Runnable runnable) {
-		GetInstance thisGet = get();
-		GetInstance newGet  = new GetInstance(thisGet, this);
+		Get.Instance thisGet = get();
+		Get.Instance newGet  = new Get.Instance(thisGet, this);
 		return new Thread(()->{
 			threadGet.set(newGet);
 			runnable.run();

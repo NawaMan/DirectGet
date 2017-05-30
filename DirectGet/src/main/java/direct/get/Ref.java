@@ -128,7 +128,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		
 		public Direct(Class<T> targetClass, Supplier<T> factory) {
 			super(targetClass);
-			this.proviging = new Providing.Basic<>(this, ProvidingLevel.Default, factory);
+			this.proviging = (factory == null) ? null : new Providing.Basic<>(this, ProvidingLevel.Default, factory);
 		}
 		
 		@Override

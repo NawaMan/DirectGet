@@ -8,12 +8,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class GetTest {
+public class GetInstanceTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testBasic() {
-		ArrayList<String> list = AppSpace.get._a(ArrayList.class).orElse(null);
+		ArrayList<String> list = Get._a(ArrayList.class).orElse(null);
 		assertNotNull(list);
 	}
 	

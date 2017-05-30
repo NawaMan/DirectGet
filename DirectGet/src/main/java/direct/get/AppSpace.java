@@ -14,9 +14,9 @@ public final class AppSpace extends RefSpace {
 	
 	public static final AppSpace current = new AppSpace();
 	
-	public static final Get Get = current.get();
+	public static final GetInstance Get = current.get();
 	
-	public static final Get get = Get;
+	public static final GetInstance get = Get;
 	
 	public static AppSpace initialize(Configuration config) throws ApplicationAlreadyInitializedException {
 		current.init(config);

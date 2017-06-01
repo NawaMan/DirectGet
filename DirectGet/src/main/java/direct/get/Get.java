@@ -1,10 +1,15 @@
 package direct.get;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import direct.get.exceptions.GetException;
 
@@ -51,11 +56,7 @@ public final class Get {
 	}
 	
 	public static <T> Instance substitute(Providing<T> providing, Runnable runnable) {
-		 return AppSpace.get.substitute(providing, runnable);
-	}
-
-	public static <T> WithSubstitution withSubstitution(Providing<T> providing) {
-		return AppSpace.get.withSubstitution(providing);
+		 return AppSpace.get.substitute(Arrays.asList(providing), runnable);
 	}
 	
 	//== The implementation ===================================================
@@ -83,6 +84,11 @@ public final class Get {
 		
 		public RefSpace getSpace() {
 			return this.refSpace;
+		}
+		
+		@SuppressWarnings("rawtypes")
+		Stream<Ref> getStackRefs() {
+			return providingStacks.keySet().stream();
 		}
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -176,25 +182,31 @@ public final class Get {
 			return _a(Ref.forClass(clzz));
 		}
 		
-		public <T> Instance substitute(Providing<T> providing, Runnable runnable) {
-			if (providing == null) {
+		// TODO - Make it array friendly.
+		
+		@SuppressWarnings("rawtypes")
+		public <T> Instance substitute(List<Providing> providings, Runnable runnable) {
+			if ((providings == null) || providings.isEmpty()) {
 				runnable.run();
 			} else {
-				Ref<T> ref = providing.getRef();
+				List<Ref> addedRefs = new ArrayList<>();
 				try {
-					providingStacks.computeIfAbsent(ref, r->new Stack<>());
-					providingStacks.get(ref).push(providing);
+					providings
+					.stream()
+					.filter(Objects::nonNull)
+					.forEach(providing->{
+						Ref ref = providing.getRef();
+						providingStacks.computeIfAbsent(ref, r->new Stack<>());
+						providingStacks.get(ref).push(providing);
+						addedRefs.add(ref);
+					});
 					
 					runnable.run();
 				} finally {
-					providingStacks.get(ref).pop();
+					addedRefs.forEach(ref->providingStacks.get(ref).pop());
 				}
 			}
 			return this;
-		}
-	
-		public <T> WithSubstitution withSubstitution(Providing<T> providing) {
-			return new WithSubstitution(providing);
 		}
 		
 	}

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import direct.get.exceptions.ApplicationAlreadyInitializedException;
 
@@ -13,6 +15,12 @@ import direct.get.exceptions.ApplicationAlreadyInitializedException;
  * @author nawaman
  */
 public class RefSpace {
+	
+	@SuppressWarnings("rawtypes")
+	public static final Predicate<Ref> INHERIT_ALL = ref->true;
+
+	@SuppressWarnings("rawtypes")
+	public static final Predicate<Ref> INHERIT_NONE = ref->false;
 
 	private static final String APP_SPACE_NAME = "AppSpace";
 	
@@ -28,7 +36,7 @@ public class RefSpace {
 	
 	private final ThreadLocal<Get.Instance> threadGet;
 	
-	private volatile List<StackTraceElement> stackTrace;
+	private volatile List<StackTraceElement> stackTraceAtCreation;
 	
 	// For AppSpace only.
 	RefSpace() {
@@ -64,7 +72,7 @@ public class RefSpace {
 			synchronized (lock) {
 				if (config == DEF_CONFIG) {
 					config     = (newConfig == null) ? new Configuration() : newConfig;
-					stackTrace = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
+					stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
 					return true;
 				}
 			}
@@ -78,7 +86,7 @@ public class RefSpace {
 	
 	public final List<StackTraceElement> getInitialzedStackTrace() {
 		ensureInitialized();
-		return stackTrace;
+		return stackTraceAtCreation;
 	}
 	
 	// -- For both types of RefSpace ------------------------------------------
@@ -139,14 +147,13 @@ public class RefSpace {
 		
 		return ref._get();
 	}
-
-	public <T> RefSpace substitute(Providing<T> providing, Runnable runnable) {
-		get().substitute(providing, runnable);
-		return this;
-	}
 	
-	public <T> WithSubstitution withSubstitution(Providing<T> providing) {
-		return get().withSubstitution(providing);
+	// TODO - Make it array friendly.
+
+	@SuppressWarnings("rawtypes")
+	public <T> RefSpace substitute(List<Providing> providings, Runnable runnable) {
+		get().substitute(providings, runnable);
+		return this;
 	}
 	
 	public RefSpace newSubSpace(Configuration config) {
@@ -157,17 +164,47 @@ public class RefSpace {
 		return new RefSpace(name, this, config);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Thread newSubThread(Runnable runnable) {
+		return newSubThread((Predicate<Ref>)null, runnable);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public Thread newSubThread(List<Ref> refsToInherit, Runnable runnable) {
+		return newSubThread(ref->refsToInherit.contains(ref), runnable);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Thread newSubThread(Predicate<Ref> refsToInherit, Runnable runnable) {
 		Get.Instance thisGet = get();
 		Get.Instance newGet  = new Get.Instance(thisGet, this);
+		
+		Predicate<Ref> predicate = Optional.ofNullable(refsToInherit).orElse(ref->false);
+		
+		List<Providing> providings
+			= (List<Providing>)thisGet.getStackRefs()
+			.filter(predicate)
+			.map(thisGet::getProviding)
+			.collect(Collectors.toList());
+		
 		return new Thread(()->{
 			threadGet.set(newGet);
-			runnable.run();
+			newGet.substitute(providings, runnable);
 		});
 	}
 	
 	public void runSubThread(Runnable runnable) {
 		newSubThread(runnable).start();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void runSubThread(List<Ref> refsToInherit, Runnable runnable) {
+		newSubThread(refsToInherit, runnable).start();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void runSubThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+		newSubThread(refsToInherit, runnable).start();
 	}
 	
 	public String toString() {

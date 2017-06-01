@@ -3,13 +3,13 @@ package direct.get;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import direct.get.exceptions.GetException;
@@ -51,12 +51,22 @@ public class ProvidingOrderTest {
 	private final Providing<String> spaceParentDefault = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"SpaceParentDefault");
 	private final Providing<String> spaceDefault       = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"SpaceDefault");
 	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"StackDefault");
+
+	private void doTest(
+			Providing<String> _getParent,
+			Providing<String> _spaceParent,
+			Providing<String> _space,
+			Providing<String> _stack,
+			String expected) {
+		doTest(_getParent, _spaceParent, _space, _stack, false, expected);
+	}
 	
 	private void doTest(
 			Providing<String> _getParent,
 			Providing<String> _spaceParent,
 			Providing<String> _space,
 			Providing<String> _stack,
+			boolean isToInherit,
 			String expected) {
 		RefSpace appSpace    = AppSpace.current;
 		RefSpace parentSpace = appSpace   .newSubSpace(new Configuration(Collections.singletonMap(ref, _spaceParent)));
@@ -64,19 +74,25 @@ public class ProvidingOrderTest {
 		
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-		theSpace.substitute(_getParent, ()->{
-			theSpace.runSubThread(()->{
-				theSpace.substitute(_stack, ()->{
-					String actual = theSpace.get()._a(ref).orElse(null);
-					try {
-						assertEquals(expected, actual);
-					} catch (AssertionError e) {
-						assertErr.set(e);
-					} finally {
-						latch.countDown();
-					}
+		theSpace.substitute(Arrays.asList(_getParent), ()->{
+			try {
+				@SuppressWarnings("rawtypes")
+				List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
+				theSpace.runSubThread(list, ()->{
+					theSpace.substitute(Arrays.asList(_stack), ()->{
+						String actual = theSpace.get()._a(ref).orElse(null);
+						try {
+							assertEquals(expected, actual);
+						} catch (AssertionError e) {
+							assertErr.set(e);
+						} finally {
+							latch.countDown();
+						}
+					});
 				});
-			});
+			} catch (Throwable e) {
+				latch.countDown();
+			}
 		});
 		
 		try {
@@ -257,33 +273,23 @@ public class ProvidingOrderTest {
 	}
 	
 	@Test
-	@Ignore(NOT_IMPLEMENT_YET)
+	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testGetParentDefault_borrowSpecifyRefs_includeChecked_fromParent() {
 		Providing<String> _getParent   = getParentDefault;
 		Providing<String> _spaceParent = null;
 		Providing<String> _space       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "GetParentDefault");
+		doTest(_getParent, _spaceParent, _space, _stack, true, "GetParentDefault");
 	}
 	
 	@Test
-	@Ignore(NOT_IMPLEMENT_YET)
+	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testGetParentDefault_borrowSpecifyRefs_excludeChecked_fromParent() {
 		Providing<String> _getParent   = getParentDefault;
 		Providing<String> _spaceParent = null;
 		Providing<String> _space       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "RefDefault");
-	}
-	
-	@Test
-	@Ignore(NOT_IMPLEMENT_YET)
-	public void testGetParentDefaultt_borrowAll_fromParent() {
-		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
-		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "GetParentDefault");
+		doTest(_getParent, _spaceParent, _space, _stack, false, "RefDefault");
 	}
 	
 	//-- Normal --
@@ -480,23 +486,23 @@ public class ProvidingOrderTest {
 	}
 	
 	@Test
-	@Ignore(NOT_IMPLEMENT_YET)
+	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testRefDefaultStackDictateSpaceDictateSpaceParentDictateGetParentDictate_includeParent() {
 		Providing<String> _getParent   = getParentDictate;
 		Providing<String> _spaceParent = spaceParentDictate;
 		Providing<String> _space       = spaceDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDictate");
+		doTest(_getParent, _spaceParent, _space, _stack, true, "SpaceParentDictate");
 	}
 	
 	@Test
-	@Ignore(NOT_IMPLEMENT_YET)
+	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testRefDefaultStackDictateSpaceDictateSpaceParentDictateGetParentDictate_excludeParent() {
 		Providing<String> _getParent   = getParentDictate;
 		Providing<String> _spaceParent = spaceParentDictate;
 		Providing<String> _space       = spaceDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDictate");
+		doTest(_getParent, _spaceParent, _space, _stack, false, "SpaceParentDictate");
 	}
 	
 }

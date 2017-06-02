@@ -21,7 +21,7 @@ public class GetInstanceTest {
 	@SuppressWarnings("rawtypes")
 	public void testRef() {
 		List      theList = new ArrayList();
-		Ref<List> aLIST   = Ref.of(List.class, ()->theList);
+		Ref<List> aLIST   = Ref.of("aList", List.class, ()->theList);
 		assertTrue(AppSpace.get._a(aLIST).filter(list->list == theList).isPresent());
 	}
 

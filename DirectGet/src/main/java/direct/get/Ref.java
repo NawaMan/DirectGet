@@ -1,6 +1,7 @@
 package direct.get;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import direct.get.exceptions.GetException;
@@ -11,10 +12,15 @@ import direct.get.exceptions.GetException;
  * 
  * @author nawaman
  */
-@FunctionalInterface
 public interface Ref<T> extends Comparable<Ref<T>> {
 	
 	public Class<T> getTargetClass();
+
+	/**
+	 * This value is for the benefit of human who look at it.
+	 * There is no use in the program in anyway (except debugging/logging/auditing purposes).
+	 **/
+	public String getName();
 	
 	default public T get() {
 		try {
@@ -55,6 +61,10 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		protected AbstractRef(Class<T> targetClass) {
 			this.targetClass = targetClass;
 			this.targetClassName = this.targetClass.getCanonicalName();
+		}
+		
+		public String getName() {
+			return this.targetClassName;
 		}
 
 		@Override
@@ -111,11 +121,19 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 	//-- Direct -------------------------------------------------------------
 	
 	public static <T> Ref<T> of(Class<T> targetClass) {
-		return of(targetClass, null);
+		return of(null, targetClass, null);
 	}
 	
 	public static <T> Ref<T> of(Class<T> targetClass, Supplier<T> factory) {
-		return new Direct<>(targetClass, factory);
+		return of(null, targetClass, factory);
+	}
+	
+	public static <T> Ref<T> of(String name, Class<T> targetClass) {
+		return of(null, targetClass, null);
+	}
+	
+	public static <T> Ref<T> of(String name, Class<T> targetClass, Supplier<T> factory) {
+		return new Direct<>((name != null) ? name : ("#" + Direct.id.incrementAndGet()), targetClass, factory);
 	}
 	
 	/**
@@ -124,11 +142,20 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 	 **/
 	public static class Direct<T> extends AbstractRef<T> implements Ref<T> {
 		
+		private static final AtomicLong id = new AtomicLong();
+		
+		private final String name;
+		
 		private final Providing<T> proviging;
 		
-		public Direct(Class<T> targetClass, Supplier<T> factory) {
+		public Direct(String name, Class<T> targetClass, Supplier<T> factory) {
 			super(targetClass);
+			this.name = name;
 			this.proviging = (factory == null) ? null : new Providing.Basic<>(this, PriorityLevel.Default, factory);
+		}
+		
+		public String getName() {
+			return this.name;
 		}
 		
 		@Override
@@ -148,6 +175,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		@Override
 		public final boolean equals(Object obj) {
 			return this == obj;
+		}
+		
+		@Override
+		public final String toString() {
+			return "Ref<" + this.name + ":" + this.getTargetClass().getName() + ">";
 		}
 		
 	}

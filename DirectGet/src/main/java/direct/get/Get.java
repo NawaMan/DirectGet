@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -91,63 +92,45 @@ public final class Get {
 			return providingStacks.keySet().stream();
 		}
 		
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		<T> Providing<T> getProviding(Ref<T> ref) {
-			Providing<T> parentProviding = null;
-			if (parentGet != null) {
-				parentProviding = parentGet.getProviding(ref);
-				if (ProvidingLevel.Dictate.is(parentProviding)) {
-					return parentProviding;
-				}
+			if (ref == null) {
+				return null;
 			}
 			
-			RefSpace curSpace = Optional.ofNullable(refSpace).orElse(AppSpace.current);
-			Providing<T> configProviding = curSpace.getProviding(ref);
-			if (ProvidingLevel.Dictate.is(configProviding)) {
-				return configProviding;
-			}
-	
-			Providing stackProviding = peekStackProviding(ref);
-			if (ProvidingLevel.Dictate.is(stackProviding)) {
-				return stackProviding;
-			}
-			
-			// At this point, non is dictate.
-			
-			if (ProvidingLevel.Normal.is(stackProviding)) {
-				return stackProviding;
-			}
-			if (ProvidingLevel.Normal.is(configProviding)) {
-				return configProviding;
-			}
-			if (ProvidingLevel.Normal.is(parentProviding)) {
-				return parentProviding;
-			}
-			
-			// At this point, non is normal.
-			
-			if (ProvidingLevel.Default.is(stackProviding)) {
-				return stackProviding;
-			}
-			if (ProvidingLevel.Default.is(configProviding)) {
-				return configProviding;
-			}
-			if (ProvidingLevel.Default.is(parentProviding)) {
-				return parentProviding;
-			}
-			
-			return null;
+			Providing<T> providing
+					= PriorityLevel.determineGetProviding(
+						providingFromParentGet(ref),
+						providingFromRefSpace(ref),
+						providingFromStack(ref));
+			return providing;
+		}
+
+		private <T> Supplier<Providing<T>> providingFromParentGet(Ref<T> ref) {
+			return ()->Optional.ofNullable(parentGet).map(pGet->pGet.getProviding(ref)).orElse(null);
+		}
+		
+		private <T> Supplier<Providing<T>> providingFromRefSpace(Ref<T> ref) {
+			return ()->Optional.ofNullable(refSpace).map(rfSp->rfSp.getProviding(ref)).orElse(null);
+		}
+		
+		private <T> Predicate<Stack<T>> not(Predicate<Stack<T>> check) {
+			return stack->!check.test(stack);
 		}
 	
-		@SuppressWarnings("rawtypes")
-		private <T> Providing peekStackProviding(Ref<T> ref) {
-			Stack<Providing> stackProvidingStack = providingStacks.get(ref);
-			Providing        stackProviding      = ((stackProvidingStack != null) && !stackProvidingStack.isEmpty()) ? stackProvidingStack.peek() : null;
-			return stackProviding;
+		@SuppressWarnings("unchecked")
+		private <T> Supplier<Providing<T>> providingFromStack(Ref<T> ref) {
+			return ()->Optional.ofNullable(providingStacks.get(ref))
+						.filter(not(Stack::isEmpty))
+						.map(Stack::peek)
+						.orElse(null);
 		}
 		
 		public <T> Optional<T> _a(Ref<T> ref) {
 			return refSpace.doGet(ref);
+		}
+		
+		public <T> Optional<T> _a(Class<T> clzz) {
+			return _a(Ref.forClass(clzz));
 		}
 	
 		public <T> T a(Class<T> clzz) {
@@ -168,18 +151,6 @@ public final class Get {
 			} catch (GetException e) {
 				return elseValue;
 			}
-		}
-		
-		public <T> T a(Class<T> clzz, Supplier<T> elseSupplier) {
-			return a(Ref.forClass(clzz), elseSupplier);
-		}
-		
-		public <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
-			return _a(ref).orElseGet(elseSupplier);
-		}
-		
-		public <T> Optional<T> _a(Class<T> clzz) {
-			return _a(Ref.forClass(clzz));
 		}
 		
 		// TODO - Make it array friendly.

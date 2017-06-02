@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import direct.get.exceptions.ApplicationAlreadyInitializedException;
@@ -103,37 +104,27 @@ public class RefSpace {
 		ensureInitialized();
 		return config;
 	}
+
+	private <T> Supplier<Providing<T>> providingFromParentSpace(Ref<T> ref) {
+		return ()->Optional.ofNullable(parentSpace).map(parent->parent.getProviding(ref)).orElse(null);
+	}
+
+	private <T> Supplier<Providing<T>> providingFromConfiguration(Ref<T> ref) {
+		return ()->this.config._get(ref).orElse(null);
+	}
 	
 	protected final <T> Providing<T> getProviding(Ref<T> ref) {
-		Optional<Providing<T>> parentProviding = Optional.ofNullable(parentSpace).map(parent->parent.getProviding(ref));
-		if (parentProviding.filter(ProvidingLevel.Dictate::is).isPresent()) {
-			return parentProviding.get();
-		}
-		Optional<Providing<T>> thisProviding = this.config._get(ref);
-		if (thisProviding.filter(ProvidingLevel.Dictate::is).isPresent()) {
-			return thisProviding.get();
-		}
-		
-		// A this point, no dictate;
+		if (ref == null) {
+			return null;
+		}		
 
-		if (thisProviding.filter(ProvidingLevel.Normal::is).isPresent()) {
-			return thisProviding.get();
-		}
-		if (parentProviding.filter(ProvidingLevel.Normal::is).isPresent()) {
-			return parentProviding.get();
-		}
-		
-		// A this point, no normal;
-
-		if (thisProviding.filter(ProvidingLevel.Default::is).isPresent()) {
-			return thisProviding.get();
-		}
-		if (parentProviding.filter(ProvidingLevel.Default::is).isPresent()) {
-			return parentProviding.get();
-		}
-		
-		return null;
+		Providing<T> providing
+				= PriorityLevel.determineRefSpaceProviding(
+					providingFromParentSpace(ref),
+					providingFromConfiguration(ref));
+		return providing;
 	}
+
 	
 	Get.Instance get() {
 		return threadGet.get();
@@ -197,12 +188,10 @@ public class RefSpace {
 		newSubThread(runnable).start();
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public void runSubThread(List<Ref> refsToInherit, Runnable runnable) {
 		newSubThread(refsToInherit, runnable).start();
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public void runSubThread(Predicate<Ref> refsToInherit, Runnable runnable) {
 		newSubThread(refsToInherit, runnable).start();
 	}

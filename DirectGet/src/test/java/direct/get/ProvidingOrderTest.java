@@ -19,7 +19,7 @@ public class ProvidingOrderTest {
 	public static final String NOT_IMPLEMENT_YET = "NOT_IMPLEMENT_YET";
 
 	// The order
-	// Get parent dictate
+	// Get parent dictate - when included
 	// Get space parent dictate
 	// Get space dictate
 	// Get stack parent dictate
@@ -27,30 +27,30 @@ public class ProvidingOrderTest {
 	// Get stack normal
 	// Get space normal
 	// Get space parent normal
-	// Get parent normal
+	// Get parent normal - when included
 	// Get stack default
 	// Get space default
 	// Get space parent default
-	// Get parent default
+	// Get parent default - when included
 	// Ref default
 	
 	private final Ref<String> ref          = Ref.of(String.class, ()->"RefDefault");
 	private final Ref<String> refNoDefault = Ref.of(String.class);
 	
-	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, ProvidingLevel.Dictate, ()->"GetParentDictate");
-	private final Providing<String> spaceParentDictate = new Providing.Basic<>(ref, ProvidingLevel.Dictate, ()->"SpaceParentDictate");
-	private final Providing<String> spaceDictate       = new Providing.Basic<>(ref, ProvidingLevel.Dictate, ()->"SpaceDictate");
-	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, ProvidingLevel.Dictate, ()->"StackDictate");
+	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"GetParentDictate");
+	private final Providing<String> spaceParentDictate = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"SpaceParentDictate");
+	private final Providing<String> spaceDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"SpaceDictate");
+	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"StackDictate");
 
-	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, ProvidingLevel.Normal, ()->"GetParentNormal");
-	private final Providing<String> spaceParentNormal = new Providing.Basic<>(ref, ProvidingLevel.Normal, ()->"SpaceParentNormal");
-	private final Providing<String> spaceNormal       = new Providing.Basic<>(ref, ProvidingLevel.Normal, ()->"SpaceNormal");
-	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, ProvidingLevel.Normal, ()->"StackNormal");
+	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"GetParentNormal");
+	private final Providing<String> spaceParentNormal = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"SpaceParentNormal");
+	private final Providing<String> spaceNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"SpaceNormal");
+	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"StackNormal");
 
-	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"GetParentDefault");
-	private final Providing<String> spaceParentDefault = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"SpaceParentDefault");
-	private final Providing<String> spaceDefault       = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"SpaceDefault");
-	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, ProvidingLevel.Default, ()->"StackDefault");
+	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"GetParentDefault");
+	private final Providing<String> spaceParentDefault = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"SpaceParentDefault");
+	private final Providing<String> spaceDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"SpaceDefault");
+	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"StackDefault");
 
 	private void doTest(
 			Providing<String> _getParent,
@@ -183,8 +183,9 @@ public class ProvidingOrderTest {
 	}
 	
 	@Test
-	public void test_refDefault_withNoDefaultConstruction_returnResult() {
-		AppSpace.current.get().a(Ref.of(List.class), new ArrayList<>());
+	public void test_refDefault_withNoDefaultConstruction_returnTheGivenResult() {
+		List<String> theList = new ArrayList<>();
+		Assert.assertEquals(theList, AppSpace.current.get().a(Ref.of(List.class), theList));
 	}
 	
 	@Test

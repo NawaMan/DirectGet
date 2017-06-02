@@ -10,12 +10,11 @@ public class Providing<T> implements Supplier<T> {
 	
 	private final Ref<T> ref;
 	
-	private final PriorityLevel level;
+	private final Preferability preferability;
 	
-	public Providing(Ref<T> ref, PriorityLevel level) {
-		super();
-		this.ref   = Objects.requireNonNull(ref);
-		this.level = Optional.ofNullable(level).orElse(PriorityLevel.Default);
+	public Providing(Ref<T> ref, Preferability preferability) {
+		this.ref           = Objects.requireNonNull(ref);
+		this.preferability = Optional.ofNullable(preferability).orElse(Preferability.Default);
 	}
 	
 	public Ref<T> getRef() {
@@ -31,8 +30,8 @@ public class Providing<T> implements Supplier<T> {
 		throw new GetException(ref.toString());
 	}
 	
-	public PriorityLevel getLevel() {
-		return level;
+	public Preferability getPreferability() {
+		return preferability;
 	}
 	
 	// == Sub implementations =================================================
@@ -41,8 +40,8 @@ public class Providing<T> implements Supplier<T> {
 
 		private final Supplier<T> supplier;
 		
-		public Basic(Ref<T> ref, PriorityLevel level, Supplier<T> supplier) {
-			super(ref, level);
+		public Basic(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
+			super(ref, preferability);
 			this.supplier = supplier;
 		}
 

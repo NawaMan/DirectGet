@@ -153,7 +153,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		public Direct(String name, Class<T> targetClass, Supplier<T> factory) {
 			super(targetClass);
 			this.name = name;
-			this.proviging = (factory == null) ? null : new Providing.Basic<>(this, PriorityLevel.Default, factory);
+			this.proviging = (factory == null) ? null : new Providing.Basic<>(this, Preferability.Default, factory);
 		}
 		
 		public String getName() {

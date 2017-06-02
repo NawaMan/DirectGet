@@ -37,20 +37,20 @@ public class ProvidingOrderTest {
 	private final Ref<String> ref          = Ref.of(String.class, ()->"RefDefault");
 	private final Ref<String> refNoDefault = Ref.of(String.class);
 	
-	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"GetParentDictate");
-	private final Providing<String> scopeParentDictate = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"ScopeParentDictate");
-	private final Providing<String> scopeDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"ScopeDictate");
-	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"StackDictate");
+	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, Preferability.Dictate, ()->"GetParentDictate");
+	private final Providing<String> scopeParentDictate = new Providing.Basic<>(ref, Preferability.Dictate, ()->"ScopeParentDictate");
+	private final Providing<String> scopeDictate       = new Providing.Basic<>(ref, Preferability.Dictate, ()->"ScopeDictate");
+	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, Preferability.Dictate, ()->"StackDictate");
 
-	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"GetParentNormal");
-	private final Providing<String> scopeParentNormal = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"ScopeParentNormal");
-	private final Providing<String> scopeNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"ScopeNormal");
-	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"StackNormal");
+	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, Preferability.Normal, ()->"GetParentNormal");
+	private final Providing<String> scopeParentNormal = new Providing.Basic<>(ref, Preferability.Normal, ()->"ScopeParentNormal");
+	private final Providing<String> scopeNormal       = new Providing.Basic<>(ref, Preferability.Normal, ()->"ScopeNormal");
+	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, Preferability.Normal, ()->"StackNormal");
 
-	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"GetParentDefault");
-	private final Providing<String> scopeParentDefault = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"ScopeParentDefault");
-	private final Providing<String> scopeDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"ScopeDefault");
-	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"StackDefault");
+	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, Preferability.Default, ()->"GetParentDefault");
+	private final Providing<String> scopeParentDefault = new Providing.Basic<>(ref, Preferability.Default, ()->"ScopeParentDefault");
+	private final Providing<String> scopeDefault       = new Providing.Basic<>(ref, Preferability.Default, ()->"ScopeDefault");
+	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, Preferability.Default, ()->"StackDefault");
 
 	private void doTest(
 			Providing<String> _getParent,

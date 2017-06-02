@@ -2,21 +2,33 @@ package direct.get;
 
 import java.util.function.Supplier;
 
-// OK - I feel like am going to regret this but this closed design makes things
+// OK - I feel like am going to regret this but this closed design (of using Enums) makes things
 //        much simpler and it might worth the thread off.
-public enum PriorityLevel {
+/**
+ * This enum is used to specify the preferability of a providing.
+ * 
+ * @author manusitn
+ */
+public enum Preferability {
 	
-	Default, Normal, Dictate;
+	/** Only use when no other is preferred. */
+	Default,
+	/** Whatever */
+	Normal,
+	/** Use me first! */
+	Dictate;
 	
-	public boolean is(PriorityLevel level) {
-		return this == level;
+	/** @return {@code true} if the given preferability is the same as this preferability. */
+	public boolean is(Preferability preferability) {
+		return this == preferability;
 	}
-	
+
+	/** @return {@code true} if the given providing has the same preferability as this preferability. */
 	public <T> boolean is(Providing<T> providing) {
 		if(providing == null) {
 			return false;
 		}
-		return is(providing.getLevel());
+		return is(providing.getPreferability());
 	}
 	
 	// The following two method is heavily duplicate (both the inside and each others).
@@ -25,10 +37,17 @@ public enum PriorityLevel {
 	// Ok, I am going to regret typing this too .... but
 	// This logic is not intended or supposed to be changed often.
 	
+	/**
+	 * Determine the providing for Get.
+	 * 
+	 * @return the providing.
+	 * @see {@link direct.get.ProvidingOrderTest}
+	 */
 	public static <T> Providing<T> determineGetProviding(
 			Supplier<Providing<T>> parentProvidingSupplier,
 			Supplier<Providing<T>> scopeProvidingSupplier,
 			Supplier<Providing<T>> stackProvidingSupplier) {
+		
 		Providing<T> parentProviding = null;
 		parentProviding = parentProvidingSupplier.get();
 		if (Dictate.is(parentProviding)) {
@@ -71,7 +90,13 @@ public enum PriorityLevel {
 		
 		return null;
 	}
-	
+
+	/**
+	 * Determine the providing for Space.
+	 * 
+	 * @return the providing.
+	 * @see {@link direct.get.ProvidingOrderTest}
+	 */
 	public static <T> Providing<T> determineScopeProviding(
 			Supplier<Providing<T>> parentProvidingSupplier,
 			Supplier<Providing<T>> configProvidingSupplier) {

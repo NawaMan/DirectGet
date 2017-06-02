@@ -125,7 +125,7 @@ public class Scope {
 		}		
 
 		Providing<T> providing
-				= PriorityLevel.determineScopeProviding(
+				= Preferability.determineScopeProviding(
 					providingFromParentScope(ref),
 					providingFromConfiguration(ref));
 		return providing;

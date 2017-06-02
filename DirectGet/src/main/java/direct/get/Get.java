@@ -98,7 +98,7 @@ public final class Get {
 			}
 			
 			Providing<T> providing
-					= PriorityLevel.determineGetProviding(
+					= Preferability.determineGetProviding(
 						providingFromParent(ref),
 						providingFromScope(ref),
 						providingFromStack(ref));

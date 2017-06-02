@@ -17,15 +17,15 @@ public class AppTest {
 	@Test
 	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
 	public void testDefaultInitialize() {
-		// This test prove that without setting anything, the Get of the App space is ready to use.
-		AppSpace.get.a(ArrayList.class);
+		// This test prove that without setting anything, the Get of the App scope is ready to use.
+		AppScope.get.a(ArrayList.class);
 	}
 
 	@Test
 	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
 	public void testFirstInitialize() throws ApplicationAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
-		AppSpace.initialize(null);
+		AppScope.initialize(null);
 	}
 	
 	@Test(expected=ApplicationAlreadyInitializedException.class)
@@ -33,13 +33,13 @@ public class AppTest {
 	public void testSecondInitialize() throws ApplicationAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
 		try {
-			AppSpace.initialize(null);
+			AppScope.initialize(null);
 		} catch (ApplicationAlreadyInitializedException e) {
 			fail("Oh no! Not from here.");
 		}
 		
 		// ... but the second time will throws an exception.
-		AppSpace.initialize(null);
+		AppScope.initialize(null);
 	}
 	
 	// TODO - Should test if the config is really in effect.

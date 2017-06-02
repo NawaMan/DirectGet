@@ -27,7 +27,7 @@ public enum PriorityLevel {
 	
 	public static <T> Providing<T> determineGetProviding(
 			Supplier<Providing<T>> parentProvidingSupplier,
-			Supplier<Providing<T>> spaceProvidingSupplier,
+			Supplier<Providing<T>> scopeProvidingSupplier,
 			Supplier<Providing<T>> stackProvidingSupplier) {
 		Providing<T> parentProviding = null;
 		parentProviding = parentProvidingSupplier.get();
@@ -35,7 +35,7 @@ public enum PriorityLevel {
 			return parentProviding;
 		}
 		
-		Providing<T> configProviding = spaceProvidingSupplier.get();
+		Providing<T> configProviding = scopeProvidingSupplier.get();
 		if (Dictate.is(configProviding)) {
 			return configProviding;
 		}
@@ -72,7 +72,7 @@ public enum PriorityLevel {
 		return null;
 	}
 	
-	public static <T> Providing<T> determineRefSpaceProviding(
+	public static <T> Providing<T> determineScopeProviding(
 			Supplier<Providing<T>> parentProvidingSupplier,
 			Supplier<Providing<T>> configProvidingSupplier) {
 		Providing<T> parentProviding = parentProvidingSupplier.get();

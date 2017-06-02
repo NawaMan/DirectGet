@@ -15,7 +15,7 @@ import direct.get.exceptions.ApplicationAlreadyInitializedException;
  * 
  * @author nawaman
  */
-public class RefSpace {
+public class Scope {
 	
 	@SuppressWarnings("rawtypes")
 	public static final Predicate<Ref> INHERIT_ALL = ref->true;
@@ -23,15 +23,21 @@ public class RefSpace {
 	@SuppressWarnings("rawtypes")
 	public static final Predicate<Ref> INHERIT_NONE = ref->false;
 
-	private static final String APP_SPACE_NAME = "AppSpace";
+	private static final String APP_SCOPE_NAME = "AppScope";
 	
 	private static final Configuration DEF_CONFIG = new Configuration();
 
 	private static final Object lock = new Object();
-	
+
+	/**
+	 * The name of the scope.
+	 * 
+	 * This value is for the benefit of human who look at it.
+	 * There is no use in the program in anyway (except debugging/logging/auditing purposes).
+	 **/
 	private final String name;
 	
-	private final RefSpace parentSpace;
+	private final Scope parentScope;
 	
 	private volatile Configuration config;
 	
@@ -39,23 +45,23 @@ public class RefSpace {
 	
 	private volatile List<StackTraceElement> stackTraceAtCreation;
 	
-	// For AppSpace only.
-	RefSpace() {
-		this.name        = APP_SPACE_NAME;
-		this.parentSpace = null;
+	// For AppScope only.
+	Scope() {
+		this.name        = APP_SCOPE_NAME;
+		this.parentScope = null;
 		this.config      = DEF_CONFIG;
 		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(null, this));
 	}
 	
-	// For other space.
-	RefSpace(String name, RefSpace parentSpace, Configuration config) {
-		this.name        = Optional.ofNullable(name).orElse("Space:" + this.getClass().getName());
-		this.parentSpace = parentSpace;
+	// For other scope.
+	Scope(String name, Scope parentScope, Configuration config) {
+		this.name        = Optional.ofNullable(name).orElse("Scope:" + this.getClass().getName());
+		this.parentScope = parentScope;
 		this.config      = Optional.ofNullable(config).orElseGet(Configuration::new);
 		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(null, this));
 	}
 	
-	// -- For AppSpace only ---------------------------------------------------
+	// -- For AppScope only ---------------------------------------------------
 	void init(Configuration newConfig) throws ApplicationAlreadyInitializedException {
 		if (config == DEF_CONFIG) {
 			initIfAbsent(newConfig);
@@ -90,14 +96,14 @@ public class RefSpace {
 		return stackTraceAtCreation;
 	}
 	
-	// -- For both types of RefSpace ------------------------------------------
+	// -- For both types of Scope ------------------------------------------
 	
 	public String getName() {
 		return name;
 	}
 	
-	public RefSpace getParentSpace() {
-		return this.parentSpace;
+	public Scope getParentScope() {
+		return this.parentScope;
 	}
 
 	protected final Configuration getConfiguration() {
@@ -105,8 +111,8 @@ public class RefSpace {
 		return config;
 	}
 
-	private <T> Supplier<Providing<T>> providingFromParentSpace(Ref<T> ref) {
-		return ()->Optional.ofNullable(parentSpace).map(parent->parent.getProviding(ref)).orElse(null);
+	private <T> Supplier<Providing<T>> providingFromParentScope(Ref<T> ref) {
+		return ()->Optional.ofNullable(parentScope).map(parent->parent.getProviding(ref)).orElse(null);
 	}
 
 	private <T> Supplier<Providing<T>> providingFromConfiguration(Ref<T> ref) {
@@ -119,8 +125,8 @@ public class RefSpace {
 		}		
 
 		Providing<T> providing
-				= PriorityLevel.determineRefSpaceProviding(
-					providingFromParentSpace(ref),
+				= PriorityLevel.determineScopeProviding(
+					providingFromParentScope(ref),
 					providingFromConfiguration(ref));
 		return providing;
 	}
@@ -142,17 +148,17 @@ public class RefSpace {
 	// TODO - Make it array friendly.
 
 	@SuppressWarnings("rawtypes")
-	public <T> RefSpace substitute(List<Providing> providings, Runnable runnable) {
+	public <T> Scope substitute(List<Providing> providings, Runnable runnable) {
 		get().substitute(providings, runnable);
 		return this;
 	}
 	
-	public RefSpace newSubSpace(Configuration config) {
-		return new RefSpace(null, this, config);
+	public Scope newSubScope(Configuration config) {
+		return new Scope(null, this, config);
 	}
 	
-	public RefSpace newSubSpace(String name, Configuration config) {
-		return new RefSpace(name, this, config);
+	public Scope newSubScope(String name, Configuration config) {
+		return new Scope(name, this, config);
 	}
 	
 	@SuppressWarnings("rawtypes")

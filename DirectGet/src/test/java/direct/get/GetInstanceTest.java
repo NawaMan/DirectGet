@@ -22,7 +22,7 @@ public class GetInstanceTest {
 	public void testRef() {
 		List      theList = new ArrayList();
 		Ref<List> aLIST   = Ref.of("aList", List.class, ()->theList);
-		assertTrue(AppSpace.get._a(aLIST).filter(list->list == theList).isPresent());
+		assertTrue(AppScope.get._a(aLIST).filter(list->list == theList).isPresent());
 	}
 
 }

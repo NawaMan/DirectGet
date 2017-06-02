@@ -15,8 +15,10 @@ import direct.get.exceptions.GetException;
 public interface Ref<T> extends Comparable<Ref<T>> {
 	
 	public Class<T> getTargetClass();
-
+	
 	/**
+	 * The name of the reference.
+	 * 
 	 * This value is for the benefit of human who look at it.
 	 * There is no use in the program in anyway (except debugging/logging/auditing purposes).
 	 **/

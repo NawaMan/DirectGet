@@ -20,17 +20,17 @@ public class ProvidingOrderTest {
 
 	// The order
 	// Get parent dictate - when included
-	// Get space parent dictate
-	// Get space dictate
+	// Get scope parent dictate
+	// Get scope dictate
 	// Get stack parent dictate
 	// Get stack dictate
 	// Get stack normal
-	// Get space normal
-	// Get space parent normal
+	// Get scope normal
+	// Get scope parent normal
 	// Get parent normal - when included
 	// Get stack default
-	// Get space default
-	// Get space parent default
+	// Get scope default
+	// Get scope parent default
 	// Get parent default - when included
 	// Ref default
 	
@@ -38,49 +38,49 @@ public class ProvidingOrderTest {
 	private final Ref<String> refNoDefault = Ref.of(String.class);
 	
 	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"GetParentDictate");
-	private final Providing<String> spaceParentDictate = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"SpaceParentDictate");
-	private final Providing<String> spaceDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"SpaceDictate");
+	private final Providing<String> scopeParentDictate = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"ScopeParentDictate");
+	private final Providing<String> scopeDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"ScopeDictate");
 	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, PriorityLevel.Dictate, ()->"StackDictate");
 
 	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"GetParentNormal");
-	private final Providing<String> spaceParentNormal = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"SpaceParentNormal");
-	private final Providing<String> spaceNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"SpaceNormal");
+	private final Providing<String> scopeParentNormal = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"ScopeParentNormal");
+	private final Providing<String> scopeNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"ScopeNormal");
 	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, PriorityLevel.Normal, ()->"StackNormal");
 
 	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"GetParentDefault");
-	private final Providing<String> spaceParentDefault = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"SpaceParentDefault");
-	private final Providing<String> spaceDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"SpaceDefault");
+	private final Providing<String> scopeParentDefault = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"ScopeParentDefault");
+	private final Providing<String> scopeDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"ScopeDefault");
 	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, PriorityLevel.Default, ()->"StackDefault");
 
 	private void doTest(
 			Providing<String> _getParent,
-			Providing<String> _spaceParent,
-			Providing<String> _space,
+			Providing<String> _scopeParent,
+			Providing<String> _scope,
 			Providing<String> _stack,
 			String expected) {
-		doTest(_getParent, _spaceParent, _space, _stack, false, expected);
+		doTest(_getParent, _scopeParent, _scope, _stack, false, expected);
 	}
 	
 	private void doTest(
 			Providing<String> _getParent,
-			Providing<String> _spaceParent,
-			Providing<String> _space,
+			Providing<String> _scopeParent,
+			Providing<String> _scope,
 			Providing<String> _stack,
 			boolean isToInherit,
 			String expected) {
-		RefSpace appSpace    = AppSpace.current;
-		RefSpace parentSpace = appSpace   .newSubSpace(new Configuration(Collections.singletonMap(ref, _spaceParent)));
-		RefSpace theSpace    = parentSpace.newSubSpace(new Configuration(Collections.singletonMap(ref, _space)));
+		Scope appScope    = AppScope.current;
+		Scope parentScope = appScope   .newSubScope(new Configuration(Collections.singletonMap(ref, _scopeParent)));
+		Scope theScope    = parentScope.newSubScope(new Configuration(Collections.singletonMap(ref, _scope)));
 		
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-		theSpace.substitute(Arrays.asList(_getParent), ()->{
+		theScope.substitute(Arrays.asList(_getParent), ()->{
 			try {
 				@SuppressWarnings("rawtypes")
 				List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
-				theSpace.runSubThread(list, ()->{
-					theSpace.substitute(Arrays.asList(_stack), ()->{
-						String actual = theSpace.get()._a(ref).orElse(null);
+				theScope.runSubThread(list, ()->{
+					theScope.substitute(Arrays.asList(_stack), ()->{
+						String actual = theScope.get()._a(ref).orElse(null);
 						try {
 							assertEquals(expected, actual);
 						} catch (AssertionError e) {
@@ -112,89 +112,89 @@ public class ProvidingOrderTest {
 	@Test
 	public void test_forDictate_superHasPriority() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
 	}
 	
 	@Test
 	public void test_forNormal_subHasPriority() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
 	public void test_forDefault_subHasPriority() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
 	}
 	
 	@Test
 	public void test_forDefault_hasPriority_thenNull() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDefault");
 	}
 	
 	@Test
 	public void test_forNormal_hasPriority_thenDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
 	public void test_forDictate_hasPriority_thenNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
 	}
 	
 	@Test
 	public void test_ifNonSpecified_refDefaultIsReturned() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "RefDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
 	}
 	
 	@Test
 	public void test_refDefault_defaultConstructionIsCalledIsUsed() {
-		Assert.assertEquals("", AppSpace.current.get().a(refNoDefault));
+		Assert.assertEquals("", AppScope.current.get().a(refNoDefault));
 	}
 	
 	@Test(expected=GetException.class)
 	public void test_refDefault_withNoDefaultConstruction_exceptionIsThrown() {
-		AppSpace.current.get().a(Ref.of(List.class));
+		AppScope.current.get().a(Ref.of(List.class));
 	}
 	
 	@Test
 	public void test_refDefault_withNoDefaultConstruction_returnTheGivenResult() {
 		List<String> theList = new ArrayList<>();
-		Assert.assertEquals(theList, AppSpace.current.get().a(Ref.of(List.class), theList));
+		Assert.assertEquals(theList, AppScope.current.get().a(Ref.of(List.class), theList));
 	}
 	
 	@Test
 	public void test_byDefault_parentHasNoEffect_so_refDefault() {
-		Providing<String> _getParent   = spaceDictate;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _getParent   = scopeDictate;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "RefDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
 	}
 	
 	// == Characteristic tests ================================================
@@ -204,93 +204,91 @@ public class ProvidingOrderTest {
 	@Test
 	public void testRefDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "RefDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
 	}
 	
 	@Test
 	public void testRefDefaultStackDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
 	}
 	
 	@Test
-	public void testSpaceDefaultStackDefault() {
+	public void testScopeDefaultStackDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
 	}
 	
 	@Test
-	public void testSpaceParentDefaultSpaceDefaultStackDefault() {
+	public void testScopeParentDefaultScopeDefaultStackDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
 	}
 	
 	@Test
-	public void testGetParentDefaultSpaceParentDefaultSpaceDefaultStackDefault() {
+	public void testGetParentDefaultScopeParentDefaultScopeDefaultStackDefault() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
 	}
 	
 	@Test
-	public void testGetParentDefaultSpaceParentDefaultSpaceDefault() {
+	public void testGetParentDefaultScopeParentDefaultScopeDefault() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDefault");
 	}
 	
 	@Test
-	public void testGetParentDefaultSpaceParentDefault() {
+	public void testGetParentDefaultScopeParentDefault() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDefault");
 	}
 	
 	@Test
 	public void testGetParentDefault() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, "RefDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
 	}
 	
 	@Test
-	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testGetParentDefault_borrowSpecifyRefs_includeChecked_fromParent() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, true, "GetParentDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, true, "GetParentDefault");
 	}
 	
 	@Test
-	//@Ignore(NOT_IMPLEMENT_YET)
 	public void testGetParentDefault_borrowSpecifyRefs_excludeChecked_fromParent() {
 		Providing<String> _getParent   = getParentDefault;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = null;
-		doTest(_getParent, _spaceParent, _space, _stack, false, "RefDefault");
+		doTest(_getParent, _scopeParent, _scope, _stack, false, "RefDefault");
 	}
 	
 	//-- Normal --
@@ -298,118 +296,118 @@ public class ProvidingOrderTest {
 	@Test
 	public void testRefDefaultStackNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormal() {
+	public void testRefDefaultStackDefaultScopeNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceNormal() {
+	public void testRefDefaultStackNormalScopeNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormalSpaceParentNormal() {
+	public void testRefDefaultStackDefaultScopeNormalScopeParentNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormalSpaceParentDefault() {
+	public void testRefDefaultStackDefaultScopeNormalScopeParentDefault() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceDefaultSpaceParentNormal() {
+	public void testRefDefaultStackDefaultScopeDefaultScopeParentNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceDefaultSpaceParentNormal() {
+	public void testRefDefaultStackNormalScopeDefaultScopeParentNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceNormalSpaceParentNormal() {
+	public void testRefDefaultStackNormalScopeNormalScopeParentNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormalSpaceParentormalGetParentNormal() {
+	public void testRefDefaultStackDefaultScopeNormalScopeParentormalGetParentNormal() {
 		Providing<String> _getParent   = getParentNormal;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormalSpaceParentDefaultGetParentNormal() {
+	public void testRefDefaultStackDefaultScopeNormalScopeParentDefaultGetParentNormal() {
 		Providing<String> _getParent   = getParentNormal;
-		Providing<String> _spaceParent = spaceParentDefault;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentDefault;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceDefaultSpaceParentNormalGetParentNormal() {
+	public void testRefDefaultStackDefaultScopeDefaultScopeParentNormalGetParentNormal() {
 		Providing<String> _getParent   = getParentNormal;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceDefaultSpaceParentNormalGetParentNormal() {
+	public void testRefDefaultStackNormalScopeDefaultScopeParentNormalGetParentNormal() {
 		Providing<String> _getParent   = getParentNormal;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceDefault;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeDefault;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceNormalSpaceParentNormalGetParentNormal() {
+	public void testRefDefaultStackNormalScopeNormalScopeParentNormalGetParentNormal() {
 		Providing<String> _getParent   = getParentNormal;
-		Providing<String> _spaceParent = spaceParentNormal;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentNormal;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackNormal");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
 	}
 	
 	//-- Dictate --
@@ -417,93 +415,91 @@ public class ProvidingOrderTest {
 	@Test
 	public void testRefDefaultStackDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = null;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = null;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceDictate() {
+	public void testRefDefaultStackDefaultScopeDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackNormalSpaceDictate() {
+	public void testRefDefaultStackNormalScopeDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackNormal;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDictateSpaceNormal() {
+	public void testRefDefaultStackDictateScopeNormal() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDictateSpaceDictate() {
+	public void testRefDefaultStackDictateScopeDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = null;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = null;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "StackDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceNormalSpaceParentDictate() {
+	public void testRefDefaultStackDefaultScopeNormalScopeParentDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentDictate;
-		Providing<String> _space       = spaceNormal;
+		Providing<String> _scopeParent = scopeParentDictate;
+		Providing<String> _scope       = scopeNormal;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDefaultSpaceDictateSpaceParentDictate() {
+	public void testRefDefaultStackDefaultScopeDictateScopeParentDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentDictate;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = scopeParentDictate;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDefault;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
 	}
 	
 	@Test
-	public void testRefDefaultStackDictateSpaceDictateSpaceParentDictate() {
+	public void testRefDefaultStackDictateScopeDictateScopeParentDictate() {
 		Providing<String> _getParent   = null;
-		Providing<String> _spaceParent = spaceParentDictate;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = scopeParentDictate;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, "SpaceParentDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
 	}
 	
 	@Test
-	//@Ignore(NOT_IMPLEMENT_YET)
-	public void testRefDefaultStackDictateSpaceDictateSpaceParentDictateGetParentDictate_includeParent() {
+	public void testRefDefaultStackDictateScopeDictateScopeParentDictateGetParentDictate_includeParent() {
 		Providing<String> _getParent   = getParentDictate;
-		Providing<String> _spaceParent = spaceParentDictate;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = scopeParentDictate;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, true, "SpaceParentDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, true, "ScopeParentDictate");
 	}
 	
 	@Test
-	//@Ignore(NOT_IMPLEMENT_YET)
-	public void testRefDefaultStackDictateSpaceDictateSpaceParentDictateGetParentDictate_excludeParent() {
+	public void testRefDefaultStackDictateScopeDictateScopeParentDictateGetParentDictate_excludeParent() {
 		Providing<String> _getParent   = getParentDictate;
-		Providing<String> _spaceParent = spaceParentDictate;
-		Providing<String> _space       = spaceDictate;
+		Providing<String> _scopeParent = scopeParentDictate;
+		Providing<String> _scope       = scopeDictate;
 		Providing<String> _stack       = stackDictate;
-		doTest(_getParent, _spaceParent, _space, _stack, false, "SpaceParentDictate");
+		doTest(_getParent, _scopeParent, _scope, _stack, false, "ScopeParentDictate");
 	}
 	
 }

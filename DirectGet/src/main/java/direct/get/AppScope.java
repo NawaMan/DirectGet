@@ -10,15 +10,15 @@ import direct.get.exceptions.ApplicationAlreadyInitializedException;
  * 
  * @author nawaman
  */
-public final class AppSpace extends RefSpace {
+public final class AppScope extends Scope {
 	
-	public static final AppSpace current = new AppSpace();
+	public static final AppScope current = new AppScope();
 	
 	public static final Get.Instance Get = current.get();
 	
 	public static final Get.Instance get = Get;
 	
-	public static AppSpace initialize(Configuration config) throws ApplicationAlreadyInitializedException {
+	public static AppScope initialize(Configuration config) throws ApplicationAlreadyInitializedException {
 		current.init(config);
 		return current;
 	}
@@ -31,7 +31,7 @@ public final class AppSpace extends RefSpace {
 		return current.hasBeenInitialized();
 	}
 	
-	private AppSpace() {
+	private AppScope() {
 		super();
 	}
 	

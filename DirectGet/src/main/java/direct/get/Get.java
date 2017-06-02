@@ -21,7 +21,7 @@ public final class Get {
 	}
 		
 	public static <T> Optional<T> _a(Ref<T> ref) {
-		return AppSpace.get._a(ref);
+		return AppScope.get._a(ref);
 	}
 
 	public static <T> T a(Class<T> clzz) {
@@ -57,7 +57,7 @@ public final class Get {
 	}
 	
 	public static <T> Instance substitute(Providing<T> providing, Runnable runnable) {
-		 return AppSpace.get.substitute(Arrays.asList(providing), runnable);
+		 return AppScope.get.substitute(Arrays.asList(providing), runnable);
 	}
 	
 	//== The implementation ===================================================
@@ -69,22 +69,22 @@ public final class Get {
 	 */
 	public static final class Instance {
 		
-		private final RefSpace refSpace;
+		private final Scope scope;
 		
 		private final Instance parentGet;
 		
 		@SuppressWarnings("rawtypes")
 		private final Map<Ref, Stack<Providing>> providingStacks = new TreeMap<>();
 		
-		Instance(Instance parentGet, RefSpace refSpace) {
+		Instance(Instance parentGet, Scope scope) {
 			this.parentGet = parentGet;
-			this.refSpace  = refSpace;
+			this.scope     = scope;
 			
 			// TODO - Check for conflict between parentGet and config.
 		}
 		
-		public RefSpace getSpace() {
-			return this.refSpace;
+		public Scope getScope() {
+			return this.scope;
 		}
 		
 		@SuppressWarnings("rawtypes")
@@ -99,18 +99,18 @@ public final class Get {
 			
 			Providing<T> providing
 					= PriorityLevel.determineGetProviding(
-						providingFromParentGet(ref),
-						providingFromRefSpace(ref),
+						providingFromParent(ref),
+						providingFromScope(ref),
 						providingFromStack(ref));
 			return providing;
 		}
 
-		private <T> Supplier<Providing<T>> providingFromParentGet(Ref<T> ref) {
+		private <T> Supplier<Providing<T>> providingFromParent(Ref<T> ref) {
 			return ()->Optional.ofNullable(parentGet).map(pGet->pGet.getProviding(ref)).orElse(null);
 		}
 		
-		private <T> Supplier<Providing<T>> providingFromRefSpace(Ref<T> ref) {
-			return ()->Optional.ofNullable(refSpace).map(rfSp->rfSp.getProviding(ref)).orElse(null);
+		private <T> Supplier<Providing<T>> providingFromScope(Ref<T> ref) {
+			return ()->Optional.ofNullable(scope).map(rfSp->rfSp.getProviding(ref)).orElse(null);
 		}
 		
 		private <T> Predicate<Stack<T>> not(Predicate<Stack<T>> check) {
@@ -126,7 +126,7 @@ public final class Get {
 		}
 		
 		public <T> Optional<T> _a(Ref<T> ref) {
-			return refSpace.doGet(ref);
+			return scope.doGet(ref);
 		}
 		
 		public <T> Optional<T> _a(Class<T> clzz) {

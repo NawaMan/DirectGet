@@ -3,7 +3,7 @@ package direct.get;
 import direct.get.exceptions.ApplicationAlreadyInitializedException;
 
 /**
- * This is the application context.
+ * This is the application scope.
  * 
  * IMPORTANT NOTE: This class is complicated to test.
  *   So you should have a really really good reason to change it!!!

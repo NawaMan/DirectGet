@@ -188,10 +188,12 @@ public class RefSpace {
 		newSubThread(runnable).start();
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void runSubThread(List<Ref> refsToInherit, Runnable runnable) {
 		newSubThread(refsToInherit, runnable).start();
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void runSubThread(Predicate<Ref> refsToInherit, Runnable runnable) {
 		newSubThread(refsToInherit, runnable).start();
 	}

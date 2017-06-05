@@ -1,28 +1,27 @@
 package direct.get.exceptions;
 
+import direct.get.Ref;
+
 /**
  * This exception holds the exceptional result for Get.
  * 
  * @author nawaman
  */
-public class GetException extends RuntimeException {
+public class GetException extends DirectGetRuntimeException {
 
 	private static final long serialVersionUID = -5821727183532729001L;
-
-	public GetException() {
-        super();
+	
+	private final Ref<?> ref;
+	
+	/** Constructor */
+    public GetException(Ref<?> ref, Throwable cause) {
+        super(ref.toString(), cause);
+        this.ref = ref;
     }
-
-    public GetException(String message) {
-        super(message);
-    }
-
-    public GetException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public GetException(Throwable cause) {
-        super(cause);
+    
+    /** @return the reference with the problem. */
+    public Ref<?> getRef() {
+    	return ref;
     }
     
 }

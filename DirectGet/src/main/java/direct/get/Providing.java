@@ -4,55 +4,45 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import direct.get.exceptions.GetException;
-
+/**
+ * Instance of this class holds data for providing.
+ * 
+ * @author nawaman
+ **/
 public class Providing<T> implements Supplier<T> {
 	
 	private final Ref<T> ref;
 	
 	private final Preferability preferability;
+
+	private final Supplier<T> supplier;
 	
-	public Providing(Ref<T> ref, Preferability preferability) {
+	/**
+	 * Constructor.
+	 * 
+	 * @param ref            the reference.
+	 * @param preferability  the level of preferability.
+	 * @param supplier       the supplier to get the value.
+	 */
+	public Providing(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
 		this.ref           = Objects.requireNonNull(ref);
 		this.preferability = Optional.ofNullable(preferability).orElse(Preferability.Default);
+		this.supplier      = Optional.ofNullable(supplier).orElse(()->null);
 	}
 	
-	public Ref<T> getRef() {
+	/** @return the reference for this providing. */
+	public final Ref<T> getRef() {
 		return ref;
 	}
 
 	@Override
 	public T get() {
-		Optional<T> optT = ref._get();
-		if (optT.isPresent()) {
-			return optT.get();
-		}
-		throw new GetException(ref.toString());
+		return supplier.get();
 	}
-	
-	public Preferability getPreferability() {
+
+	/** @return the preferability for this providing. */
+	public final Preferability getPreferability() {
 		return preferability;
-	}
-	
-	// == Sub implementations =================================================
-	
-	public static class Basic<T> extends Providing<T> {
-
-		private final Supplier<T> supplier;
-		
-		public Basic(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
-			super(ref, preferability);
-			this.supplier = supplier;
-		}
-
-		@Override
-		public T get() {
-			if (supplier == null) {
-				return super.get();
-			}
-			return supplier.get();
-		}
-		
 	}
 	
 }

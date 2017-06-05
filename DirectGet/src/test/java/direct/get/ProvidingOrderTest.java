@@ -37,20 +37,20 @@ public class ProvidingOrderTest {
 	private final Ref<String> ref          = Ref.of(String.class, ()->"RefDefault");
 	private final Ref<String> refNoDefault = Ref.of(String.class);
 	
-	private final Providing<String> getParentDictate   = new Providing.Basic<>(ref, Preferability.Dictate, ()->"GetParentDictate");
-	private final Providing<String> scopeParentDictate = new Providing.Basic<>(ref, Preferability.Dictate, ()->"ScopeParentDictate");
-	private final Providing<String> scopeDictate       = new Providing.Basic<>(ref, Preferability.Dictate, ()->"ScopeDictate");
-	private final Providing<String> stackDictate       = new Providing.Basic<>(ref, Preferability.Dictate, ()->"StackDictate");
+	private final Providing<String> getParentDictate   = new Providing<>(ref, Preferability.Dictate, ()->"GetParentDictate");
+	private final Providing<String> scopeParentDictate = new Providing<>(ref, Preferability.Dictate, ()->"ScopeParentDictate");
+	private final Providing<String> scopeDictate       = new Providing<>(ref, Preferability.Dictate, ()->"ScopeDictate");
+	private final Providing<String> stackDictate       = new Providing<>(ref, Preferability.Dictate, ()->"StackDictate");
 
-	private final Providing<String> getParentNormal   = new Providing.Basic<>(ref, Preferability.Normal, ()->"GetParentNormal");
-	private final Providing<String> scopeParentNormal = new Providing.Basic<>(ref, Preferability.Normal, ()->"ScopeParentNormal");
-	private final Providing<String> scopeNormal       = new Providing.Basic<>(ref, Preferability.Normal, ()->"ScopeNormal");
-	private final Providing<String> stackNormal       = new Providing.Basic<>(ref, Preferability.Normal, ()->"StackNormal");
+	private final Providing<String> getParentNormal   = new Providing<>(ref, Preferability.Normal, ()->"GetParentNormal");
+	private final Providing<String> scopeParentNormal = new Providing<>(ref, Preferability.Normal, ()->"ScopeParentNormal");
+	private final Providing<String> scopeNormal       = new Providing<>(ref, Preferability.Normal, ()->"ScopeNormal");
+	private final Providing<String> stackNormal       = new Providing<>(ref, Preferability.Normal, ()->"StackNormal");
 
-	private final Providing<String> getParentDefault   = new Providing.Basic<>(ref, Preferability.Default, ()->"GetParentDefault");
-	private final Providing<String> scopeParentDefault = new Providing.Basic<>(ref, Preferability.Default, ()->"ScopeParentDefault");
-	private final Providing<String> scopeDefault       = new Providing.Basic<>(ref, Preferability.Default, ()->"ScopeDefault");
-	private final Providing<String> stackDefault       = new Providing.Basic<>(ref, Preferability.Default, ()->"StackDefault");
+	private final Providing<String> getParentDefault   = new Providing<>(ref, Preferability.Default, ()->"GetParentDefault");
+	private final Providing<String> scopeParentDefault = new Providing<>(ref, Preferability.Default, ()->"ScopeParentDefault");
+	private final Providing<String> scopeDefault       = new Providing<>(ref, Preferability.Default, ()->"ScopeDefault");
+	private final Providing<String> stackDefault       = new Providing<>(ref, Preferability.Default, ()->"StackDefault");
 
 	private void doTest(
 			Providing<String> _getParent,
@@ -68,18 +68,18 @@ public class ProvidingOrderTest {
 			Providing<String> _stack,
 			boolean isToInherit,
 			String expected) {
-		Scope appScope    = AppScope.current;
-		Scope parentScope = appScope   .newSubScope(new Configuration(Collections.singletonMap(ref, _scopeParent)));
-		Scope theScope    = parentScope.newSubScope(new Configuration(Collections.singletonMap(ref, _scope)));
+		Scope appScope    = AppScope.instance;
+		Scope parentScope = appScope   .newSubScope(new Configuration(_scopeParent));
+		Scope theScope    = parentScope.newSubScope(new Configuration(_scope));
 		
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-		theScope.substitute(Arrays.asList(_getParent), ()->{
+		theScope.get().substitute(Arrays.asList(_getParent), ()->{
 			try {
 				@SuppressWarnings("rawtypes")
 				List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
-				theScope.runSubThread(list, ()->{
-					theScope.substitute(Arrays.asList(_stack), ()->{
+				theScope.runNewThread(list, ()->{
+					theScope.get().substitute(Arrays.asList(_stack), ()->{
 						String actual = theScope.get()._a(ref).orElse(null);
 						try {
 							assertEquals(expected, actual);
@@ -174,18 +174,18 @@ public class ProvidingOrderTest {
 	
 	@Test
 	public void test_refDefault_defaultConstructionIsCalledIsUsed() {
-		Assert.assertEquals("", AppScope.current.get().a(refNoDefault));
+		Assert.assertEquals("", AppScope.instance.get().a(refNoDefault));
 	}
 	
 	@Test(expected=GetException.class)
 	public void test_refDefault_withNoDefaultConstruction_exceptionIsThrown() {
-		AppScope.current.get().a(Ref.of(List.class));
+		AppScope.instance.get().a(Ref.of(List.class));
 	}
 	
 	@Test
 	public void test_refDefault_withNoDefaultConstruction_returnTheGivenResult() {
 		List<String> theList = new ArrayList<>();
-		Assert.assertEquals(theList, AppScope.current.get().a(Ref.of(List.class), theList));
+		Assert.assertEquals(theList, AppScope.instance.get().a(Ref.of(List.class), theList));
 	}
 	
 	@Test

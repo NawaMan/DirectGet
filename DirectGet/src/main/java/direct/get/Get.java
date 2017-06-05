@@ -1,41 +1,57 @@
 package direct.get;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import direct.get.exceptions.GetException;
+import direct.get.exceptions.RunWithSubstitutionException;
 
+/**
+ * This class provide access to the application scope.
+ * 
+ * @author nawaman
+ */
 public final class Get {
 	
 	private Get() {
 		
 	}
-		
+	
+	/** @return the optional value associated with the given ref.  */
 	public static <T> Optional<T> _a(Ref<T> ref) {
 		return AppScope.get._a(ref);
 	}
-
+	
+	/** @return the optional value associated with the given class.  */
+	public static <T> Optional<T> _a(Class<T> clzz) {
+		return _a(Ref.forClass(clzz));
+	}
+	
+	/** @return the value associated with the given class.  */
 	public static <T> T a(Class<T> clzz) {
 		return a(Ref.forClass(clzz));
 	}
 	
+	/** @return the value associated with the given ref.  */
 	public static <T> T a(Ref<T> ref) {
 		return _a(ref).orElse(null);
 	}
 	
+	/** @return the value associated with the given class or return the elseValue if no value associated with the class.  */
 	public static <T> T a(Class<T> clzz, T elseValue) {
 		return a(Ref.forClass(clzz), elseValue);
 	}
-	
+
+	/** @return the value associated with the given ref or return the elseValue if no value associated with the ref.  */
 	public static <T> T a(Ref<T> ref, T elseValue) {
 		try {
 			return _a(ref).orElse(elseValue);
@@ -43,21 +59,30 @@ public final class Get {
 			return elseValue;
 		}
 	}
-	
+
+	/** @return the value associated with the given class or return the from elseSupplier if no value associated with the class.  */
 	public static <T> T a(Class<T> clzz, Supplier<T> elseSupplier) {
 		return a(Ref.forClass(clzz), elseSupplier);
 	}
 	
+	/** @return the value associated with the given ref or return the from elseSupplier if no value associated with the ref.  */
 	public static <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
 		return _a(ref).orElseGet(elseSupplier);
 	}
 	
-	public static <T> Optional<T> _a(Class<T> clzz) {
-		return _a(Ref.forClass(clzz));
+	/**
+	 * Substitute the given providings and run the runnable.
+	 */
+	public static void substitute(@SuppressWarnings("rawtypes") List<Providing> providings, Runnable runnable) {
+		 AppScope.get.substitute(providings, runnable);
 	}
 	
-	public static <T> Instance substitute(Providing<T> providing, Runnable runnable) {
-		 return AppScope.get.substitute(Arrays.asList(providing), runnable);
+	/**
+	 * Substitute the given providings and run the action.
+	 */
+	@SuppressWarnings("rawtypes")
+	public <V, T extends Throwable> V substitute(List<Providing> providings, Computation<V, T> computation) throws T {
+		return AppScope.get.substitute(providings, computation);
 	}
 	
 	//== The implementation ===================================================
@@ -83,6 +108,7 @@ public final class Get {
 			// TODO - Check for conflict between parentGet and config.
 		}
 		
+		/** @return the scope this Get is in. */
 		public Scope getScope() {
 			return this.scope;
 		}
@@ -124,27 +150,33 @@ public final class Get {
 						.map(Stack::peek)
 						.orElse(null);
 		}
-		
+
+		/** @return the optional value associated with the given ref.  */
 		public <T> Optional<T> _a(Ref<T> ref) {
 			return scope.doGet(ref);
 		}
-		
+
+		/** @return the optional value associated with the given class.  */
 		public <T> Optional<T> _a(Class<T> clzz) {
 			return _a(Ref.forClass(clzz));
 		}
-	
+		
+		/** @return the value associated with the given ref.  */
 		public <T> T a(Class<T> clzz) {
 			return a(Ref.forClass(clzz));
 		}
 		
+		/** @return the value associated with the given class.  */
 		public <T> T a(Ref<T> ref) {
 			return _a(ref).orElse(null);
 		}
 		
+		/** @return the value associated with the given class or return the elseValue if no value associated with the class.  */
 		public <T> T a(Class<T> clzz, T elseValue) {
 			return a(Ref.forClass(clzz), elseValue);
 		}
-		
+
+		/** @return the value associated with the given ref or return the elseValue if no value associated with the ref.  */
 		public <T> T a(Ref<T> ref, T elseValue) {
 			try {
 				return _a(ref).orElse(elseValue);
@@ -152,32 +184,67 @@ public final class Get {
 				return elseValue;
 			}
 		}
+
+		/** @return the value associated with the given class or return the from elseSupplier if no value associated with the class.  */
+		public <T> T a(Class<T> clzz, Supplier<T> elseSupplier) {
+			return a(Ref.forClass(clzz), elseSupplier);
+		}
+		
+		/** @return the value associated with the given ref or return the from elseSupplier if no value associated with the ref.  */
+		public <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
+			return _a(ref).orElseGet(elseSupplier);
+		}
 		
 		// TODO - Make it array friendly.
-		
-		@SuppressWarnings("rawtypes")
-		public <T> Instance substitute(List<Providing> providings, Runnable runnable) {
-			if ((providings == null) || providings.isEmpty()) {
-				runnable.run();
-			} else {
-				List<Ref> addedRefs = new ArrayList<>();
-				try {
-					providings
-					.stream()
-					.filter(Objects::nonNull)
-					.forEach(providing->{
-						Ref ref = providing.getRef();
-						providingStacks.computeIfAbsent(ref, r->new Stack<>());
-						providingStacks.get(ref).push(providing);
-						addedRefs.add(ref);
-					});
-					
-					runnable.run();
-				} finally {
-					addedRefs.forEach(ref->providingStacks.get(ref).pop());
-				}
+		/**
+		 * Substitute the given providings and run the runnable.
+		 */
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public <T> void substitute(List<Providing> providings, Runnable runnable) {
+			AtomicReference<RuntimeException> problem = new AtomicReference<RuntimeException>(null);
+			try {
+				substitute(providings, (Computation)(()->{
+					try {
+						runnable.run();
+					} catch (RuntimeException e) {
+						problem.set(e);
+					}
+					return null;
+				}));
+			} catch (Throwable t) {
+				throw new RunWithSubstitutionException(t);
 			}
-			return this;
+			
+			if (problem.get() != null) {
+				throw problem.get();
+			}
+		}
+		
+		/**
+		 * Substitute the given providings and run the action.
+		 */
+		@SuppressWarnings("rawtypes")
+		public <V, T extends Throwable> V substitute(List<Providing> providings, Computation<V, T> computation) throws T {
+			if ((providings == null) || providings.isEmpty()) {
+				return computation.run();
+			}
+			
+			List<Ref> addedRefs = new ArrayList<>();
+			try {
+				providings
+				.stream()
+				.filter(Objects::nonNull)
+				.forEach(providing->{
+					Ref ref = providing.getRef();
+					providingStacks.computeIfAbsent(ref, r->new Stack<>());
+					providingStacks.get(ref).push(providing);
+					addedRefs.add(ref);
+				});
+				
+				return computation.run();
+			} finally {
+				addedRefs.forEach(ref->providingStacks.get(ref).pop());
+			}
 		}
 		
 	}

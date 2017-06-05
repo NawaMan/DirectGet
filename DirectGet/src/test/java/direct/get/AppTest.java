@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import direct.get.exceptions.ApplicationAlreadyInitializedException;
+import direct.get.exceptions.AppScopeAlreadyInitializedException;
 
 // VERY IMPORTANT NOTE!!!
 // These test cases are designed to be run alone.
@@ -23,18 +23,18 @@ public class AppTest {
 
 	@Test
 	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
-	public void testFirstInitialize() throws ApplicationAlreadyInitializedException {
+	public void testFirstInitialize() throws AppScopeAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
 		AppScope.initialize(null);
 	}
 	
-	@Test(expected=ApplicationAlreadyInitializedException.class)
+	@Test(expected=AppScopeAlreadyInitializedException.class)
 	//@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
-	public void testSecondInitialize() throws ApplicationAlreadyInitializedException {
+	public void testSecondInitialize() throws AppScopeAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
 		try {
 			AppScope.initialize(null);
-		} catch (ApplicationAlreadyInitializedException e) {
+		} catch (AppScopeAlreadyInitializedException e) {
 			fail("Oh no! Not from here.");
 		}
 		

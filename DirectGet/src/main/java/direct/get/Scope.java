@@ -4,22 +4,30 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import direct.get.exceptions.ApplicationAlreadyInitializedException;
+import direct.get.exceptions.AppScopeAlreadyInitializedException;
 
 /***
- * 
+ * Scope holds a configuration which specify providings.
  * 
  * @author nawaman
  */
 public class Scope {
 	
+	/** This predicate specifies that all of the references are to be inherited */
 	@SuppressWarnings("rawtypes")
 	public static final Predicate<Ref> INHERIT_ALL = ref->true;
-
+	
+	/** This predicate specifies that none of the references are to be inherited */
 	@SuppressWarnings("rawtypes")
 	public static final Predicate<Ref> INHERIT_NONE = ref->false;
 
@@ -28,6 +36,12 @@ public class Scope {
 	private static final Configuration DEF_CONFIG = new Configuration();
 
 	private static final Object lock = new Object();
+	
+	/** The reference to the thread factory. */
+	public static final Ref<ThreadFactory> _ThreadFactory_ = Ref.of(ThreadFactory.class, Executors.defaultThreadFactory());
+	/** The reference to the executor. */
+	public static final Ref<Executor>      _Executor_      = Ref.of(Executor.class,      Executors.newCachedThreadPool());
+	
 
 	/**
 	 * The name of the scope.
@@ -62,12 +76,12 @@ public class Scope {
 	}
 	
 	// -- For AppScope only ---------------------------------------------------
-	void init(Configuration newConfig) throws ApplicationAlreadyInitializedException {
+	void init(Configuration newConfig) throws AppScopeAlreadyInitializedException {
 		if (config == DEF_CONFIG) {
 			initIfAbsent(newConfig);
 			return;
 		}
-		throw new ApplicationAlreadyInitializedException();
+		throw new AppScopeAlreadyInitializedException();
 	}
 	
 	void ensureInitialized() {
@@ -91,17 +105,20 @@ public class Scope {
 		return config != null;
 	}
 	
-	public final List<StackTraceElement> getInitialzedStackTrace() {
+	/** @return the stacktrace when this scope is initialized. */
+	public final Stream<StackTraceElement> getInitialzedStackTrace() {
 		ensureInitialized();
-		return stackTraceAtCreation;
+		return stackTraceAtCreation.stream();
 	}
 	
 	// -- For both types of Scope ------------------------------------------
 	
+	/** @return the name of the scope. */
 	public String getName() {
 		return name;
 	}
-	
+
+	/** @return the name of the scope. */
 	public Scope getParentScope() {
 		return this.parentScope;
 	}
@@ -116,7 +133,7 @@ public class Scope {
 	}
 
 	private <T> Supplier<Providing<T>> providingFromConfiguration(Ref<T> ref) {
-		return ()->this.config._get(ref).orElse(null);
+		return ()->this.config.getProviding(ref);
 	}
 	
 	protected final <T> Providing<T> getProviding(Ref<T> ref) {
@@ -130,9 +147,9 @@ public class Scope {
 					providingFromConfiguration(ref));
 		return providing;
 	}
-
 	
-	Get.Instance get() {
+	/** @return the get for the current thread that is associated with this scope. */
+	public Get.Instance get() {
 		return threadGet.get();
 	}
 	
@@ -145,37 +162,114 @@ public class Scope {
 		return ref._get();
 	}
 	
-	// TODO - Make it array friendly.
-
-	@SuppressWarnings("rawtypes")
-	public <T> Scope substitute(List<Providing> providings, Runnable runnable) {
-		get().substitute(providings, runnable);
-		return this;
+	/** {@inheritDoc} */
+	@Override
+	public final String toString() {
+		return name;
 	}
 	
+	/**
+	 * Create and return a new sub scope with the given configuration.
+	 */
 	public Scope newSubScope(Configuration config) {
 		return new Scope(null, this, config);
 	}
 	
+	/**
+	 * Create and return a new sub scope with the given name and configuration.
+	 */
 	public Scope newSubScope(String name, Configuration config) {
 		return new Scope(name, this, config);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public Thread newSubThread(Runnable runnable) {
-		return newSubThread((Predicate<Ref>)null, runnable);
+	/**
+	 * Create a sub thread with a get that inherits all substitution from the current Get
+	 *   and run the runnable with it.
+	 **/
+	public Thread newThread(Runnable runnable) {
+		return newThread(INHERIT_ALL, runnable);
 	}
 	
+	/**
+	 * Create a sub thread with a get that inherits the given substitution from the current
+	 *   Get and run the runnable with it.
+	 **/
 	@SuppressWarnings("rawtypes")
-	public Thread newSubThread(List<Ref> refsToInherit, Runnable runnable) {
-		return newSubThread(ref->refsToInherit.contains(ref), runnable);
+	public Thread newThread(List<Ref> refsToInherit, Runnable runnable) {
+		return newThread(ref->refsToInherit.contains(ref), runnable);
+	}
+
+	/**
+	 * Create a sub thread with a get that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test) and run the runnable with it.
+	 **/
+	@SuppressWarnings("rawtypes")
+	public Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+		Get.Instance    newGet     = prepareNewGet();
+		List<Providing> providings = prepareProvidings(refsToInherit);
+		
+		ThreadFactory newThread = get().a(_ThreadFactory_);
+		return newThread.newThread(()->{
+			threadGet.set(newGet);
+			newGet.substitute(providings, runnable);
+		});
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Thread newSubThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+	/**
+	 * Create and run a sub thread with a get that inherits all substitution from the current
+	 *   Get and run the runnable with it.
+	 **/
+	public void runNewThread(Runnable runnable) {
+		newThread(INHERIT_ALL, runnable).start();
+	}
+	
+	/**
+	 * Run the given runnable on a new thread that inherits the providings of those given refs.
+	 **/
+	@SuppressWarnings("rawtypes") 
+	public void runNewThread(List<Ref> refsToInherit, Runnable runnable) {
+		newThread(refsToInherit, runnable).start();
+	}
+	
+	/**
+	 * Run the given runnable on a new thread that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test).
+	 **/
+	@SuppressWarnings("rawtypes") 
+	public void runNewThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+		newThread(refsToInherit, runnable).start();
+	}
+	
+	/**
+	 * Create a sub thread with a get that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test) and run the runnable with it.
+	 **/
+	@SuppressWarnings("rawtypes")
+	public <V, T extends Throwable> CompletableFuture<V> runThread(Predicate<Ref> refsToInherit, Computation<V, T> computation) {
+		Get.Instance    newGet     = prepareNewGet();
+		List<Providing> providings = prepareProvidings(refsToInherit);
+		
+		
+		Executor executor = get().a(_Executor_);
+		return CompletableFuture.supplyAsync(()->{
+			threadGet.set(newGet);
+			try {
+				return newGet.substitute(providings, computation);
+			} catch (Throwable t) {
+				throw new CompletionException(t);
+			}
+		}, executor);
+	}
+	
+	private Get.Instance prepareNewGet() {
 		Get.Instance thisGet = get();
 		Get.Instance newGet  = new Get.Instance(thisGet, this);
-		
+		return newGet;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<Providing> prepareProvidings(Predicate<Ref> refsToInherit) {
+		Get.Instance thisGet = get();
 		Predicate<Ref> predicate = Optional.ofNullable(refsToInherit).orElse(ref->false);
 		
 		List<Providing> providings
@@ -183,27 +277,7 @@ public class Scope {
 			.filter(predicate)
 			.map(thisGet::getProviding)
 			.collect(Collectors.toList());
-		
-		return new Thread(()->{
-			threadGet.set(newGet);
-			newGet.substitute(providings, runnable);
-		});
-	}
-	
-	public void runSubThread(Runnable runnable) {
-		newSubThread(runnable).start();
-	}
-	
-	public void runSubThread(@SuppressWarnings("rawtypes") List<Ref> refsToInherit, Runnable runnable) {
-		newSubThread(refsToInherit, runnable).start();
-	}
-	
-	public void runSubThread(@SuppressWarnings("rawtypes") Predicate<Ref> refsToInherit, Runnable runnable) {
-		newSubThread(refsToInherit, runnable).start();
-	}
-	
-	public String toString() {
-		return name;
+		return providings;
 	}
 	
 }

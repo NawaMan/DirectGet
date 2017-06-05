@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 /**
  * This enum is used to specify the preferability of a providing.
  * 
- * @author manusitn
+ * @author nawaman
  */
 public enum Preferability {
 	

@@ -45,4 +45,8 @@ public class Providing<T> implements Supplier<T> {
 		return preferability;
 	}
 	
+	public String toString() {
+		return "Providing (" + preferability + ":" + ref + "): " + supplier;
+	}
+	
 }

@@ -10,24 +10,20 @@ import direct.get.exceptions.AppScopeAlreadyInitializedException;
  * 
  * @author nawaman
  */
-public final class AppScope extends Scope {
+public final class App {
 	
 	/** The instance of the Application scope. */
-	public static final AppScope instance = new AppScope();
+	public static final Scope instance = new Scope();
 
-	/** The Get instance of this scope - static import friendly. */
-	public static final Get.Instance Get = instance.get();
-
-	/** The Get instance of this scope - non-static import friendly. */
-	public static final Get.Instance get = Get;
-
-	/** The Get instance of this scope - whatever float your boat. */
-	public static final Get.Instance giveMe = Get;
+	/** @return the get for the current thread that is associated with this scope. NOTE: capital 'G' is intentional. */
+	public static Get.Instance Get() {
+		return instance.Get();
+	}
 	
 	/**
 	 * Initialize the application scope. This method can only be run once.
 	 **/
-	public static AppScope initialize(Configuration config) throws AppScopeAlreadyInitializedException {
+	public static Scope initialize(Configuration config) throws AppScopeAlreadyInitializedException {
 		instance.init(config);
 		return instance;
 	}
@@ -47,7 +43,7 @@ public final class AppScope extends Scope {
 	}
 	
 	/** Private part */
-	private AppScope() {
+	private App() {
 		super();
 	}
 	

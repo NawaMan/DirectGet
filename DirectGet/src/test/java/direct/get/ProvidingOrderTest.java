@@ -68,29 +68,35 @@ public class ProvidingOrderTest {
 			Providing<String> _stack,
 			boolean isToInherit,
 			String expected) {
-		Scope appScope    = AppScope.instance;
+		Scope appScope    = App.instance;
 		Scope parentScope = appScope   .newSubScope(new Configuration(_scopeParent));
 		Scope theScope    = parentScope.newSubScope(new Configuration(_scope));
 		
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-		theScope.get().substitute(Arrays.asList(_getParent), ()->{
+	theScope.Get().substitute(Arrays.asList(_getParent), ()->{
 			try {
 				@SuppressWarnings("rawtypes")
-				List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
-				theScope.runNewThread(list, ()->{
-					theScope.get().substitute(Arrays.asList(_stack), ()->{
-						String actual = theScope.get()._a(ref).orElse(null);
-						try {
-							assertEquals(expected, actual);
-						} catch (AssertionError e) {
-							assertErr.set(e);
-						} finally {
-							latch.countDown();
-						}
-					});
+			List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
+				theScope.Get().runNewThread(list, ()->{
+					try {
+						theScope.Get().substitute(Arrays.asList(_stack), ()->{
+							String actual = theScope.Get()._a(ref).orElse(null);
+							try {
+								assertEquals(expected, actual);
+							} catch (AssertionError e) {
+								assertErr.set(e);
+							} finally {
+								latch.countDown();
+							}
+						});
+					} finally {
+						latch.countDown();
+					}
 				});
 			} catch (Throwable e) {
+				e.printStackTrace();
+			} finally {
 				latch.countDown();
 			}
 		});
@@ -174,18 +180,18 @@ public class ProvidingOrderTest {
 	
 	@Test
 	public void test_refDefault_defaultConstructionIsCalledIsUsed() {
-		Assert.assertEquals("", AppScope.instance.get().a(refNoDefault));
+		Assert.assertEquals("", App.instance.Get().a(refNoDefault));
 	}
 	
 	@Test(expected=GetException.class)
 	public void test_refDefault_withNoDefaultConstruction_exceptionIsThrown() {
-		AppScope.instance.get().a(Ref.of(List.class));
+		App.instance.Get().a(Ref.of(List.class));
 	}
 	
 	@Test
 	public void test_refDefault_withNoDefaultConstruction_returnTheGivenResult() {
 		List<String> theList = new ArrayList<>();
-		Assert.assertEquals(theList, AppScope.instance.get().a(Ref.of(List.class), theList));
+		Assert.assertEquals(theList, App.instance.Get().a(Ref.of(List.class), theList));
 	}
 	
 	@Test

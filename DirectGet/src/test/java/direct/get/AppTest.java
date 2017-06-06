@@ -18,14 +18,14 @@ public class AppTest {
 	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
 	public void testDefaultInitialize() {
 		// This test prove that without setting anything, the Get of the App scope is ready to use.
-		AppScope.get.a(ArrayList.class);
+		App.Get().a(ArrayList.class);
 	}
 
 	@Test
 	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
 	public void testFirstInitialize() throws AppScopeAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
-		AppScope.initialize(null);
+		App.initialize(null);
 	}
 	
 	@Test(expected=AppScopeAlreadyInitializedException.class)
@@ -33,13 +33,13 @@ public class AppTest {
 	public void testSecondInitialize() throws AppScopeAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
 		try {
-			AppScope.initialize(null);
+			App.initialize(null);
 		} catch (AppScopeAlreadyInitializedException e) {
 			fail("Oh no! Not from here.");
 		}
 		
 		// ... but the second time will throws an exception.
-		AppScope.initialize(null);
+		App.initialize(null);
 	}
 	
 	// TODO - Should test if the config is really in effect.

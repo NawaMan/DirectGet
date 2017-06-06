@@ -1,5 +1,6 @@
 package direct.get;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 // OK - I feel like am going to regret this but this closed design (of using Enums) makes things
@@ -44,48 +45,43 @@ public enum Preferability {
 	 * @see {@link direct.get.ProvidingOrderTest}
 	 */
 	public static <T> Providing<T> determineGetProviding(
-			Supplier<Providing<T>> parentProvidingSupplier,
+			Ref<T>                 ref,
 			Supplier<Providing<T>> scopeProvidingSupplier,
 			Supplier<Providing<T>> stackProvidingSupplier) {
-		
-		Providing<T> parentProviding = null;
-		parentProviding = parentProvidingSupplier.get();
-		if (Dictate.is(parentProviding)) {
-			return parentProviding;
-		}
+		Consumer<Supplier<String>> log = Get._Logger_.equals(ref) ? Get._Logger_.get() : Get.a(Get._Logger_);
 		
 		Providing<T> configProviding = scopeProvidingSupplier.get();
 		if (Dictate.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
 		}
 
 		Providing<T> stackProviding = stackProvidingSupplier.get();
 		if (Dictate.is(stackProviding)) {
+			log.accept(()->"Get (" + ref + "): Stack: " + stackProviding);
 			return stackProviding;
 		}
 		
 		// At this point, non is dictate.
 		
 		if (Normal.is(stackProviding)) {
+			log.accept(()->"Get (" + ref + "): Stack: " + stackProviding);
 			return stackProviding;
 		}
 		if (Normal.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
-		}
-		if (Normal.is(parentProviding)) {
-			return parentProviding;
 		}
 		
 		// At this point, non is normal.
 		
 		if (Default.is(stackProviding)) {
+			log.accept(()->"Get (" + ref + "): Stack: " + stackProviding);
 			return stackProviding;
 		}
 		if (Default.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
-		}
-		if (Default.is(parentProviding)) {
-			return parentProviding;
 		}
 		
 		return null;
@@ -98,32 +94,41 @@ public enum Preferability {
 	 * @see {@link direct.get.ProvidingOrderTest}
 	 */
 	public static <T> Providing<T> determineScopeProviding(
+			Ref<T> ref,
 			Supplier<Providing<T>> parentProvidingSupplier,
 			Supplier<Providing<T>> configProvidingSupplier) {
+		Consumer<Supplier<String>> log = Get._Logger_.equals(ref) ? Get._Logger_.get() : Get.a(Get._Logger_);
+		
 		Providing<T> parentProviding = parentProvidingSupplier.get();
 		if (Dictate.is(parentProviding)) {
+			log.accept(()->"Get (" + ref + "): Parent: " + parentProviding);
 			return parentProviding;
 		}
 		Providing<T> configProviding = configProvidingSupplier.get();
 		if (Dictate.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
 		}
 		
 		// A this point, no dictate;
 
 		if (Normal.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
 		}
 		if (Normal.is(parentProviding)) {
+			log.accept(()->"Get (" + ref + "): Parent: " + parentProviding);
 			return parentProviding;
 		}
 		
 		// A this point, no normal;
 		
 		if (Default.is(configProviding)) {
+			log.accept(()->"Get (" + ref + "): Scope: " + configProviding);
 			return configProviding;
 		}
 		if (Default.is(parentProviding)) {
+			log.accept(()->"Get (" + ref + "): Parent: " + parentProviding);
 			return parentProviding;
 		}
 		

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -86,7 +87,19 @@ public final class Configuration {
 	}
 	
 	public String toString() {
-		return "Configuration:" + providings.toString();
+		return "Configuration(" + providings.size() + ")";
+	}
+	/** Return the detail string representation of this object. */
+	public String toXRayString() {
+		if (providings.isEmpty()) {
+			return "{\n}";
+		}
+		
+		return "{\n\t"
+				+ providings.entrySet().stream()
+					.map(each->each.getKey() + "=" + each.getValue())
+					.collect(Collectors.joining(",\n\t"))
+				+ "\n}"; 
 	}
 	
 }

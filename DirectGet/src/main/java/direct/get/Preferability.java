@@ -133,17 +133,18 @@ public enum Preferability {
 	}
 	
 	private static String callStackToString() {
-		String toString = Arrays.stream(Thread.currentThread().getStackTrace())
-			.map(Objects::toString)
-			.collect(Collectors.joining("\n\t"));
+		String toString
+			= Arrays.stream(Thread.currentThread().getStackTrace())
+				.map(Objects::toString)
+				.collect(Collectors.joining("\n\t"));
 		return "\t" + toString;
 	}
 	
 	private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope, Get.ProvidingStackMap stacks) {
 		return ()->"{"
-			+ "\n\tParent:" + ((parentScope  != null) ? parentScope.toXRayString()  : null)
-			+ "\n\tConfig:" + ((currentScope != null) ? currentScope.toXRayString() : null)
-			+ "\n\tStack :" + ((stacks       != null) ? stacks.toString()           : null)
+			+ "\n\tParent:" + ((parentScope  != null) ? parentScope.toXRayString().replaceAll("\n", "\n\t")  : null)
+			+ "\n\tConfig:" + ((currentScope != null) ? currentScope.toXRayString().replaceAll("\n", "\n\t") : null)
+			+ "\n\tStack :" + ((stacks       != null) ? stacks.toXRayString().replaceAll("\n", "\n\t")       : null)
 			+ "\n}";
 	}
 	

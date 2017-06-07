@@ -74,9 +74,16 @@ public class GetInstanceTest implements Named.User {
 		List providings = new ArrayList();
 		Preferability.DetermineProvidingListener listener = new Preferability.DetermineProvidingListener() {
 			@Override
-			public <T> void onDetermine(Ref<T> ref, String from, Providing<T> result, Supplier<String> stackTraceSupplier,
+			public <T> void onDetermine(
+					Ref<T> ref, String from, Providing<T> result,
+					Supplier<String> stackTraceSupplier,
 					Supplier<String> xraySupplier) {
-				System.out.println("Get(" + ref + ") = " + result + " from " + xraySupplier.get() + " on => {\n" + stackTraceSupplier.get() + "\n}");
+				String str
+					= "Get(" + ref + ") = " + result
+					+ "\nXRay " + xraySupplier.get()
+					+ " on => " + Thread.currentThread().toString()
+					+ " {\n" + stackTraceSupplier.get() + "\n}";
+				System.out.println(str);
 			}
 		};
 		providings.add(new Providing(Preferability._Listener_, Preferability.Dictate, ()->listener));

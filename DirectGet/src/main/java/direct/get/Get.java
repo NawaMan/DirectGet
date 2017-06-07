@@ -206,6 +206,14 @@ public final class Get {
 			}
 			return stack.peek();
 		}
+		/** Return the detail string representation of this object. */
+		public String toXRayString() {
+			return "{\n\t"
+					+ entrySet().stream()
+						.map(each->each.getKey() + "=" + each.getValue())
+						.collect(Collectors.joining(",\n\t"))
+					+ "\n}"; 
+		}
 	}
 	
 	/**

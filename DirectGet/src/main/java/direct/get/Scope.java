@@ -139,7 +139,7 @@ public class Scope {
 	
 	/** Return the detail string representation of this object. */
 	public final String toXRayString() {
-		return name + "(" + config + ")";
+		return name + "(" + config.toXRayString() + ")";
 	}
 	
 	/**

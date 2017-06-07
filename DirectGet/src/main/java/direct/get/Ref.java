@@ -41,6 +41,9 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		return Optional.ofNullable(get());
 	}
 	
+	/** @return the providing for the default value */
+	public Providing<T> getProviding();
+	
 	/** @return the compare result of between this Ref and the given reference. */
     default public int compareTo(Ref<T> o) {
     	if (o == null) {
@@ -74,6 +77,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		}
 		
 		/** {@inheritDoc} */
+		@Override
 		public String getName() {
 			return this.targetClassName;
 		}
@@ -117,8 +121,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 	 */
 	public static final class ForClass<T> extends AbstractRef<T> implements Ref<T> {
 		
+		private final Providing<T> providing;
+		
 		ForClass(Class<T> targetClass) {
 			super(targetClass);
+			this.providing = new Providing<>(this, Preferability.Default, ()->get());
 		}
 		
 		/**
@@ -133,6 +140,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 			Class<T> thisTargetClass = this.getTargetClass();
 			Class    thatTargetClass = ((Ref.AbstractRef) obj).getTargetClass();
 			return thisTargetClass == thatTargetClass;
+		}
+		
+		@Override
+		public Providing<T> getProviding() {
+			return providing;
 		}
 		
 	}
@@ -179,12 +191,12 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		
 		private final String name;
 		
-		private final Providing<T> proviging;
+		private final Providing<T> providing;
 		
 		Direct(String name, Class<T> targetClass, Supplier<T> factory) {
 			super(targetClass);
 			this.name = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
-			this.proviging = (factory == null) ? null : new Providing<>(this, Preferability.Default, factory);
+			this.providing = (factory == null) ? null : new Providing<>(this, Preferability.Default, factory);
 		}
 		
 		/** @return the name of the reference  */
@@ -195,10 +207,10 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		/** @return the default object. */
 		@Override
 		public final T get() {
-			if (proviging == null) {
+			if (providing == null) {
 				return super.get();
 			} else {
-				return proviging.get();
+				return providing.get();
 			}
 		}
 
@@ -206,6 +218,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		@Override
 		public final Optional<T> _get() {
 			return Optional.ofNullable(get());
+		}
+		
+		@Override
+		public Providing<T> getProviding() {
+			return this.providing;
 		}
 
 		/**

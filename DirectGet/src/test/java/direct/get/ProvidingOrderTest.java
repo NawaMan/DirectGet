@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -74,13 +75,13 @@ public class ProvidingOrderTest {
 		
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-	theScope.Get().substitute(Arrays.asList(_getParent), ()->{
+	theScope.Get().substitute(Stream.of(_getParent), ()->{
 			try {
 				@SuppressWarnings("rawtypes")
 			List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
 				theScope.Get().runNewThread(list, ()->{
 					try {
-						theScope.Get().substitute(Arrays.asList(_stack), ()->{
+						theScope.Get().substitute(Stream.of(_stack), ()->{
 							String actual = theScope.Get()._a(ref).orElse(null);
 							try {
 								assertEquals(expected, actual);

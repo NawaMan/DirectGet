@@ -1,9 +1,10 @@
 package direct.get;
 
+import static direct.get.Named.Predicate;
+
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -13,7 +14,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -21,8 +21,6 @@ import java.util.stream.Stream;
 
 import direct.get.exceptions.GetException;
 import direct.get.exceptions.RunWithSubstitutionException;
-
-import static direct.get.Named.*;
 
 /**
  * This class provide access to the application scope.
@@ -53,22 +51,6 @@ public final class Get {
 		Thread newThread = Get.a(_ThreadFactory_).newThread(runnable);
 		newThread.start();
 	}));
-	
-	/** This logger will not say a word */
-	public static final Consumer<Supplier<String>> quiteLogger = sub->{};
-
-	/** This logger will show the message and stack trace. */
-	public static final Consumer<Supplier<String>> verboseLogger = sup->{
-		System.out.println(((Supplier<String>)sup).get());
-		Arrays.stream(Thread.currentThread().getStackTrace()).forEach(each->System.out.println("\t" + each));
-	};
-	
-	// TODO - This seriously need to be cleaned up.
-	/** Ref for logger used within DirectGet. */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static final Ref<Consumer<Supplier<String>>> _Logger_
-			= (Ref<Consumer<Supplier<String>>>)
-				(Ref)Ref.of(Consumer.class,  quiteLogger);
 	
 	private Get() {
 		
@@ -121,7 +103,8 @@ public final class Get {
 	/**
 	 * Substitute the given providings and run the runnable.
 	 */
-	public static void substitute(@SuppressWarnings("rawtypes") List<Providing> providings, Runnable runnable) {
+	@SuppressWarnings("rawtypes") 
+	public static void substitute(Stream<Providing> providings, Runnable runnable) {
 		 App.Get().substitute(providings, runnable);
 	}
 	
@@ -129,7 +112,7 @@ public final class Get {
 	 * Substitute the given providings and run the action.
 	 */
 	@SuppressWarnings("rawtypes")
-	public <V, T extends Throwable> V substitute(List<Providing> providings, Computation<V, T> computation) throws T {
+	public <V, T extends Throwable> V substitute(Stream<Providing> providings, Computation<V, T> computation) throws T {
 		return App.Get().substitute(providings, computation);
 	}
 	
@@ -197,6 +180,34 @@ public final class Get {
 	
 	//== The implementation ===================================================
 	
+	/** Map of providing stack. */
+	@SuppressWarnings("rawtypes")
+	public static class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
+		private static final long serialVersionUID = -8113998773064688984L;
+		
+		@Override
+		public Stack<Providing> get(Object ref) {
+			Stack<Providing> stack = super.get(ref);
+			if (stack == null) {
+				this.put((Ref)ref, new Stack<Providing>());
+				stack = super.get(ref);
+			}
+			return stack;
+		}
+		/** Safely peek the stack of the value. */
+		@SuppressWarnings("unchecked")
+		public <T> Providing<T> peek(Ref<T> ref) {
+			if (!containsKey(ref)) {
+				return null;
+			}
+			Stack<Providing> stack = get(ref);
+			if (stack.isEmpty()) {
+				return null;
+			}
+			return stack.peek();
+		}
+	}
+	
 	/**
 	 * Get is a service to allow access to other service.
 	 * 
@@ -206,8 +217,7 @@ public final class Get {
 		
 		private final Scope scope;
 		
-		@SuppressWarnings("rawtypes")
-		private final Map<Ref, Stack<Providing>> providingStacks = new TreeMap<>();
+		private final ProvidingStackMap providingStacks = new ProvidingStackMap();
 		
 		Instance(Scope scope) {
 			this.scope = scope;
@@ -228,24 +238,8 @@ public final class Get {
 				return null;
 			}
 			
-			Providing<T> providing = Preferability.determineGetProviding(
-					ref,
-					providingFromScope(ref),
-					providingFromStack(ref));
+			Providing<T> providing = Preferability.determineProviding(ref, scope.getParentScope(), scope, providingStacks);
 			return providing;
-		}
-
-		private <T> Supplier<Providing<T>> providingFromScope(Ref<T> ref) {
-			return ()->Optional.ofNullable(scope).map(rfSp->rfSp.getProviding(ref)).orElse(null);
-		}
-		
-		@SuppressWarnings("unchecked")
-		private <T> Supplier<Providing<T>> providingFromStack(Ref<T> ref) {
-			return ()->{
-				@SuppressWarnings("rawtypes")
-				Stack<Providing> stack = providingStacks.get(ref);
-				return ((stack == null) || stack.isEmpty()) ? null : stack.peek();
-			};
 		}
 
 		/** @return the optional value associated with the given ref.  */
@@ -297,7 +291,7 @@ public final class Get {
 		 * Substitute the given providings and run the runnable.
 		 */
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public <T> void substitute(List<Providing> providings, Runnable runnable) {
+		public <T> void substitute(Stream<Providing> providings, Runnable runnable) {
 			AtomicReference<RuntimeException> problem = new AtomicReference<RuntimeException>(null);
 			try {
 				substitute(providings, (Computation)(()->{
@@ -321,29 +315,28 @@ public final class Get {
 		 * Substitute the given providings and run the action.
 		 */
 		@SuppressWarnings("rawtypes")
-		synchronized public <V, T extends Throwable> V substitute(List<Providing> providings, Computation<V, T> computation) throws T {
-			if ((providings == null) || providings.isEmpty()) {
-				return computation.run();
-			}
-			Map<Ref, Stack<Providing>> providingStacks = this.providingStacks;
-			List<Ref> addedRefs = new ArrayList<>();
+		synchronized public <V, T extends Throwable> V substitute(Stream<Providing> providings, Computation<V, T> computation) throws T {
+			List<Ref> addedRefs = null;
 			try {
-				for (Providing providing : providings) {
+				Iterable<Providing> iterable = ()->providings.iterator();
+				for (Providing providing : iterable) {
 					if (providing == null) {
 						continue;
 					}
 					
 					Ref ref = providing.getRef();
-					if (null == providingStacks.get(ref)) {
-						providingStacks.put(ref, new Stack<>());
+					providingStacks.get(ref).push(providing);
+					if (addedRefs == null) {
+						addedRefs = new ArrayList<>();
 					}
-					Stack<Providing> stack = providingStacks.get(ref);
-					stack.push(providing);
+					addedRefs.add(ref);
 				}
 
 				return computation.run();
 			} finally {
-				addedRefs.forEach(ref->providingStacks.get(ref).pop());
+				if (addedRefs != null) {
+					addedRefs.forEach(ref->providingStacks.get(ref).pop());
+				}
 			}
 		}
 		
@@ -364,22 +357,6 @@ public final class Get {
 			return newThread(
 					ref->refsToInherit.contains(ref),
 					runnable);
-		}
-		
-		/**
-		 * Create a sub thread with a get that inherits the substitution from the current Get
-		 *   (all Ref that pass the predicate test) and run the runnable with it.
-		 **/
-		@SuppressWarnings("rawtypes")
-		public Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
-			Get.Instance    newGet     = prepareNewGet();
-			List<Providing> providings = prepareProvidings(refsToInherit);
-			
-			ThreadFactory newThread = a(_ThreadFactory_);
-			return newThread.newThread(()->{
-				scope.threadGet.set(newGet);
-				newGet.substitute(providings, runnable);
-			});
 		}
 		
 		/**
@@ -412,38 +389,62 @@ public final class Get {
 		 *   (all Ref that pass the predicate test) and run the runnable with it.
 		 **/
 		@SuppressWarnings("rawtypes")
+		public Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+			Get.Instance    newGet = new Get.Instance(scope);
+			List<Providing> providings = prepareProvidings(refsToInherit);
+			
+			ThreadFactory newThread = a(_ThreadFactory_);
+			return newThread.newThread(()->{
+				scope.threadGet.set(newGet);
+				List<Providing> providingsList = providings;
+				newGet.substitute(providingsList.stream(), runnable);
+			});
+		}
+		
+		/**
+		 * Create a sub thread with a get that inherits the substitution from the current Get
+		 *   (all Ref that pass the predicate test) and run the runnable with it.
+		 **/
+		@SuppressWarnings("rawtypes")
 		public <V, T extends Throwable> CompletableFuture<V> runThread(
 				Predicate<Ref> refsToInherit,
 				Computation<V, T> computation) {
-			Get.Instance    newGet     = prepareNewGet();
+			Get.Instance    newGet     = new Get.Instance(scope);
 			List<Providing> providings = prepareProvidings(refsToInherit);
 			
 			Executor executor = a(_Executor_);
 			return CompletableFuture.supplyAsync(()->{
 				scope.threadGet.set(newGet);
 				try {
-					return newGet.substitute(providings, computation);
+					List<Providing> providingsList = providings;
+					V result = newGet.substitute(providingsList.stream(), computation);
+					return result;
 				} catch (Throwable t) {
 					throw new CompletionException(t);
 				}
 			}, executor);
 		}
 		
-		private Get.Instance prepareNewGet() {
-			Get.Instance newGet = new Get.Instance(scope);
-			return newGet;
-		}
-
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private List<Providing> prepareProvidings(Predicate<Ref> refsToInherit) {
-			Predicate<Ref> predicate = Optional.ofNullable(refsToInherit).orElse(ref->false);
-			
-			List<Providing> providings
-				= (List<Providing>)this.getStackRefs()
-				.filter(predicate)
-				.map(this::getProviding)
-				.collect(Collectors.toList());
-			return providings;
+			Preferability._ListenerEnabled_.set(false);
+			try {
+				return 
+					Optional.ofNullable(refsToInherit)
+					.filter(test -> test != INHERIT_NONE)
+					.map(test->(List)getStackRefs()
+								.filter(test)
+								.map(this::getProviding)
+								.collect(Collectors.toList()))
+					.orElse(Collections.emptyList());
+			} finally {
+				Preferability._ListenerEnabled_.set(true);
+			}
+		}
+		
+		/** Return the detail string representation of this object. */
+		public final String toXRayString() {
+			return "Get(" + scope + ")";
 		}
 		
 	}

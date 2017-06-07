@@ -29,7 +29,7 @@ public class AppTest {
 	}
 	
 	@Test(expected=AppScopeAlreadyInitializedException.class)
-	//@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
+	@Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
 	public void testSecondInitialize() throws AppScopeAlreadyInitializedException {
 		// This test prove that first initialize has no problem.
 		try {

@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.Thread.*;
 import static direct.get.Run.*;
@@ -29,7 +30,7 @@ public class GetInstanceTest implements Named.User {
 	
 	private Ref<String> _text_ = Ref.of("TheText", String.class, Supplier("OrginalText",  ()->orgText));
 	
-	private List<Providing> provideNewText = Arrays.asList(new Providing<>(_text_, Preferability.Dictate, supplier("OrginalText",  ()->newText)));
+	private Stream<Providing> provideNewText = Stream.of(new Providing<>(_text_, Preferability.Dictate, supplier("NewText",  ()->newText)));
 	
 	private Fork fork = new Fork();
 
@@ -69,41 +70,44 @@ public class GetInstanceTest implements Named.User {
 		App.Get().substitute(provideNewText, runnable);
 	};
 	
-	private final Run.Wrapper _verboseLogger = runnable->()->{
-		List<Providing> provideVervoseLoggger = Arrays.asList(new Providing<>(Get._Logger_, Preferability.Dictate, ()->Get.verboseLogger));
-		App.Get().substitute(provideVervoseLoggger, runnable);
-		runnable.run();
-	};
+	private final Run.Wrapper _verboseLogger = runnable->Named.runnable("VERBOSE", ()->{
+		List providings = new ArrayList();
+		Preferability.DetermineProvidingListener listener = new Preferability.DetermineProvidingListener() {
+			@Override
+			public <T> void onDetermine(Ref<T> ref, String from, Providing<T> result, Supplier<String> stackTraceSupplier,
+					Supplier<String> xraySupplier) {
+				System.out.println("Get(" + ref + ") = " + result + " from " + xraySupplier.get() + " on => {\n" + stackTraceSupplier.get() + "\n}");
+			}
+		};
+		providings.add(new Providing(Preferability._Listener_, Preferability.Dictate, ()->listener));
+		App.Get().substitute(providings.stream(), runnable);
+	});
 	
 	private final Run.Wrapper _newEmptyThread = (Runnable runnable)->()->{
 		App.Get().runNewThread(Get.INHERIT_NONE, fork.run(runnable));
 	};
 	
-	
 	private final Run.Wrapper _newThread = (Runnable runnable)->()->{
 		App.Get().runNewThread(Get.INHERIT_ALL, fork.run(runnable));
 	};
-
+	
 	@Test
 	public void testRunNewThread_notInherit() throws Throwable {
 		With(_newText)
-		.using(_newEmptyThread)
-		.run(()->{
+		.using(_newEmptyThread).run(()->{
 			assertEquals(orgText, Get.a(_text_));
 		});
 		fork.join();
-		sleep(1000);
 	}
-
+	
 	@Test
 	public void testRunNewThread_inherit() throws Throwable {
 		With(_newText)
-		.using(_newThread)
-		.run(()->{
+		.and.with(_verboseLogger)	// TODO - Create a separate test for this.
+		.using(_newThread).run(()->{
 			assertEquals(newText, Get.a(_text_));
 		});
 		fork.join();
-		sleep(1000);
 	}
 
 }

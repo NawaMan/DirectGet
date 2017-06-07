@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import direct.get.Get.Instance;
@@ -108,26 +107,13 @@ public class Scope {
 		ensureInitialized();
 		return config;
 	}
-
-	private <T> Supplier<Providing<T>> providingFromParentScope(Ref<T> ref) {
-		return ()->Optional.ofNullable(parentScope).map(parent->parent.getProviding(ref)).orElse(null);
-	}
-
-	private <T> Supplier<Providing<T>> providingFromConfiguration(Ref<T> ref) {
-		return ()->this.config.getProviding(ref);
-	}
 	
 	protected final <T> Providing<T> getProviding(Ref<T> ref) {
 		if (ref == null) {
 			return null;
 		}		
 
-		Providing<T> providing
-				= Preferability.determineScopeProviding(
-						ref,
-						providingFromParentScope(ref),
-						providingFromConfiguration(ref));
-		return providing;
+		return config.getProviding(ref);
 	}
 	
 	/** @return the get for the current thread that is associated with this scope. NOTE: capital 'G' is intentional. */
@@ -141,14 +127,19 @@ public class Scope {
 		if (providing != null) {
 			return Optional.ofNullable(providing.get());
 		}
-		
+		// TODO - Move this to determineXXX
 		return ref._get();
 	}
 	
 	/** {@inheritDoc} */
 	@Override
 	public final String toString() {
-		return name;
+		return name + "(" + config + ")";
+	}
+	
+	/** Return the detail string representation of this object. */
+	public final String toXRayString() {
+		return name + "(" + config + ")";
 	}
 	
 	/**

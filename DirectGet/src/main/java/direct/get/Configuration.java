@@ -85,4 +85,8 @@ public final class Configuration {
 		return providings.containsKey(ref);
 	}
 	
+	public String toString() {
+		return "Configuration:" + providings.toString();
+	}
+	
 }

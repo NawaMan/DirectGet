@@ -1,3 +1,18 @@
+//  ========================================================================
+//  Copyright (c) 2017 The Direct Solution Software Builder.
+//  ------------------------------------------------------------------------
+//  All rights reserved. This program and the accompanying materials
+//  are made available under the terms of the Eclipse Public License v1.0
+//  and Apache License v2.0 which accompanies this distribution.
+//
+//      The Eclipse Public License is available at
+//      http://www.eclipse.org/legal/epl-v10.html
+//
+//      The Apache License v2.0 is available at
+//      http://www.opensource.org/licenses/apache2.0.php
+//
+//  You may elect to redistribute this code under either of these licenses.
+//  ========================================================================
 package direct.get;
 
 import java.util.Arrays;
@@ -5,8 +20,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
 // OK - I feel like am going to regret this but this closed design (of using Enums) makes things
 //        much simpler and it might worth the thread off.
@@ -15,6 +34,7 @@ import java.util.stream.Collectors;
  * 
  * @author nawaman
  */
+@ExtensionMethod({ Extensions.class })
 public enum Preferability {
 	
 	/** Only use when no other is preferred. */
@@ -23,6 +43,11 @@ public enum Preferability {
 	Normal,
 	/** Use me first! */
 	Dictate;
+	
+	private static Function<Scope, String>                 scopeToXRay = Scope::toXRayString;
+	private static Function<Get.ProvidingStackMap, String> stackToXRay = Get.ProvidingStackMap::toXRayString;
+	
+	private static Function<String, String> addingTabIndentation = str->str.replaceAll("\n", "\n\t");
 	
 	/** @return {@code true} if the given preferability is the same as this preferability. */
 	public boolean is(Preferability preferability) {
@@ -141,11 +166,16 @@ public enum Preferability {
 	}
 	
 	private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope, Get.ProvidingStackMap stacks) {
-		return ()->"{"
-			+ "\n\tParent:" + ((parentScope  != null) ? parentScope.toXRayString().replaceAll("\n", "\n\t")  : null)
-			+ "\n\tConfig:" + ((currentScope != null) ? currentScope.toXRayString().replaceAll("\n", "\n\t") : null)
-			+ "\n\tStack :" + ((stacks       != null) ? stacks.toXRayString().replaceAll("\n", "\n\t")       : null)
-			+ "\n}";
+		val parentXRayString  = parentScope .mapFrom(scopeToXRay);
+		val currentXRayString = currentScope.mapFrom(scopeToXRay);
+		val stackXRayString   = stacks      .mapFrom(stackToXRay);
+		return ()->{
+			return "{"
+				+ "\n\tParent:" + parentXRayString .mapBy(addingTabIndentation)
+				+ "\n\tConfig:" + currentXRayString.mapBy(addingTabIndentation)
+				+ "\n\tStack :" + stackXRayString  .mapBy(addingTabIndentation)
+				+ "\n}";
+		};
 	}
 	
 }

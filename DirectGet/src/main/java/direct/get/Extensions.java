@@ -13,30 +13,27 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package direct.get.exceptions;
+package direct.get;
 
-import direct.get.Ref;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-/**
- * This exception holds the exceptional result for Get.
- * 
- * @author nawaman
- */
-public class GetException extends DirectGetRuntimeException {
-
-	private static final long serialVersionUID = -5821727183532729001L;
+class Extensions {
 	
-	private final Ref<?> ref;
+	public static <T> T orElse(T obj, T elseValue) {
+		return (obj == null) ? elseValue : obj;
+	}
 	
-	/** Constructor */
-    public GetException(Ref<?> ref, Throwable cause) {
-        super(ref.toString(), cause);
-        this.ref = ref;
-    }
-    
-    /** @return the reference with the problem. */
-    public Ref<?> getRef() {
-    	return ref;
-    }
-    
+	public static <T> T orElse(T obj, Supplier<T> elseSupplier) {
+		return (obj == null) ? elseSupplier.get() : obj;
+	}
+	
+	public static <F, T> T mapFrom(F obj, Function<F, T> mapper) {
+		return (obj == null) ? null : mapper.apply(obj);
+	} 
+	
+	public static <F, T> T mapBy(F obj, Function<F, T> mapper) {
+		return (obj == null) ? null : mapper.apply(obj);
+	} 
+	
 }

@@ -44,8 +44,8 @@ public enum Preferability {
 	/** Use me first! */
 	Dictate;
 	
-	private static Function<Scope, String>                 scopeToXRay = Scope::toXRayString;
-	private static Function<Get.ProvidingStackMap, String> stackToXRay = Get.ProvidingStackMap::toXRayString;
+	private static Function<Scope,             String> scopeToXRay = Scope::toXRayString;
+	private static Function<ProvidingStackMap, String> stackToXRay = ProvidingStackMap::toXRayString;
 	
 	private static Function<String, String> addingTabIndentation = str->str.replaceAll("\n", "\n\t");
 	
@@ -63,7 +63,9 @@ public enum Preferability {
 	}
 	
 	/** */
-	public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class, Named.supplier("NULL", ()->(DetermineProvidingListener)null));
+	public static final Ref<DetermineProvidingListener> _Listener_ 
+			= Ref.of(DetermineProvidingListener.class,
+					Named.supplier("NULL", ()->(DetermineProvidingListener)null));
 
 	static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
 	
@@ -97,7 +99,7 @@ public enum Preferability {
 			Ref<T> ref,
 			Scope parentScope,
 			Scope currentScope,
-			Get.ProvidingStackMap stacks) {
+			ProvidingStackMap stacks) {
 		Optional<BiConsumer<String, Providing<T>>> alarm
 			= Optional.ofNullable((!_ListenerEnabled_.get() || (ref == _Listener_)) ? null : Get.a(_Listener_)).map(listener->
 				(foundSource, foundProviding)->{
@@ -106,19 +108,19 @@ public enum Preferability {
 							getXRayString(ref, parentScope, currentScope, stacks));
 			});
 		
-		Providing<T> parentProviding = (parentScope != null) ? parentScope.getProviding(ref) : null;
+		val parentProviding = (parentScope != null) ? parentScope.getProviding(ref) : null;
 		if (Dictate.is(parentProviding)) {
 			alarm.ifPresent(it->it.accept("Parent", parentProviding));
 			return parentProviding;
 		}
 		
-		Providing<T> configProviding = currentScope.getProviding(ref);
+		val configProviding = currentScope.getProviding(ref);
 		if (Dictate.is(configProviding)) {
 			alarm.ifPresent(it->it.accept("Config", configProviding));
 			return configProviding;
 		}
 
-		Providing<T> stackProviding = stacks.peek(ref);
+		val stackProviding = stacks.peek(ref);
 		if (Dictate.is(stackProviding)) {
 			alarm.ifPresent(it->it.accept("Stack", stackProviding));
 			return stackProviding;
@@ -158,22 +160,25 @@ public enum Preferability {
 	}
 	
 	private static String callStackToString() {
-		String toString
+		val toString
 			= Arrays.stream(Thread.currentThread().getStackTrace())
 				.map(Objects::toString)
 				.collect(Collectors.joining("\n\t"));
 		return "\t" + toString;
 	}
 	
-	private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope, Get.ProvidingStackMap stacks) {
-		val parentXRayString  = parentScope .mapFrom(scopeToXRay);
-		val currentXRayString = currentScope.mapFrom(scopeToXRay);
-		val stackXRayString   = stacks      .mapFrom(stackToXRay);
+	private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope, ProvidingStackMap stacks) {
+		val parentXRayString  = parentScope ._changeFrom(scopeToXRay);
+		val currentXRayString = currentScope._changeFrom(scopeToXRay);
+		val stackXRayString   = stacks      ._changeFrom(stackToXRay);
 		return ()->{
+			val parentXRay  = parentXRayString ._changeBy(addingTabIndentation);
+			val currentXRay = currentXRayString._changeBy(addingTabIndentation);
+			val stackXRay   = stackXRayString  ._changeBy(addingTabIndentation);
 			return "{"
-				+ "\n\tParent:" + parentXRayString .mapBy(addingTabIndentation)
-				+ "\n\tConfig:" + currentXRayString.mapBy(addingTabIndentation)
-				+ "\n\tStack :" + stackXRayString  .mapBy(addingTabIndentation)
+				+ "\n\tParent:" + parentXRay
+				+ "\n\tConfig:" + currentXRay
+				+ "\n\tStack :" + stackXRay
 				+ "\n}";
 		};
 	}

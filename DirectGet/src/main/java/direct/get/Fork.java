@@ -18,42 +18,44 @@ package direct.get;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.val;
+import lombok.experimental.ExtensionMethod;
+
 /**
  * This class offer a natural way to fork an execution.
  * 
  * @author nawaman
  **/
+@ExtensionMethod({ Extensions.class })
 public class Fork {
+
+	private static final Failable.Consumer<Session, Throwable> joinSession = Session::join;
 	
 	private ThreadLocal<Session> forkSession = new ThreadLocal<>();
 	
-	/** Constuctor. */
+	/** Constructor. */
 	public Fork() {
 		
 	}
 	
-	void setSession(Session fork) {
+	<T extends Throwable> void setSession(Session fork) {
 		this.forkSession.set(fork);
 	}
 	
 	/** Run something. */
 	public Runnable run(Runnable runnable) {
-		Session fork = new Session(runnable);
+		val fork = new Session(runnable);
 		this.setSession(fork);
 		return fork.runnable();
 	}
 	
 	/** Join the latest run with this thread. */
 	public void join() throws Throwable {
-		Session session = this.forkSession.get();
-		if (session != null) {
-			session.join();
-		}
+		this.forkSession.get()._do(joinSession.gracefully());
 	}
 
 	/** Fork session. */
 	public static class Session {
-		
 		
 		private final AtomicReference<Throwable> problem = new AtomicReference<Throwable>(null);
 		

@@ -15,10 +15,6 @@
 //  ========================================================================
 package direct.get;
 
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-
 /**
  * This class offer a way to make it easy to debug lambda by adding name to them.
  * 
@@ -26,44 +22,105 @@ import java.util.function.Supplier;
  **/
 // https://stackoverflow.com/questions/42876840/namingtostring-lambda-expressions-for-debugging-purpose/42876841#42876841
 // https://stackoverflow.com/questions/23704355/creating-string-representation-of-lambda-expression/23705160#23705160
-public class Named {
+public interface Named {
 	
 	/** The ready to use object. */
 	public static Named.User instance = new User() {};
 	
-	private Named() {
-		
-	}
+	/** Returns the name. */
+	public String getName();
+	
+	
 	
 	/** Add name to the given predicate. */
-	public static <T> Predicate<T> predicate(String name, Predicate<T> check) {
+	public static <T> Predicate<T> predicate(String name, java.util.function.Predicate<T> check) {
 		return instance.predicate(name, check);
 	}
 	
 	/** Add name to the given predicate. */
-	public static <T> Predicate<T> Predicate(String name, Predicate<T> check) {
+	public static <T> Predicate<T> Predicate(String name, java.util.function.Predicate<T> check) {
 		return instance.predicate(name, check);
 	}
 	
 	/** Add name to the given supplier. */
-	public static <T> Supplier<T> supplier(String name, Supplier<T> supplier) {
+	public static <T> Supplier<T> supplier(String name, java.util.function.Supplier<T> supplier) {
 		return instance.supplier(name, supplier);
 	}
 	
 	/** Add name to the given supplier. */
-	public static <T> Supplier<T> Supplier(String name, Supplier<T> supplier) {
+	public static <T> Supplier<T> Supplier(String name, java.util.function.Supplier<T> supplier) {
 		return instance.supplier(name, supplier);
 	}
 	
 	/** Add name to the given runnable. */
-	public static Runnable runnable(String name, Runnable runnable) {
+	public static Runnable runnable(String name, java.lang.Runnable runnable) {
 		return instance.runnable(name, runnable);
 	}
 	
 	/** Add name to the given runnable. */
-	public static Runnable Runnable(String name, Runnable runnable) {
+	public static java.lang.Runnable Runnable(String name, java.lang.Runnable runnable) {
 		return instance.runnable(name, runnable);
 	}
+	
+	/** Named predicate. **/
+	public static class Predicate<T> implements Named, java.util.function.Predicate<T> {
+		private final String name;
+		private final java.util.function.Predicate<T> check;
+		/** Constructors. */
+		public Predicate(String name, java.util.function.Predicate<T> check) {
+			this.name  = name;
+			this.check = check;
+		}
+		public String getName() {
+			return this.name;
+		}
+		public boolean test(T t) {
+			return check.test(t);
+		}
+		public String toString() {
+			return "Predicate(" + name + ")";
+		}
+	}
+
+	/** Named runnable. **/
+	public static class Runnable implements Named, java.lang.Runnable {
+		private final String name;
+		private final java.lang.Runnable runnable;
+		/** Constructors. */
+		public Runnable(String name, java.lang.Runnable runnable) {
+			this.name     = name;
+			this.runnable = runnable;
+		}
+		public void run() {
+			runnable.run();
+		}
+		public String getName() {
+			return name;
+		}
+		public String toString() {
+			return "Runnable(" + name + ")";
+		}
+	}
+	
+	/** Named supplier */
+	public static class Supplier<T> implements Named, java.util.function.Supplier<T> {
+		private final String name;
+		private final java.util.function.Supplier<T> supplier;
+		/** Constructors. */
+		public Supplier(String name, java.util.function.Supplier<T> supplier) {
+			this.name     = name;
+			this.supplier = supplier;
+		}
+		public String getName() {
+			return this.name;
+		}
+		public T get() {
+			return supplier.get();
+		}
+		public String toString() {
+			return "Supplier(" + name + ")";
+		}
+	} 
 	
 	/**
 	 * This interface make it possible to the user of the class to use these 
@@ -72,46 +129,20 @@ public class Named {
 	public static interface User {
 
 		/** Add name to the given predicate. */
-		public default <T> Predicate<T> predicate(String name, Predicate<T> check) {
-			return new Predicate<T>() {
-				@Override
-				public boolean test(T t) {
-					return check.test(t);
-				}
-				@Override
-				public String toString() {
-					return "Predicate(" + name + ")";
-				}
-			};
+		public default <T> Predicate<T> predicate(String name, java.util.function.Predicate<T> check) {
+			return new Predicate<T>(name, check);
 		}
 
 		/** Add name to the given supplier. */
-		public default Runnable runnable(String name, Runnable runnable) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					runnable.run();
-				}
-				@Override
-				public String toString() {
-					return "Runnable(" + name + ")";
-				}
-			};
+		public default Runnable runnable(String name, java.lang.Runnable runnable) {
+			return new Runnable(name, runnable);
 		}
 		
 		/** Add name to the given runnable. */
-		public default <T> Supplier<T> supplier(String name, Supplier<T> supplier) {
-			return new Supplier<T>() {
-				@Override
-				public T get() {
-					return supplier.get();
-				}
-				@Override
-				public String toString() {
-					return "Supplier(" + name + ")";
-				}
-			};
+		public default <T> Supplier<T> supplier(String name, java.util.function.Supplier<T> supplier) {
+			return new Supplier<T>(name, supplier);
 		}
+		
 		
 		/** Add name to the given predicate. */
 		public default <T> Predicate<T> Predicate(String name, Predicate<T> check) {

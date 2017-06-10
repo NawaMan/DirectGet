@@ -1,0 +1,290 @@
+package direct.get;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import direct.get.exceptions.GetException;
+import direct.get.exceptions.RunWithSubstitutionException;
+import lombok.val;
+import lombok.experimental.ExtensionMethod;
+
+/**
+ * Get is a service to allow access to other service.
+ * 
+ * @author nawaman
+ */
+@ExtensionMethod({ Extensions.class })
+public final class GetInstance {
+
+	private final Scope scope;
+	
+	private final ProvidingStackMap providingStacks = new ProvidingStackMap();
+	
+	GetInstance(Scope scope) {
+		this.scope = scope;
+	}
+	
+	/** @return the scope this Get is in. */
+	public Scope getScope() {
+		return this.scope;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	Stream<Ref> getStackRefs() {
+		return providingStacks.keySet().stream();
+	}
+	
+	<T> Providing<T> getProviding(Ref<T> ref) {
+		if (ref == null) {
+			return null;
+		}
+		
+		val providing = Preferability.determineProviding(ref, scope.getParentScope(), scope, providingStacks);
+		return providing;
+	}
+
+	/** @return the optional value associated with the given ref.  */
+	public <T> Optional<T> _a(Ref<T> ref) {
+		val optValue = scope.doGet(ref);
+		return optValue;
+	}
+
+	/** @return the optional value associated with the given class.  */
+	public <T> Optional<T> _a(Class<T> clzz) {
+		val ref      = Ref.forClass(clzz);
+		val optValue = _a(ref);
+		return optValue;
+	}
+	
+	/** @return the value associated with the given ref.  */
+	public <T> T a(Class<T> clzz) {
+		val ref   = Ref.forClass(clzz);
+		val value = a(ref);
+		return value;
+	}
+	
+	/** @return the value associated with the given class.  */
+	public <T> T a(Ref<T> ref) {
+		val optValue = _a(ref);
+		val value    = optValue.orElse(null);
+		return value;
+	}
+	
+	/** @return the value associated with the given class or return the elseValue if no value associated with the class.  */
+	public <T> T a(Class<T> clzz, T elseValue) {
+		val ref   = Ref.forClass(clzz);
+		val value = a(ref, elseValue);
+		return value;
+	}
+
+	/** @return the value associated with the given ref or return the elseValue if no value associated with the ref.  */
+	public <T> T a(Ref<T> ref, T elseValue) {
+		try {
+			val optValue = _a(ref);
+			val value    = optValue.orElse(elseValue);
+			return value;
+		} catch (GetException e) {
+			return elseValue;
+		}
+	}
+
+	/** @return the value associated with the given class or return the from elseSupplier if no value associated with the class.  */
+	public <T> T a(Class<T> clzz, Supplier<T> elseSupplier) {
+		val ref   = Ref.forClass(clzz);
+		val value = a(ref, elseSupplier);
+		return value;
+	}
+	
+	/** @return the value associated with the given ref or return the from elseSupplier if no value associated with the ref.  */
+	public <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
+		val optValue = _a(ref);
+		val value = optValue.orElseGet(elseSupplier);
+		return value;
+	}
+	
+	// TODO - Make it array friendly.
+	/**
+	 * Substitute the given providings and run the runnable.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void substitute(Stream<Providing> providings, Runnable runnable) {
+		val problem = new AtomicReference<RuntimeException>(null);
+		try {
+			substitute(providings, (Supplier)(()->{
+				try {
+					runnable.run();
+				} catch (RuntimeException e) {
+					problem.set(e);
+				}
+				return null;
+			}));
+		} catch (Throwable t) {
+			throw new RunWithSubstitutionException(t);
+		}
+		
+		val theProblem = problem.get();
+		if (theProblem != null) {
+			throw theProblem;
+		}
+	}
+	
+	/**
+	 * Substitute the given providings and run the action.
+	 */
+	@SuppressWarnings("rawtypes")
+	synchronized public <V> V substitute(Stream<Providing> providings, Supplier<V> supplier) {
+		List<Ref> addedRefs = null;
+		try {
+			Iterable<Providing> iterable = ()->providings.iterator();
+			for (Providing providing : iterable) {
+				if (providing == null) {
+					continue;
+				}
+				
+				val ref   = providing.getRef();
+				val stack = providingStacks.get(ref);
+				stack.push(providing);
+				if (addedRefs == null) {
+					addedRefs = new ArrayList<>();
+				}
+				addedRefs.add(ref);
+			}
+
+			val result = supplier.get();
+			return result;
+		} finally {
+			if (addedRefs != null) {
+				addedRefs.forEach(ref->{
+					val stack = providingStacks.get(ref);
+					stack.pop();
+				});
+			}
+		}
+	}
+	
+	/**
+	 * Create a sub thread with a get that inherits all substitution from the current Get
+	 *   and run the runnable with it.
+	 **/
+	public Thread newThread(Runnable runnable) {
+		val thread = newThread(Get.INHERIT_NONE, runnable);
+		return thread;
+	}
+	
+	/**
+	 * Create a sub thread with a get that inherits the given substitution from the current
+	 *   Get and run the runnable with it.
+	 **/
+	@SuppressWarnings("rawtypes")
+	public <T extends Throwable>Thread newThread(List<Ref> refsToInherit, Runnable runnable) {
+		val thread = newThread(refsToInherit::contains, runnable);
+		return thread;
+	}
+	
+	/**
+	 * Create and run a sub thread with a get that inherits all substitution from the current
+	 *   Get and run the runnable with it.
+	 **/
+	public void runNewThread(Runnable runnable) {
+		val thread = newThread(Get.INHERIT_ALL, runnable);
+		thread.start();
+	}
+	
+	/**
+	 * Run the given runnable on a new thread that inherits the providings of those given refs.
+	 **/
+	@SuppressWarnings("rawtypes") 
+	public void runNewThread(List<Ref> refsToInherit, Runnable runnable) {
+		val thread = newThread(refsToInherit, runnable);
+		thread.start();
+	}
+	
+	/**
+	 * Run the given runnable on a new thread that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test).
+	 **/
+	@SuppressWarnings("rawtypes") 
+	public void runNewThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+		val thread = newThread(refsToInherit, runnable);
+		thread.start();
+	}
+	
+	/**
+	 * Create a sub thread with a get that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test) and run the runnable with it.
+	 **/
+	@SuppressWarnings("rawtypes")
+	public Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+		val newGet     = new GetInstance(scope);
+		val providings = prepareProvidings(refsToInherit);
+		
+		val newThread = a(Get._ThreadFactory_);
+		return newThread.newThread(()->{
+			scope.threadGet.set(newGet);
+			val providingsList = providings;
+			newGet.substitute(providingsList.stream(), runnable);
+		});
+	}
+	
+	/**
+	 * Create a sub thread with a get that inherits the substitution from the current Get
+	 *   (all Ref that pass the predicate test) and run the runnable with it.
+	 **/
+	@SuppressWarnings("rawtypes")
+	public <V> CompletableFuture<V> runThread(
+			Predicate<Ref> refsToInherit,
+			Supplier<V>    action) {
+		val newGet     = new GetInstance(scope);
+		val providings = prepareProvidings(refsToInherit);
+		
+		val executor = a(Get._Executor_);
+		val future   = CompletableFuture.supplyAsync(()->{
+			scope.threadGet.set(newGet);
+			try {
+				val providingsList = providings;
+				val result         = newGet.substitute(providingsList.stream(), action);
+				return result;
+			} catch (Throwable t) {
+				throw new CompletionException(t);
+			}
+		}, executor);
+		return future;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private static final Predicate<Predicate<Ref>> notInteritNone = test->test != Get.INHERIT_NONE;
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<Providing> prepareProvidings(Predicate<Ref> refsToInherit) {
+		Preferability._ListenerEnabled_.set(false);
+		try {
+			val list
+				= refsToInherit
+					._toNullable()
+					.filter(notInteritNone)
+					.map(test->(List)getStackRefs()
+							.filter(test)
+							.map(this::getProviding)
+							._toList())
+					.orElse(Collections.emptyList());
+			return (List<Providing>)list;
+		} finally {
+			Preferability._ListenerEnabled_.set(true);
+		}
+	}
+	
+	/** Return the detail string representation of this object. */
+	public final String toXRayString() {
+		String toString = "Get(" + scope + ")";
+		return toString;
+	}
+	
+}

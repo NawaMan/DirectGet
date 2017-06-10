@@ -43,7 +43,7 @@ public class GetInstanceTest implements Named.User {
 	private String orgText = "The Text";
 	private String newText = "New Text!!!";
 	
-	private Ref<String> _text_ = Ref.of("TheText", String.class, Supplier("OrginalText",  ()->orgText));
+	private Ref<String> _text_ = Ref.of("TheText", String.class, Named.Supplier("OrginalText",  ()->orgText));
 	
 	private Stream<Providing> provideNewText = Stream.of(new Providing<>(_text_, Preferability.Dictate, supplier("NewText",  ()->newText)));
 	

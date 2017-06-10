@@ -22,6 +22,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.val;
+
 /**
  * This class offer a natural way to run something.
  * 
@@ -30,32 +32,32 @@ import java.util.stream.Collectors;
 public class  Run {
 	
 	/** Add the wrapper */
-	public static SessionBuilder with(Function<Runnable, Runnable> wrapper) {
+	public static  SessionBuilder with(Function<Runnable, Runnable> wrapper) {
 		return new SessionBuilder().with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public static SessionBuilder With(Function<Runnable, Runnable> wrapper) {
+	public static  SessionBuilder With(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public SessionBuilder by(Function<Runnable, Runnable> wrapper) {
+	public  SessionBuilder by(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public SessionBuilder By(Function<Runnable, Runnable> wrapper) {
+	public  SessionBuilder By(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public SessionBuilder using(Function<Runnable, Runnable> wrapper) {
+	public  SessionBuilder using(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public SessionBuilder Using(Function<Runnable, Runnable> wrapper) {
+	public  SessionBuilder Using(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 	
@@ -123,8 +125,8 @@ public class  Run {
 		public void run(Runnable runnable) {
 			Runnable current = runnable;
 			for (int i = wrappers.size(); i-->0;) {
-				Function<Runnable, Runnable> wrapper = wrappers.get(i);
-				Runnable wrapped = wrapper.apply(current);
+				val wrapper = wrappers.get(i);
+				val wrapped = wrapper.apply(current);
 				if (wrapped != null) {
 					current = wrapped;
 				}

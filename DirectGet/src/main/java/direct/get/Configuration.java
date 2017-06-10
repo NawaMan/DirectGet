@@ -22,99 +22,93 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.Stream;
+
+import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
 /**
  * This class contains the providings for a scope.
  * 
  * @author nawaman
  **/
+@SuppressWarnings({ "rawtypes", "unchecked" })	// OK, OK. I know is really bad to put it here but
+                                                //   the alternative to have it on every method is
+                                                //   just as bad if not worse.
+@ExtensionMethod({ Extensions.class })
 public final class Configuration {
+
+	private static final Function<Map, Map> newTreeMap = (Function<Map, Map>)TreeMap::new;
 	
-	@SuppressWarnings("rawtypes")
 	private final Map<Ref, Providing> providings;
 	
-	/**
-	 * Default constructor.
-	 */
-	@SuppressWarnings("rawtypes")
+	/** Default constructor. */
 	public Configuration() {
 		this((Map<Ref, Providing>)null);
 	}
 	
-	/**
-	 * Constructor.
-	 */
-	public Configuration(
-			@SuppressWarnings("rawtypes") Providing ... providings) {
+	/** Constructor. */
+	public Configuration(Providing ... providings) {
 		this(Arrays.asList(providings));
 	}
 
-	/**
-	 * Constructor.
-	 */
-	public Configuration(
-			@SuppressWarnings("rawtypes") Collection<Providing> providings) {
-		this(providings.stream()
-				.filter(providing->providing != null)
+	/** Constructor. */
+	public Configuration(Collection<Providing> providings) {
+		this(providings.stream());
+	}
+
+	/** Constructor. */
+	public Configuration(Stream<Providing> providings) {
+		this(providings
+				.filter(Objects::nonNull)
 				.collect(toMap(Providing::getRef, p->p)));
 	}
 	
-	/**
-	 * Constructor.
-	 */
-	private Configuration(
-			@SuppressWarnings("rawtypes") Map<Ref, Providing> providings) {
-		@SuppressWarnings("rawtypes") 
-		Map<Ref, Providing> providingMap = Optional
-			.ofNullable(providings)
-			.orElse(emptyMap());
-		this.providings = unmodifiableMap(new TreeMap<>(providingMap));
+	private Configuration(Map<Ref, Providing> providings) {
+		val newProvidingMap = providings._changeBy(newTreeMap)._or(emptyMap());
+		this.providings = unmodifiableMap(newProvidingMap);
 	}
 	
 	/** @return all the refs specified by this configuration. */
-	public Stream<? extends Ref<?>> getRefs() {
-		@SuppressWarnings("unchecked")
-		Stream<? extends Ref<?>> stream = (Stream<? extends Ref<?>>) providings.keySet().stream();
-		return stream;
+	public Stream<Ref> getRefs() {
+		return providings.keySet().stream();
 	}
 	
 	/** @return all the providings specified by this configuration. */
-	public Stream<? extends Providing<?>> getProvidings() {
-		@SuppressWarnings("unchecked")
-		Stream<? extends Providing<?>> stream = (Stream<? extends Providing<?>>) providings.values().stream();
-		return stream;
+	public Stream<Providing> getProvidings() {
+		return providings.values().stream();
 	}
 	
 	/** @return the providing for the given ref. */
 	public <T> Providing<T> getProviding(Ref<T> ref) {
-		@SuppressWarnings("unchecked")
-		Providing<T> providing = providings.get(ref);
+		val providing = providings.get(ref);
 		return providing;
 	}
 
 	/** @return {@code} if this configuration specified the providing for the given ref. */
 	public <T> boolean hasProviding(Ref<T> ref) {
-		return providings.containsKey(ref);
+		val hasProviding = providings.containsKey(ref);
+		return hasProviding;
 	}
 	
 	public String toString() {
-		return "Configuration(" + providings.size() + ")";
+		val toString = String.format("Configuration(%s)", providings.size());
+		return toString;
 	}
+	
 	/** Return the detail string representation of this object. */
 	public String toXRayString() {
-		if (providings.isEmpty()) {
+		val isEmpty = providings.isEmpty();
+		if (isEmpty) {
 			return "{\n}";
 		}
 		
-		return "{\n\t"
-				+ providings.entrySet().stream()
-					.map(each->each.getKey() + "=" + each.getValue())
-					.collect(Collectors.joining(",\n\t"))
-				+ "\n}"; 
+		val pairs = providings._toPairStrings()._toIndentLines();
+		val xRay  = String.format("{\n\t%s\n}", pairs);
+		return xRay; 
 	}
 	
 }

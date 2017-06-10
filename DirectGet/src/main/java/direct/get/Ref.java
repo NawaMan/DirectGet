@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import direct.get.exceptions.GetException;
+import lombok.val;
 
 /***
  * Ref is a reference to an object that we want to get.
@@ -44,8 +45,9 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 	/** @return the default object. */
 	default public T get() {
 		try {
-			Class<T> clzz = getTargetClass();
-			return clzz.newInstance();
+			val clzz     = getTargetClass();
+			val instance = clzz.newInstance();
+			return instance;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new GetException(this, e);
 		}
@@ -152,8 +154,8 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 			if (!(obj instanceof Ref.AbstractRef)) {
 				return false;
 			}
-			Class<T> thisTargetClass = this.getTargetClass();
-			Class    thatTargetClass = ((Ref.AbstractRef) obj).getTargetClass();
+			val thisTargetClass = this.getTargetClass();
+			val thatTargetClass = ((Ref.AbstractRef) obj).getTargetClass();
 			return thisTargetClass == thatTargetClass;
 		}
 		
@@ -210,7 +212,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
 		
 		Direct(String name, Class<T> targetClass, Supplier<T> factory) {
 			super(targetClass);
-			this.name = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
+			this.name      = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
 			this.providing = (factory == null) ? null : new Providing<>(this, Preferability.Default, factory);
 		}
 		

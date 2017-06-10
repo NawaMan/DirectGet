@@ -16,6 +16,7 @@
 package direct.get;
 
 import direct.get.exceptions.AppScopeAlreadyInitializedException;
+import lombok.val;
 
 /**
  * This is the application scope.
@@ -27,11 +28,11 @@ import direct.get.exceptions.AppScopeAlreadyInitializedException;
  */
 public final class App {
 	
-	/** The instance of the Application scope. */
+	/** The only instance of the Application scope. */
 	public static final Scope instance = new Scope();
 
 	/** @return the get for the current thread that is associated with this scope. NOTE: capital 'G' is intentional. */
-	public static Get.Instance Get() {
+	public static GetInstance Get() {
 		return instance.Get();
 	}
 	
@@ -49,12 +50,14 @@ public final class App {
 	 * @return {@code true} if the initialization actually happen with this call.
 	 */
 	public static boolean initializeIfAbsent(Configuration configuration) {
-		return instance.initIfAbsent(configuration);
+		val isAbsent = instance.initIfAbsent(configuration);
+		return isAbsent;
 	}
 	
 	/** @return {@code true} if the application scope has been initialized */
 	public static boolean isInitialized() {
-		return instance.hasBeenInitialized();
+		val isAbsent = instance.hasBeenInitialized();
+		return isAbsent;
 	}
 	
 	/** Private part */

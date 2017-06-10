@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import direct.get.Get.Instance;
 import direct.get.exceptions.AppScopeAlreadyInitializedException;
+import lombok.val;
 
 /***
  * Scope holds a configuration which specify providings.
@@ -50,7 +50,7 @@ public class Scope {
 	
 	private volatile Configuration config;
 	
-	final ThreadLocal<Get.Instance> threadGet;
+	final ThreadLocal<GetInstance> threadGet;
 	
 	private volatile List<StackTraceElement> stackTraceAtCreation;
 	
@@ -59,7 +59,7 @@ public class Scope {
 		this.name        = APP_SCOPE_NAME;
 		this.parentScope = null;
 		this.config      = DEF_CONFIG;
-		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(this));
+		this.threadGet   = ThreadLocal.withInitial(()->new GetInstance(this));
 	}
 	
 	// For other scope.
@@ -67,7 +67,7 @@ public class Scope {
 		this.name        = Optional.ofNullable(name).orElse("Scope:" + this.getClass().getName());
 		this.parentScope = parentScope;
 		this.config      = Optional.ofNullable(config).orElseGet(Configuration::new);
-		this.threadGet   = ThreadLocal.withInitial(()->new Get.Instance(this));
+		this.threadGet   = ThreadLocal.withInitial(()->new GetInstance(this));
 	}
 	
 	// -- For AppScope only ---------------------------------------------------
@@ -87,7 +87,7 @@ public class Scope {
 		if (config == DEF_CONFIG) {
 			synchronized (lock) {
 				if (config == DEF_CONFIG) {
-					config     = (newConfig == null) ? new Configuration() : newConfig;
+					config               = (newConfig == null) ? new Configuration() : newConfig;
 					stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
 					return true;
 				}
@@ -132,18 +132,19 @@ public class Scope {
 	}
 	
 	/** @return the get for the current thread that is associated with this scope. NOTE: capital 'G' is intentional. */
-	public Get.Instance Get() {
+	public GetInstance Get() {
 		return threadGet.get();
 	}
 	
 	<T> Optional<T> doGet(Ref<T> ref) {
-		Instance currentGet = this.Get();
-		Providing<T> providing = currentGet.getProviding(ref);
+		val currentGet = this.Get();
+		val providing  = currentGet.getProviding(ref);
 		if (providing != null) {
 			return Optional.ofNullable(providing.get());
 		}
-		// TODO - Move this to determineXXX
-		return ref._get();
+		
+		Optional<T> optValue = ref._get();
+		return optValue;
 	}
 	
 	/** {@inheritDoc} */
@@ -157,18 +158,16 @@ public class Scope {
 		return name + "(" + config.toXRayString() + ")";
 	}
 	
-	/**
-	 * Create and return a new sub scope with the given configuration.
-	 */
+	/** Create and return a new sub scope with the given configuration. */
 	public Scope newSubScope(Configuration config) {
-		return new Scope(null, this, config);
+		val subScope = new Scope(null, this, config);
+		return subScope;
 	}
 	
-	/**
-	 * Create and return a new sub scope with the given name and configuration.
-	 */
+	/** Create and return a new sub scope with the given name and configuration. */
 	public Scope newSubScope(String name, Configuration config) {
-		return new Scope(name, this, config);
+		val subScope = new Scope(name, this, config);
+		return subScope;
 	}
 	
 }

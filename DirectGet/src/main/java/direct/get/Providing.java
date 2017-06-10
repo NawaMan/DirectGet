@@ -16,14 +16,16 @@
 package direct.get;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
+
+import lombok.experimental.ExtensionMethod;
 
 /**
  * Instance of this class holds data for providing.
  * 
  * @author nawaman
  **/
+@ExtensionMethod({ Extensions.class })
 public class Providing<T> implements Supplier<T> {
 	
 	private final Ref<T> ref;
@@ -41,8 +43,8 @@ public class Providing<T> implements Supplier<T> {
 	 */
 	public Providing(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
 		this.ref           = Objects.requireNonNull(ref);
-		this.preferability = Optional.ofNullable(preferability).orElse(Preferability.Default);
-		this.supplier      = Optional.ofNullable(supplier).orElse(()->null);
+		this.preferability = preferability._or(Preferability.Default);
+		this.supplier      = supplier._or((Supplier<T>)()->null);
 	}
 	
 	/** @return the reference for this providing. */

@@ -120,7 +120,29 @@ public interface Named {
 		public String toString() {
 			return "Supplier(" + name + ")";
 		}
-	} 
+	}
+	
+	public static class ValueSupplier<T> extends Supplier<T> {
+		
+		public static final String NAME = "FromValue";
+		public static final String NAME_TEMPLATE = NAME + "(%s)";
+		
+		public ValueSupplier(T value) {
+			super(String.format(NAME, String.valueOf(value)), ()->value);
+		}
+		
+	}
+	
+	public static class RefSupplier<T> extends Supplier<T> {
+		
+		public static final String NAME = "FromRef";
+		public static final String NAME_TEMPLATE = NAME + "(%s)";
+		
+		public RefSupplier(Ref<T> ref) {
+			super(String.format(NAME_TEMPLATE, ref.toString()), ()->Get.a(ref));
+		}
+		
+	}
 	
 	/**
 	 * This interface make it possible to the user of the class to use these 

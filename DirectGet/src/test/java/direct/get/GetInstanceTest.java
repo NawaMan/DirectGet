@@ -116,7 +116,8 @@ public class GetInstanceTest implements Named.User {
 	@Test
 	public void testRunNewThread_notInherit() throws Throwable {
 		With(_newText)
-		.using(_newEmptyThread).run(()->{
+		.use(_newEmptyThread)
+		.run(()->{
 			assertEquals(orgText, Get.a(_text_));
 		});
 		fork.join();
@@ -124,9 +125,10 @@ public class GetInstanceTest implements Named.User {
 	
 	@Test
 	public void testRunNewThread_inherit() throws Throwable {
-		With(_newText)
+		Run. with(_text_.providedWith(newText))
 		.and.with(_verboseLogger)	// TODO - Create a separate test for this.
-		.using(_newThread).run(()->{
+		.and.use(_newThread)
+		.run(()->{
 			assertEquals(newText, Get.a(_text_));
 		});
 		fork.join();

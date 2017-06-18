@@ -73,6 +73,44 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     	
     	return this.toString().compareTo(o.toString());
     }
+    
+    default public Providing<T> dictatedTo(T value) {
+    	return new Providing<>(this, Preferability.Dictate, new Named.ValueSupplier<T>(value));
+    }
+    
+    default public Providing<T> dictatedToA(Ref<T> ref) {
+    	return new Providing<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
+    }
+    
+    default public Providing<T> dictatedBy(Supplier<T> supplier) {
+    	return new Providing<>(this, Preferability.Dictate, supplier);
+    }
+    
+    default public Providing<T> providedWith(T value) {
+    	return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    default public Providing<T> providedWithA(Ref<T> ref) {
+    	// TODO - The supplier should be made a separate class.
+    	return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    default public Providing<T> providedBy(Supplier<T> supplier) {
+    	return new Providing<>(this, Preferability.Normal, supplier);
+    }
+    
+    default public Providing<T> defaultedTo(T value) {
+    	return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    default public Providing<T> defaultedToA(Ref<T> ref) {
+    	// TODO - The supplier should be made a separate class.
+    	return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    default public Providing<T> defaultedToBy(Supplier<T> supplier) {
+    	return new Providing<>(this, Preferability.Normal, supplier);
+    }
 	
 	
 	// == Basic implementations ===============================================

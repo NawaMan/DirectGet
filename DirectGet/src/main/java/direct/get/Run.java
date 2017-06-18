@@ -15,12 +15,16 @@
 //  ========================================================================
 package direct.get;
 
+import static direct.get.App.Get;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.val;
 
@@ -32,13 +36,52 @@ import lombok.val;
 public class  Run {
 	
 	/** Add the wrapper */
-	public static  SessionBuilder with(Function<Runnable, Runnable> wrapper) {
+	public static SessionBuilder with(Function<Runnable, Runnable> wrapper) {
 		return new SessionBuilder().with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public static  SessionBuilder With(Function<Runnable, Runnable> wrapper) {
+	public static SessionBuilder With(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder with(Providing ... providings) {
+		return with(Stream.of(providings));
+	}
+
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder With(Providing ... providings) {
+		return with(Stream.of(providings));
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder with(Collection<Providing> providings) {
+		return with(providings.stream());
+	}
+
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder With(Collection<Providing> providings) {
+		return with(providings.stream());
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder with(Stream<Providing> providings) {
+		return new SessionBuilder().with(runnable->()->{
+			// TODO Think about how to default the scope.
+			App.Get().substitute(providings, runnable);
+		});
+	}
+
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder With(Stream<Providing> providings) {
+		return with(providings);
 	}
 
 	/** Add the wrapper */
@@ -52,13 +95,52 @@ public class  Run {
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder using(Function<Runnable, Runnable> wrapper) {
-		return with(wrapper);
+	public  SessionBuilder use(Function<Runnable, Runnable> wrapper) {
+		return use(wrapper);
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder Using(Function<Runnable, Runnable> wrapper) {
-		return with(wrapper);
+	public  SessionBuilder Use(Function<Runnable, Runnable> wrapper) {
+		return use(wrapper);
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder use(Providing ... providings) {
+		return use(Stream.of(providings));
+	}
+
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder Use(Providing ... providings) {
+		return use(providings);
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder use(Collection<Providing> providings) {
+		return use(providings.stream());
+	}
+
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder Use(Collection<Providing> providings) {
+		return use(providings);
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder use(Stream<Providing> providings) {
+		return with(providings);
+	}
+	
+	/** Add the wrapper */
+	@SuppressWarnings("rawtypes")
+	public static SessionBuilder Use(Stream<Providing> providings) {
+		return new SessionBuilder().with(runnable->()->{
+			// TODO Think about how to default the scope.
+			App.Get().substitute(providings, runnable);
+		});
 	}
 	
 	
@@ -82,6 +164,27 @@ public class  Run {
 			}
 			return this;
 		}
+		
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder with(Providing ... providings) {
+			return with(Stream.of(providings));
+		}
+
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder with(Collection<Providing> providings) {
+			return with(providings.stream());
+		}
+
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder with(Stream<Providing> providings) {
+			return with(runnable->()->{
+				// TODO Think about how to default the scope.
+				App.Get().substitute(providings, runnable);
+			});
+		}
 
 		/** Add the wrapper */
 		public SessionBuilder by(Function<Runnable, Runnable> wrapper) {
@@ -89,8 +192,29 @@ public class  Run {
 		}
 
 		/** Add the wrapper */
-		public SessionBuilder using(Function<Runnable, Runnable> wrapper) {
+		public SessionBuilder use(Function<Runnable, Runnable> wrapper) {
 			return with(wrapper);
+		}
+		
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder use(Providing ... providings) {
+			return use(Stream.of(providings));
+		}
+
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder use(Collection<Providing> providings) {
+			return with(providings.stream());
+		}
+
+		/** Add the wrapper */
+		@SuppressWarnings("rawtypes")
+		public SessionBuilder use(Stream<Providing> providings) {
+			return with(runnable->()->{
+				// TODO Think about how to default the scope.
+				App.Get().substitute(providings, runnable);
+			});
 		}
 		
 		/** Build the session for later use. */

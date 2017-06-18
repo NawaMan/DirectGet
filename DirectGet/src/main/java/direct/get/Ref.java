@@ -99,6 +99,19 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     	return new Providing<>(this, Preferability.Normal, supplier);
     }
     
+    default public Providing<T> providedWith(Preferability preferability, T value) {
+    	return new Providing<>(this, preferability, new Named.ValueSupplier<T>(value));
+    }
+    
+    default public Providing<T> providedWithA(Preferability preferability, Ref<T> ref) {
+    	// TODO - The supplier should be made a separate class.
+    	return new Providing<>(this, preferability, new Named.RefSupplier<T>(ref));
+    }
+    
+    default public Providing<T> providedBy(Preferability preferability, Supplier<T> supplier) {
+    	return new Providing<>(this, preferability, supplier);
+    }
+    
     default public Providing<T> defaultedTo(T value) {
     	return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
@@ -112,6 +125,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     	return new Providing<>(this, Preferability.Normal, supplier);
     }
 	
+    // TODO - Should there be another one that get a preferability instead.
 	
 	// == Basic implementations ===============================================
 	

@@ -15,7 +15,8 @@
 //  ========================================================================
 package direct.get;
 
-import static direct.get.App.Get;
+import static direct.get.Run.With;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,11 +24,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import direct.get.Fork.Session;
 import lombok.val;
 
+import static direct.get.Run.*;
 /**
  * This class offer a natural way to run something.
  * 
@@ -143,16 +147,108 @@ public class  Run {
 		});
 	}
 	
+	public static NewThreadWrapper OnNewThread() {
+		return new NewThreadWrapper();
+	}
+	
+	public static NewThreadWrapper onNewThread() {
+		return new NewThreadWrapper();
+	}
+	
 	
 	/** Alias type. */
 	public static interface Wrapper extends Function<Runnable, Runnable> {}
+	
+	public static class NewThreadWrapper extends SessionBuilder implements Wrapper {
+		
+		private final List<Ref> includedRefs = new ArrayList<>();
+		private final List<Ref> excludedRefs = new ArrayList<>();
+		
+		private Boolean inheritMass = null;
+		
+		private Fork fork = null;
+		
+		public NewThreadWrapper() {}
+		
+		public NewThreadWrapper(Fork fork) {
+			this.fork = fork;
+		}
+		
+		public NewThreadWrapper joinWith(Fork fork) {
+			this.fork = fork;
+			return this;
+		}
+		
+		public NewThreadWrapper inheritAll() {
+			inheritMass = true;
+			includedRefs.clear();
+			excludedRefs.clear();
+			return this;
+		}
+
+		public NewThreadWrapper inheritNone() {
+			inheritMass = false;
+			includedRefs.clear();
+			excludedRefs.clear();
+			return this;
+		}
+		
+		public NewThreadWrapper inherit(Ref ref) {
+			includedRefs.add(ref);
+			excludedRefs.remove(ref);
+			return this;
+		}
+		
+		public NewThreadWrapper notInherit(Ref ref) {
+			includedRefs.remove(ref);
+			excludedRefs.add(ref);
+			return this;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Runnable apply(Runnable runnable) {
+			Predicate<Ref> predicate = Get.INHERIT_NONE;
+			val isAll = Boolean.TRUE.equals(inheritMass);
+			if (isAll) {
+				if (excludedRefs.isEmpty()) {
+					predicate = Get.INHERIT_ALL;
+				} else {
+					predicate = ref->!excludedRefs.contains(ref);
+				}
+			} else {
+				val isNone = Boolean.TRUE.equals(inheritMass);
+				if (isNone) {
+					if (includedRefs.isEmpty()) {
+						predicate = Get.INHERIT_NONE;
+					} else {
+						predicate = ref->includedRefs.contains(ref);
+					}
+				} else {
+					predicate = ref->includedRefs.contains(ref);
+				}
+			}
+			val checker = predicate;
+			if (fork != null) {
+				return ()->{
+					App.Get().runNewThread(checker, fork.run(runnable));
+				};
+			} else {
+				return ()->{
+					App.Get().runNewThread(checker, runnable);
+				};
+			}
+		}
+		
+	}
 	
 	/**
 	 * This class make building a run a bit easier.
 	 */
 	public static class SessionBuilder {
 		
-		private final List<Function<Runnable, Runnable>> wrappers = new ArrayList<>();
+		final List<Function<Runnable, Runnable>> wrappers = new ArrayList<>();
+		
 		
 		/** Another way to chain the invocation */
 		public final SessionBuilder and = this;
@@ -217,6 +313,18 @@ public class  Run {
 			});
 		}
 		
+		public NewThreadWrapper onNewThread() {
+			val newThreadWrapper = new NewThreadWrapper();
+			newThreadWrapper.wrappers.addAll(this.wrappers);
+			newThreadWrapper.wrappers.add(newThreadWrapper);
+			return newThreadWrapper;
+		}
+		
+		public NewThreadWrapper OnNewThread() {
+			return onNewThread();
+		}
+		
+		
 		/** Build the session for later use. */
 		public WrapperContext build() {
 			return new WrapperContext(wrappers);
@@ -224,7 +332,14 @@ public class  Run {
 		
 		/** Run the session now. */
 		public void run(Runnable runnable) {
-			build().run(runnable);
+			build()
+			.run(runnable);
+		}
+		
+		/** Run the session now. */
+		public void start(Runnable runnable) {
+			build()
+			.run(runnable);
 		}
 		
 	}
@@ -246,6 +361,11 @@ public class  Run {
 		}
 		
 		/** Run something within this context. */
+		public void start(Runnable runnable) {
+			run(runnable);
+		}
+		
+		/** Run something within this context. */
 		public void run(Runnable runnable) {
 			Runnable current = runnable;
 			for (int i = wrappers.size(); i-->0;) {
@@ -258,6 +378,6 @@ public class  Run {
 			current.run();
 		}
 		
-	} 
+	}
 	
 }

@@ -36,6 +36,8 @@ import static direct.get.Run.*;
 
 import org.junit.Test;
 
+import lombok.val;
+
 public class GetInstanceTest implements Named.User {
 	
 	private CountDownLatch latch = new CountDownLatch(1);
@@ -46,8 +48,6 @@ public class GetInstanceTest implements Named.User {
 	private Ref<String> _text_ = Ref.of("TheText", String.class, Named.Supplier("OrginalText",  ()->orgText));
 	
 	private Stream<Providing> provideNewText = Stream.of(new Providing<>(_text_, Preferability.Dictate, supplier("NewText",  ()->newText)));
-	
-	private Fork fork = new Fork();
 
 	@Test
 	@SuppressWarnings("unchecked")
@@ -105,18 +105,11 @@ public class GetInstanceTest implements Named.User {
 		App.Get().substitute(providings.stream(), runnable);
 	});
 	
-	private final Run.Wrapper _newEmptyThread = (Runnable runnable)->()->{
-		App.Get().runNewThread(Get.INHERIT_NONE, fork.run(runnable));
-	};
-	
-	private final Run.Wrapper _newThread = (Runnable runnable)->()->{
-		App.Get().runNewThread(Get.INHERIT_ALL, fork.run(runnable));
-	};
-	
 	@Test
 	public void testRunNewThread_notInherit() throws Throwable {
+		val fork = new Fork();
 		With(_newText)
-		.use(_newEmptyThread)
+		.onNewThread().inheritNone().joinWith(fork)
 		.run(()->{
 			assertEquals(orgText, Get.a(_text_));
 		});
@@ -125,10 +118,11 @@ public class GetInstanceTest implements Named.User {
 	
 	@Test
 	public void testRunNewThread_inherit() throws Throwable {
+		val fork = new Fork();
 		Run. with(_text_.providedWith(newText))
 		.and.with(_verboseLogger)	// TODO - Create a separate test for this.
-		.and.use(_newThread)
-		.run(()->{
+		.and.onNewThread().inheritAll().joinWith(fork)
+		.start(()->{
 			assertEquals(newText, Get.a(_text_));
 		});
 		fork.join();

@@ -74,63 +74,69 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     	return this.toString().compareTo(o.toString());
     }
     
+    /** Create a providing that dictate the given value. */
     default public Providing<T> dictatedTo(T value) {
     	return new Providing<>(this, Preferability.Dictate, new Named.ValueSupplier<T>(value));
     }
     
+    /** Create the providing that dictate the value of the given ref. */
     default public Providing<T> dictatedToA(Ref<T> ref) {
     	return new Providing<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
     }
     
+    /** Create the providing that dictate the result of the given supplier. */
     default public Providing<T> dictatedBy(Supplier<T> supplier) {
     	return new Providing<>(this, Preferability.Dictate, supplier);
     }
-    
+
+    /** Create the providing (normal preferability) the given value. */
     default public Providing<T> providedWith(T value) {
     	return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
-    
+
+    /** Create the providing (normal preferability) the value of the given ref. */
     default public Providing<T> providedWithA(Ref<T> ref) {
-    	// TODO - The supplier should be made a separate class.
     	return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
     }
     
+    /** Create the providing (normal preferability) the result of the given supplier. */
     default public Providing<T> providedBy(Supplier<T> supplier) {
     	return new Providing<>(this, Preferability.Normal, supplier);
     }
     
+    /** Create the providing (using the given preferability) the given value. */
     default public Providing<T> providedWith(Preferability preferability, T value) {
     	return new Providing<>(this, preferability, new Named.ValueSupplier<T>(value));
     }
     
+    /** Create the providing (using the given preferability) the value of the given ref. */
     default public Providing<T> providedWithA(Preferability preferability, Ref<T> ref) {
-    	// TODO - The supplier should be made a separate class.
     	return new Providing<>(this, preferability, new Named.RefSupplier<T>(ref));
     }
     
+    /** Create the providing (using the given preferability) the result of the given supplier. */
     default public Providing<T> providedBy(Preferability preferability, Supplier<T> supplier) {
     	return new Providing<>(this, preferability, supplier);
     }
     
+    /** Create the providing that default to the given value. */
     default public Providing<T> defaultedTo(T value) {
     	return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
     
+    /** Create the providing that default to the value of the given ref. */
     default public Providing<T> defaultedToA(Ref<T> ref) {
-    	// TODO - The supplier should be made a separate class.
     	return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
     }
     
+    /** Create the providing that default to the result of the given supplier. */
     default public Providing<T> defaultedToBy(Supplier<T> supplier) {
     	return new Providing<>(this, Preferability.Normal, supplier);
     }
-	
-    // TODO - Should there be another one that get a preferability instead.
-	
-	// == Basic implementations ===============================================
-	
-	// -- Abstract or base implementation -------------------------------------
-
+    
+    // == Basic implementations ===============================================
+    
+    // -- Abstract or base implementation -------------------------------------	
     /**
      * Base implementation of references.
      **/

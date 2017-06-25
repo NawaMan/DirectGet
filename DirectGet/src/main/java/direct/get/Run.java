@@ -15,10 +15,8 @@
 //  ========================================================================
 package direct.get;
 
-import static direct.get.Run.With;
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -28,10 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import direct.get.Fork.Session;
 import lombok.val;
-
-import static direct.get.Run.*;
 /**
  * This class offer a natural way to run something.
  * 
@@ -147,10 +142,12 @@ public class  Run {
 		});
 	}
 	
+	/** Make the run to be run on a new thread. */
 	public static NewThreadWrapper OnNewThread() {
 		return new NewThreadWrapper();
 	}
-	
+
+	/** Make the run to be run on a new thread. */
 	public static NewThreadWrapper onNewThread() {
 		return new NewThreadWrapper();
 	}
@@ -159,33 +156,41 @@ public class  Run {
 	/** Alias type. */
 	public static interface Wrapper extends Function<Runnable, Runnable> {}
 	
+	/** The wrapper for a new thread run. */
 	public static class NewThreadWrapper extends SessionBuilder implements Wrapper {
 		
+		@SuppressWarnings("rawtypes")
 		private final List<Ref> includedRefs = new ArrayList<>();
+		@SuppressWarnings("rawtypes")
 		private final List<Ref> excludedRefs = new ArrayList<>();
 		
 		private Boolean inheritMass = null;
 		
 		private Fork fork = null;
 		
+		/** Default constructor. */
 		public NewThreadWrapper() {}
 		
+		/** Constructor with a fork. */
 		public NewThreadWrapper(Fork fork) {
 			this.fork = fork;
 		}
 		
+		/** Join the runnable with using the given fork. */
 		public NewThreadWrapper joinWith(Fork fork) {
 			this.fork = fork;
 			return this;
 		}
 		
+		/** Set this run to inherit all refs from the parent thread. */
 		public NewThreadWrapper inheritAll() {
 			inheritMass = true;
 			includedRefs.clear();
 			excludedRefs.clear();
 			return this;
 		}
-
+		
+		/** Set this run to inherit no refs from the parent thread. */
 		public NewThreadWrapper inheritNone() {
 			inheritMass = false;
 			includedRefs.clear();
@@ -193,15 +198,21 @@ public class  Run {
 			return this;
 		}
 		
-		public NewThreadWrapper inherit(Ref ref) {
-			includedRefs.add(ref);
-			excludedRefs.remove(ref);
+		/** Specify what refs to be inherited - in case of inherit none. */
+		@SuppressWarnings({ "rawtypes" })
+		public NewThreadWrapper inherit(Ref ... refs) {
+			List<Ref> list = Arrays.asList(refs);
+			includedRefs.addAll(list);
+			excludedRefs.removeAll(list);
 			return this;
 		}
-		
-		public NewThreadWrapper notInherit(Ref ref) {
-			includedRefs.remove(ref);
-			excludedRefs.add(ref);
+
+		/** Specify what refs NOT to be inherited - in case of inherit all. */
+		@SuppressWarnings({ "rawtypes" })
+		public NewThreadWrapper notInherit(Ref ... refs) {
+			List<Ref> list = Arrays.asList(refs);
+			includedRefs.removeAll(list);
+			excludedRefs.addAll(list);
 			return this;
 		}
 
@@ -313,6 +324,7 @@ public class  Run {
 			});
 		}
 		
+		/** Make the run to be run on a new thread. */
 		public NewThreadWrapper onNewThread() {
 			val newThreadWrapper = new NewThreadWrapper();
 			newThreadWrapper.wrappers.addAll(this.wrappers);
@@ -320,6 +332,7 @@ public class  Run {
 			return newThreadWrapper;
 		}
 		
+		/** Make the run to be run on a new thread. */
 		public NewThreadWrapper OnNewThread() {
 			return onNewThread();
 		}

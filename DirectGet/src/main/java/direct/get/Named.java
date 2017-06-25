@@ -122,22 +122,28 @@ public interface Named {
 		}
 	}
 	
+	/** Supplier for a value. */
 	public static class ValueSupplier<T> extends Supplier<T> {
 		
+		/** The name of the supplier. */
 		public static final String NAME = "FromValue";
+		/** The template for the name. */
 		public static final String NAME_TEMPLATE = NAME + "(%s)";
-		
+		/** Constructor */
 		public ValueSupplier(T value) {
 			super(String.format(NAME, String.valueOf(value)), ()->value);
 		}
 		
 	}
 	
+	/** Supplier for a value of a ref. */
 	public static class RefSupplier<T> extends Supplier<T> {
-		
+
+		/** The name of the supplier. */
 		public static final String NAME = "FromRef";
+		/** The template for the name. */
 		public static final String NAME_TEMPLATE = NAME + "(%s)";
-		
+		/** Constructor */
 		public RefSupplier(Ref<T> ref) {
 			super(String.format(NAME_TEMPLATE, ref.toString()), ()->Get.a(ref));
 		}

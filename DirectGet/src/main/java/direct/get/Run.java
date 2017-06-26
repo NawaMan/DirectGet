@@ -208,11 +208,11 @@ public class  Run {
 			val checker = predicate;
 			if (builder.fork != null) {
 				return ()->{
-					App.Get().runNewThread(checker, builder.fork.run(runnable));
+					builder.get().runNewThread(checker, builder.fork.run(runnable));
 				};
 			} else {
 				return ()->{
-					App.Get().runNewThread(checker, runnable);
+					builder.get().runNewThread(checker, runnable);
 				};
 			}
 		}
@@ -280,7 +280,7 @@ public class  Run {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public SB with(Stream<Providing> providings) {
 			with(runnable->()->{
-				scope.Get().substitute(providings, runnable);
+				get().substitute(providings, runnable);
 			});
 			return (SB)this;
 		}
@@ -317,7 +317,7 @@ public class  Run {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public SB use(Stream<Providing> providings) {
 			with(runnable->()->{
-				scope.Get().substitute(providings, runnable);
+				get().substitute(providings, runnable);
 			});
 			return (SB)this;
 		}

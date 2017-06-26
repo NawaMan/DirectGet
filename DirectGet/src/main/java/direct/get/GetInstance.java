@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -171,15 +169,6 @@ public final class GetInstance {
 	}
 	
 	/**
-	 * Create a sub thread with a get that inherits all substitution from the current Get
-	 *   and run the runnable with it.
-	 **/
-	public Thread newThread(Runnable runnable) {
-		val thread = newThread(Get.INHERIT_NONE, runnable);
-		return thread;
-	}
-	
-	/**
 	 * Create a sub thread with a get that inherits the given substitution from the current
 	 *   Get and run the runnable with it.
 	 **/
@@ -187,15 +176,6 @@ public final class GetInstance {
 	public <T extends Throwable>Thread newThread(List<Ref> refsToInherit, Runnable runnable) {
 		val thread = newThread(refsToInherit::contains, runnable);
 		return thread;
-	}
-	
-	/**
-	 * Create and run a sub thread with a get that inherits all substitution from the current
-	 *   Get and run the runnable with it.
-	 **/
-	public void runNewThread(Runnable runnable) {
-		val thread = newThread(Get.INHERIT_ALL, runnable);
-		thread.start();
 	}
 	
 	/**
@@ -232,31 +212,6 @@ public final class GetInstance {
 			val providingsList = providings;
 			newGet.substitute(providingsList.stream(), runnable);
 		});
-	}
-	
-	/**
-	 * Create a sub thread with a get that inherits the substitution from the current Get
-	 *   (all Ref that pass the predicate test) and run the runnable with it.
-	 **/
-	@SuppressWarnings("rawtypes")
-	public <V> CompletableFuture<V> runThread(
-			Predicate<Ref> refsToInherit,
-			Supplier<V>    action) {
-		val newGet     = new GetInstance(scope);
-		val providings = prepareProvidings(refsToInherit);
-		
-		val executor = a(Get._Executor_);
-		val future   = CompletableFuture.supplyAsync(()->{
-			scope.threadGet.set(newGet);
-			try {
-				val providingsList = providings;
-				val result         = newGet.substitute(providingsList.stream(), action);
-				return result;
-			} catch (Throwable t) {
-				throw new CompletionException(t);
-			}
-		}, executor);
-		return future;
 	}
 	
 	@SuppressWarnings("rawtypes")

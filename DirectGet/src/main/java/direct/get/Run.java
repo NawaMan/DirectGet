@@ -21,6 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,215 +38,177 @@ import lombok.val;
  **/
 public class  Run {
 	
+	/** Specify that the running should be done under the given scope */
+	public static SameThreadSessionBuilder under(Scope scope) {
+		return new SameThreadSessionBuilder().under(scope);
+	}
+	
+	/** Specify that the running should be done under the given scope */
+	public static SameThreadSessionBuilder Under(Scope scope) {
+		return new SameThreadSessionBuilder().under(scope);
+	}
+	
 	/** Add the wrapper */
-	public static SessionBuilder with(Function<Runnable, Runnable> wrapper) {
-		return new SessionBuilder().with(wrapper);
+	public static SameThreadSessionBuilder with(Function<Runnable, Runnable> wrapper) {
+		return new SameThreadSessionBuilder().with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public static SessionBuilder With(Function<Runnable, Runnable> wrapper) {
+	public static SameThreadSessionBuilder With(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder with(Providing ... providings) {
+	public static SameThreadSessionBuilder with(Providing ... providings) {
 		return with(Stream.of(providings));
 	}
 
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder With(Providing ... providings) {
+	public static SameThreadSessionBuilder With(Providing ... providings) {
 		return with(Stream.of(providings));
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder with(Collection<Providing> providings) {
+	public static SameThreadSessionBuilder with(Collection<Providing> providings) {
 		return with(providings.stream());
 	}
 
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder With(Collection<Providing> providings) {
+	public static SameThreadSessionBuilder With(Collection<Providing> providings) {
 		return with(providings.stream());
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder with(Stream<Providing> providings) {
-		return new SessionBuilder().with(runnable->()->{
-			// TODO Think about how to default the scope.
-			App.Get().substitute(providings, runnable);
+	public static SameThreadSessionBuilder with(Stream<Providing> providings) {
+		val sessionBuilder = new SameThreadSessionBuilder();
+		sessionBuilder.with(runnable->()->{
+			sessionBuilder.get().substitute(providings, runnable);
 		});
+		return sessionBuilder; 
 	}
 
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder With(Stream<Providing> providings) {
+	public static SameThreadSessionBuilder With(Stream<Providing> providings) {
 		return with(providings);
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder by(Function<Runnable, Runnable> wrapper) {
+	public  SameThreadSessionBuilder by(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder By(Function<Runnable, Runnable> wrapper) {
+	public  SameThreadSessionBuilder By(Function<Runnable, Runnable> wrapper) {
 		return with(wrapper);
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder use(Function<Runnable, Runnable> wrapper) {
+	public  SameThreadSessionBuilder use(Function<Runnable, Runnable> wrapper) {
 		return use(wrapper);
 	}
 
 	/** Add the wrapper */
-	public  SessionBuilder Use(Function<Runnable, Runnable> wrapper) {
+	public  SameThreadSessionBuilder Use(Function<Runnable, Runnable> wrapper) {
 		return use(wrapper);
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder use(Providing ... providings) {
+	public static SameThreadSessionBuilder use(Providing ... providings) {
 		return use(Stream.of(providings));
 	}
 
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder Use(Providing ... providings) {
+	public static SameThreadSessionBuilder Use(Providing ... providings) {
 		return use(providings);
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder use(Collection<Providing> providings) {
+	public static SameThreadSessionBuilder use(Collection<Providing> providings) {
 		return use(providings.stream());
 	}
 
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder Use(Collection<Providing> providings) {
+	public static SameThreadSessionBuilder Use(Collection<Providing> providings) {
 		return use(providings);
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder use(Stream<Providing> providings) {
+	public static SameThreadSessionBuilder use(Stream<Providing> providings) {
 		return with(providings);
 	}
 	
 	/** Add the wrapper */
 	@SuppressWarnings("rawtypes")
-	public static SessionBuilder Use(Stream<Providing> providings) {
-		return new SessionBuilder().with(runnable->()->{
-			// TODO Think about how to default the scope.
-			App.Get().substitute(providings, runnable);
+	public static SameThreadSessionBuilder Use(Stream<Providing> providings) {
+		val sessionBuilder = new SameThreadSessionBuilder();
+		sessionBuilder.with(runnable->()->{
+			sessionBuilder.get().substitute(providings, runnable);
 		});
+		return sessionBuilder;
 	}
 	
 	/** Make the run to be run on a new thread. */
-	public static NewThreadWrapper OnNewThread() {
-		return new NewThreadWrapper();
+	public static NewThreadSessionBuilder OnNewThread() {
+		return new NewThreadSessionBuilder();
 	}
 
 	/** Make the run to be run on a new thread. */
-	public static NewThreadWrapper onNewThread() {
-		return new NewThreadWrapper();
+	public static NewThreadSessionBuilder onNewThread() {
+		return new NewThreadSessionBuilder();
 	}
 	
 	
 	/** Alias type. */
 	public static interface Wrapper extends Function<Runnable, Runnable> {}
 	
-	/** The wrapper for a new thread run. */
-	public static class NewThreadWrapper extends SessionBuilder implements Wrapper {
+	
+	/** Wrapper for running on the new thread. */
+	public static class NewThreadWrapper implements Wrapper {
 		
-		@SuppressWarnings("rawtypes")
-		private final List<Ref> includedRefs = new ArrayList<>();
-		@SuppressWarnings("rawtypes")
-		private final List<Ref> excludedRefs = new ArrayList<>();
+		private final NewThreadSessionBuilder builder;
 		
-		private Boolean inheritMass = null;
-		
-		private Fork fork = null;
-		
-		/** Default constructor. */
-		public NewThreadWrapper() {}
-		
-		/** Constructor with a fork. */
-		public NewThreadWrapper(Fork fork) {
-			this.fork = fork;
+		NewThreadWrapper(NewThreadSessionBuilder builder) {
+			this.builder = builder;
 		}
 		
-		/** Join the runnable with using the given fork. */
-		public NewThreadWrapper joinWith(Fork fork) {
-			this.fork = fork;
-			return this;
-		}
-		
-		/** Set this run to inherit all refs from the parent thread. */
-		public NewThreadWrapper inheritAll() {
-			inheritMass = true;
-			includedRefs.clear();
-			excludedRefs.clear();
-			return this;
-		}
-		
-		/** Set this run to inherit no refs from the parent thread. */
-		public NewThreadWrapper inheritNone() {
-			inheritMass = false;
-			includedRefs.clear();
-			excludedRefs.clear();
-			return this;
-		}
-		
-		/** Specify what refs to be inherited - in case of inherit none. */
-		@SuppressWarnings({ "rawtypes" })
-		public NewThreadWrapper inherit(Ref ... refs) {
-			List<Ref> list = Arrays.asList(refs);
-			includedRefs.addAll(list);
-			excludedRefs.removeAll(list);
-			return this;
-		}
-
-		/** Specify what refs NOT to be inherited - in case of inherit all. */
-		@SuppressWarnings({ "rawtypes" })
-		public NewThreadWrapper notInherit(Ref ... refs) {
-			List<Ref> list = Arrays.asList(refs);
-			includedRefs.removeAll(list);
-			excludedRefs.addAll(list);
-			return this;
-		}
-
 		@SuppressWarnings("rawtypes")
 		@Override
 		public Runnable apply(Runnable runnable) {
 			Predicate<Ref> predicate = Get.INHERIT_NONE;
-			val isAll = Boolean.TRUE.equals(inheritMass);
+			val isAll = Boolean.TRUE.equals(builder.inheritMass);
 			if (isAll) {
-				if (excludedRefs.isEmpty()) {
+				if (builder.excludedRefs.isEmpty()) {
 					predicate = Get.INHERIT_ALL;
 				} else {
-					predicate = ref->!excludedRefs.contains(ref);
+					predicate = ref->!builder.excludedRefs.contains(ref);
 				}
 			} else {
-				val isNone = Boolean.TRUE.equals(inheritMass);
+				val isNone = Boolean.TRUE.equals(builder.inheritMass);
 				if (isNone) {
-					if (includedRefs.isEmpty()) {
+					if (builder.includedRefs.isEmpty()) {
 						predicate = Get.INHERIT_NONE;
 					} else {
-						predicate = ref->includedRefs.contains(ref);
+						predicate = ref->builder.includedRefs.contains(ref);
 					}
 				} else {
-					predicate = ref->includedRefs.contains(ref);
+					predicate = ref->builder.includedRefs.contains(ref);
 				}
 			}
 			val checker = predicate;
-			if (fork != null) {
+			if (builder.fork != null) {
 				return ()->{
-					App.Get().runNewThread(checker, fork.run(runnable));
+					App.Get().runNewThread(checker, builder.fork.run(runnable));
 				};
 			} else {
 				return ()->{
@@ -253,94 +219,120 @@ public class  Run {
 		
 	}
 	
-	/**
-	 * This class make building a run a bit easier.
-	 */
-	public static class SessionBuilder {
+	/** Builder for RunSession. **/
+	public static abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
 		
 		final List<Function<Runnable, Runnable>> wrappers = new ArrayList<>();
 		
+		private Scope scope = App.instance;
+		
 		
 		/** Another way to chain the invocation */
-		public final SessionBuilder and = this;
+		public final SessionBuilder<SB> and = this;
+		
+		/** Default constructor. */
+		public SessionBuilder() {
+			this(null);
+		}
+		
+		/** Constructor that take a scope. */
+		public SessionBuilder(Scope scope) {
+			this.scope = Optional.ofNullable(scope).orElse(App.instance);
+		}
+		
+		/** @return the get instance of the current scope. */
+		public GetInstance get() {
+			return scope.Get();
+		}
+
+		
+		/** Specify that the running should be done under the given scope */
+		@SuppressWarnings("unchecked")
+		public SB under(Scope scope) {
+			this.scope = Optional.ofNullable(scope).orElse(App.instance);
+			return (SB)this;
+		}
 		
 		/** Add the wrapper */
-		public SessionBuilder with(Function<Runnable, Runnable> wrapper) {
+		@SuppressWarnings("unchecked")
+		public SB with(Function<Runnable, Runnable> wrapper) {
 			if (wrapper != null) {
 				wrappers.add(wrapper);
 			}
-			return this;
+			return (SB)this;
 		}
 		
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder with(Providing ... providings) {
-			return with(Stream.of(providings));
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB with(Providing ... providings) {
+			with(Stream.of(providings));
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder with(Collection<Providing> providings) {
-			return with(providings.stream());
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB with(Collection<Providing> providings) {
+			with(providings.stream());
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder with(Stream<Providing> providings) {
-			return with(runnable->()->{
-				// TODO Think about how to default the scope.
-				App.Get().substitute(providings, runnable);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB with(Stream<Providing> providings) {
+			with(runnable->()->{
+				scope.Get().substitute(providings, runnable);
 			});
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		public SessionBuilder by(Function<Runnable, Runnable> wrapper) {
-			return with(wrapper);
+		@SuppressWarnings("unchecked")
+		public SB by(Function<Runnable, Runnable> wrapper) {
+			with(wrapper);
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		public SessionBuilder use(Function<Runnable, Runnable> wrapper) {
-			return with(wrapper);
+		@SuppressWarnings("unchecked")
+		public SB use(Function<Runnable, Runnable> wrapper) {
+			with(wrapper);
+			return (SB)this;
 		}
 		
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder use(Providing ... providings) {
-			return use(Stream.of(providings));
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB use(Providing ... providings) {
+			use(Stream.of(providings));
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder use(Collection<Providing> providings) {
-			return with(providings.stream());
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB use(Collection<Providing> providings) {
+			with(providings.stream());
+			return (SB)this;
 		}
 
 		/** Add the wrapper */
-		@SuppressWarnings("rawtypes")
-		public SessionBuilder use(Stream<Providing> providings) {
-			return with(runnable->()->{
-				// TODO Think about how to default the scope.
-				App.Get().substitute(providings, runnable);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public SB use(Stream<Providing> providings) {
+			with(runnable->()->{
+				scope.Get().substitute(providings, runnable);
 			});
+			return (SB)this;
 		}
 		
 		/** Make the run to be run on a new thread. */
-		public NewThreadWrapper onNewThread() {
-			val newThreadWrapper = new NewThreadWrapper();
-			newThreadWrapper.wrappers.addAll(this.wrappers);
-			newThreadWrapper.wrappers.add(newThreadWrapper);
-			return newThreadWrapper;
+		public NewThreadSessionBuilder onNewThread() {
+			val newThreadSessionBuilder = new NewThreadSessionBuilder();
+			newThreadSessionBuilder.wrappers.addAll(this.wrappers);
+			newThreadSessionBuilder.wrappers.add(newThreadSessionBuilder.newThreadwrapper);
+			return newThreadSessionBuilder;
 		}
-		
-		/** Make the run to be run on a new thread. */
-		public NewThreadWrapper OnNewThread() {
-			return onNewThread();
-		}
-		
 		
 		/** Build the session for later use. */
 		public WrapperContext build() {
-			return new WrapperContext(wrappers);
+			return new SameThreadWrapperContext(wrappers);
 		}
 		
 		/** Run the session now. */
@@ -358,11 +350,118 @@ public class  Run {
 	}
 	
 	/**
-	 * The contains the wrappers so that we can run something within them.
+	 * This class make building a run a bit easier.
 	 */
+	public static class SameThreadSessionBuilder extends SessionBuilder<SameThreadSessionBuilder> {
+		
+		
+		/** Another way to chain the invocation */
+		public final SameThreadSessionBuilder and = this;
+		
+		/** Default constructor. */
+		public SameThreadSessionBuilder() {
+			super(null);
+		}
+		
+		/** Constructor that take a scope. */
+		public SameThreadSessionBuilder(Scope scope) {
+			super(scope);
+		}
+		
+		/** Build the session for later use. */
+		public SameThreadWrapperContext build() {
+			return new SameThreadWrapperContext(wrappers);
+		}
+		
+		/** Run the given supplier and return a value. 
+		 * @throws T */
+		public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+			return build()
+					.run(supplier);
+		}
+		
+	}
+	
+	
+	/** The wrapper for a new thread run. */
+	public static class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuilder> {
+		
+		@SuppressWarnings("rawtypes")
+		private final List<Ref> includedRefs = new ArrayList<>();
+		@SuppressWarnings("rawtypes")
+		private final List<Ref> excludedRefs = new ArrayList<>();
+		
+		private Boolean inheritMass = null;
+		
+		private Fork fork = null;
+		
+		private NewThreadWrapper newThreadwrapper = new NewThreadWrapper(this);
+		
+		/** Default constructor. */
+		public NewThreadSessionBuilder() {}
+		
+		/** Constructor with a fork. */
+		public NewThreadSessionBuilder(Fork fork) {
+			this.fork = fork;
+		}
+		
+		/** Join the runnable with using the given fork. */
+		public NewThreadSessionBuilder joinWith(Fork fork) {
+			this.fork = fork;
+			return this;
+		}
+		
+		/** Set this run to inherit all refs from the parent thread. */
+		public NewThreadSessionBuilder inheritAll() {
+			inheritMass = true;
+			includedRefs.clear();
+			excludedRefs.clear();
+			return this;
+		}
+		
+		/** Set this run to inherit no refs from the parent thread. */
+		public NewThreadSessionBuilder inheritNone() {
+			inheritMass = false;
+			includedRefs.clear();
+			excludedRefs.clear();
+			return this;
+		}
+		
+		/** Specify what refs to be inherited - in case of inherit none. */
+		@SuppressWarnings({ "rawtypes" })
+		public NewThreadSessionBuilder inherit(Ref ... refs) {
+			List<Ref> list = Arrays.asList(refs);
+			includedRefs.addAll(list);
+			excludedRefs.removeAll(list);
+			return this;
+		}
+		
+		/** Specify what refs NOT to be inherited - in case of inherit all. */
+		@SuppressWarnings({ "rawtypes" })
+		public NewThreadSessionBuilder notInherit(Ref ... refs) {
+			List<Ref> list = Arrays.asList(refs);
+			includedRefs.removeAll(list);
+			excludedRefs.addAll(list);
+			return this;
+		}
+		
+		/** Build the session for later use. */
+		public NewThreadWrapperContext build() {
+			return new NewThreadWrapperContext(wrappers);
+		}
+		
+		/** Run the given supplier and return a value. */
+		public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
+			return build()
+					.run(supplier);
+		}
+		
+	}
+	
+	/** The contains the wrappers so that we can run something within them. */
 	public static class WrapperContext {
 		
-		private final List<Function<Runnable, Runnable>> wrappers;
+		final List<Function<Runnable, Runnable>> wrappers;
 
 		WrapperContext(List<Function<Runnable, Runnable>> functions) {
 			wrappers = functions == null
@@ -389,6 +488,62 @@ public class  Run {
 				}
 			}
 			current.run();
+		}
+		
+	}
+	
+	/** The contains the wrappers so that we can run something within them. */
+	public static class SameThreadWrapperContext extends WrapperContext {
+
+		SameThreadWrapperContext(List<Function<Runnable, Runnable>> functions) {
+			super(functions);
+		}
+		
+		/** Run the given supplier and return a value. */
+		@SuppressWarnings("unchecked")
+		public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+			val result   = new AtomicReference<R>();
+			val thrown   = new AtomicReference<Throwable>();
+			val runnable = (Runnable)()->{
+				try {
+					val theResult = supplier.get();
+					result.set(theResult);
+				} catch (Throwable t) {
+					thrown.set(t);
+				}
+			};
+			super.run(runnable);
+			val theThrown = thrown.get();
+			if (theThrown != null) {
+				throw (T)theThrown;
+			}
+			return result.get();
+		}
+		
+	}
+	
+	/** The contains the wrappers so that we can run something within them. */
+	public static class NewThreadWrapperContext extends WrapperContext {
+
+		NewThreadWrapperContext(List<Function<Runnable, Runnable>> functions) {
+			super(functions);
+		}
+		
+		/** Run the given supplier and return a value. */
+		public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
+			return CompletableFuture.supplyAsync(()->{
+				val result   = new AtomicReference<R>();
+				val runnable = (Runnable)()->{
+					try {
+						val theResult = supplier.get();
+						result.set(theResult);
+					} catch (Throwable t) {
+						throw new CompletionException(t);
+					}
+				};
+				super.run(runnable);
+				return result.get();
+			});
 		}
 		
 	}

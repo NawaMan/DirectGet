@@ -15,21 +15,15 @@
 //  ========================================================================
 package direct.get;
 
-import static direct.get.Named.Predicate;
-
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
+import direct.get.Named.Predicate;
 import direct.get.exceptions.GetException;
 import lombok.val;
-
-// TODO - substitue and xxxThread shouw be moved to Run.
 
 /**
  * This class provide access to the application scope.
@@ -124,99 +118,5 @@ public final class Get {
 		return value;
 	}
 	
-	// TODO - Lots of the below should be moved to Run.
-	
-	/**
-	 * Substitute the given providings and run the runnable.
-	 */
-	@SuppressWarnings("rawtypes") 
-	public static void substitute(Stream<Providing> providings, Runnable runnable) {
-		val get = App.Get();
-		get.substitute(providings, runnable);
-	}
-	
-	/**
-	 * Substitute the given providings and run the action.
-	 */
-	@SuppressWarnings("rawtypes")
-	public <V> V substitute(Stream<Providing> providings, Supplier<V> action) {
-		val get    = App.Get();
-		val result = get.substitute(providings, action);
-		return result;
-	}
-	
-	/**
-	 * Create a sub thread with a get that inherits all substitution from the current Get
-	 *   and run the runnable with it.
-	 **/
-	public static <V> Thread newThread(Runnable runnable) {
-		val get    = App.Get();
-		val thread = get.newThread(runnable);
-		return thread;
-	}
-	
-	/**
-	 * Create a sub thread with a get that inherits the given substitution from the current
-	 *   Get and run the runnable with it.
-	 **/
-	@SuppressWarnings("rawtypes")
-	public static <V> Thread newThread(List<Ref> refsToInherit, Runnable runnable) {
-		val get    = App.Get();
-		val thread = get.newThread(refsToInherit, runnable);
-		return thread;
-	}
-
-	/**
-	 * Create a sub thread with a get that inherits the substitution from the current Get
-	 *   (all Ref that pass the predicate test) and run the runnable with it.
-	 **/
-	@SuppressWarnings("rawtypes")
-	public static <V> Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
-		val get    = App.Get();
-		val thread = get.newThread(refsToInherit, runnable);
-		return thread;
-	}
-	
-	/**
-	 * Create and run a sub thread with a get that inherits all substitution from the current
-	 *   Get and run the runnable with it.
-	 **/
-	public static <V> void runNewThread(Runnable runnable) {
-		val get    = App.Get();
-		val thread = get.newThread(runnable);
-		thread.start();
-	}
-	
-	/**
-	 * Run the given runnable on a new thread that inherits the providings of those given refs.
-	 **/
-	@SuppressWarnings("rawtypes") 
-	public static <V> void runNewThread(List<Ref> refsToInherit, Runnable runnable) {
-		val get = App.Get();
-		get.runNewThread(refsToInherit, runnable);
-	}
-	
-	/**
-	 * Run the given runnable on a new thread that inherits the substitution from the current Get
-	 *   (all Ref that pass the predicate test).
-	 **/
-	@SuppressWarnings("rawtypes") 
-	public static <V> void runNewThread(Predicate<Ref> refsToInherit, Runnable runnable) {
-		val val = App.Get();
-		val.runNewThread(refsToInherit, runnable);
-	}
-	
-	/**
-	 * Create a sub thread with a get that inherits the substitution from the current Get
-	 *   (all Ref that pass the predicate test) and run the runnable with it.
-	 **/
-	@SuppressWarnings("rawtypes")
-	public static <V> CompletableFuture<V> runThread(
-			Predicate<Ref> refsToInherit,
-			Supplier<V>    action) {
-		val get    = App.Get();
-		val future = get.runThread(refsToInherit, action);
-		return future;
-	}
 	
 }

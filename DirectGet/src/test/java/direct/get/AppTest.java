@@ -56,7 +56,5 @@ public class AppTest {
 		// ... but the second time will throws an exception.
 		App.initialize(null);
 	}
-	
-	// TODO - Should test if the config is really in effect.
 
 }

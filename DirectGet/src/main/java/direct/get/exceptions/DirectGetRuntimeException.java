@@ -21,27 +21,27 @@ package direct.get.exceptions;
  * @author nawaman
  */
 public abstract class DirectGetRuntimeException extends RuntimeException {
-	
-	private static final long serialVersionUID = 202231858308724170L;
-
-	/** Constructor */
-	public DirectGetRuntimeException() {
+    
+    private static final long serialVersionUID = 202231858308724170L;
+    
+    /** Constructor */
+    public DirectGetRuntimeException() {
         super();
     }
-	
-	/** Constructor */
+    
+    /** Constructor */
     public DirectGetRuntimeException(String message) {
         super(message);
     }
     
-	/** Constructor */
+    /** Constructor */
     public DirectGetRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
     
-	/** Constructor */
+    /** Constructor */
     public DirectGetRuntimeException(Throwable cause) {
         super(cause);
     }
-
+    
 }

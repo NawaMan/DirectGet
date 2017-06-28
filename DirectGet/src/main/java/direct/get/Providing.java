@@ -27,43 +27,46 @@ import lombok.experimental.ExtensionMethod;
  **/
 @ExtensionMethod({ Extensions.class })
 public class Providing<T> implements Supplier<T> {
-	
-	private final Ref<T> ref;
-	
-	private final Preferability preferability;
-
-	private final Supplier<T> supplier;
-	
-	/**
-	 * Constructor.
-	 * 
-	 * @param ref            the reference.
-	 * @param preferability  the level of preferability.
-	 * @param supplier       the supplier to get the value.
-	 */
-	public Providing(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
-		this.ref           = Objects.requireNonNull(ref);
-		this.preferability = preferability._or(Preferability.Default);
-		this.supplier      = supplier._or((Supplier<T>)()->null);
-	}
-	
-	/** @return the reference for this providing. */
-	public final Ref<T> getRef() {
-		return ref;
-	}
-
-	@Override
-	public T get() {
-		return supplier.get();
-	}
-
-	/** @return the preferability for this providing. */
-	public final Preferability getPreferability() {
-		return preferability;
-	}
-	
-	public String toString() {
-		return "Providing (" + preferability + ":" + ref + "): " + supplier;
-	}
-	
+    
+    private final Ref<T> ref;
+    
+    private final Preferability preferability;
+    
+    private final Supplier<T> supplier;
+    
+    /**
+     * Constructor.
+     * 
+     * @param ref
+     *            the reference.
+     * @param preferability
+     *            the level of preferability.
+     * @param supplier
+     *            the supplier to get the value.
+     */
+    public Providing(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
+        this.ref = Objects.requireNonNull(ref);
+        this.preferability = preferability._or(Preferability.Default);
+        this.supplier = supplier._or((Supplier<T>) () -> null);
+    }
+    
+    /** @return the reference for this providing. */
+    public final Ref<T> getRef() {
+        return ref;
+    }
+    
+    @Override
+    public T get() {
+        return supplier.get();
+    }
+    
+    /** @return the preferability for this providing. */
+    public final Preferability getPreferability() {
+        return preferability;
+    }
+    
+    public String toString() {
+        return "Providing (" + preferability + ":" + ref + "): " + supplier;
+    }
+    
 }

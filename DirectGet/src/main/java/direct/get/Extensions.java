@@ -27,57 +27,58 @@ import java.util.stream.Stream;
 import lombok.val;
 
 /**
- * This class provide commonly use extension methods or the ones that help documenting the code.
+ * This class provide commonly use extension methods or the ones that help
+ * documenting the code.
  * 
  * @author nawaman
  **/
 class Extensions {
-	
-	public static <T> T _or(T obj, T elseValue) {
-		return (obj == null) ? elseValue : obj;
-	}
-	
-	public static <T> T _or(T obj, Supplier<T> elseSupplier) {
-		return (obj == null) ? elseSupplier.get() : obj;
-	}
-	
-	public static <F, T> T _changeFrom(F obj, Function<F, T> mapper) {
-		return (obj == null) ? null : mapper.apply(obj);
-	}
-	
-	public static <F, T> T _changeBy(F obj, Function<F, T> mapper) {
-		return (obj == null) ? null : mapper.apply(obj);
-	}
-	
-	public static <F, T> T _changeTo(F obj, Function<F, T> mapper) {
-		return (obj == null) ? null : mapper.apply(obj);
-	}
-	
-	public static <V> void _do(V obj, Consumer<V> action) {
-		if (obj != null) {
-			action.accept(obj);
-		}
-	}
-	
-	private static Function<Map.Entry<?, ?>, String> pairToString = each->{
-		val toString = each.getKey() + "=" + each.getValue();
-		return toString;
-	};
-	
-	public static Stream<String> _toPairStrings(Map<?,?> map) {
-		return map.entrySet().stream().map(pairToString);
-	}
-	
-	public static String _toIndentLines(Stream<String> eachLines) {
-		return eachLines.collect(Collectors.joining(",\n\t"));
-	}
-	
-	public static <T> List<T> _toList(Stream<T> stream) {
-		return stream.collect(Collectors.toList());
-	}
-	
-	public static <T> Optional<T> _toNullable(T obj) {
-		return Optional.ofNullable(obj);
-	}
-	
+    
+    public static <T> T _or(T obj, T elseValue) {
+        return (obj == null) ? elseValue : obj;
+    }
+    
+    public static <T> T _or(T obj, Supplier<T> elseSupplier) {
+        return (obj == null) ? elseSupplier.get() : obj;
+    }
+    
+    public static <F, T> T _changeFrom(F obj, Function<F, T> mapper) {
+        return (obj == null) ? null : mapper.apply(obj);
+    }
+    
+    public static <F, T> T _changeBy(F obj, Function<F, T> mapper) {
+        return (obj == null) ? null : mapper.apply(obj);
+    }
+    
+    public static <F, T> T _changeTo(F obj, Function<F, T> mapper) {
+        return (obj == null) ? null : mapper.apply(obj);
+    }
+    
+    public static <V> void _do(V obj, Consumer<V> action) {
+        if (obj != null) {
+            action.accept(obj);
+        }
+    }
+    
+    private static Function<Map.Entry<?, ?>, String> pairToString = each -> {
+        val toString = each.getKey() + "=" + each.getValue();
+        return toString;
+    };
+    
+    public static Stream<String> _toPairStrings(Map<?, ?> map) {
+        return map.entrySet().stream().map(pairToString);
+    }
+    
+    public static String _toIndentLines(Stream<String> eachLines) {
+        return eachLines.collect(Collectors.joining(",\n\t"));
+    }
+    
+    public static <T> List<T> _toList(Stream<T> stream) {
+        return stream.collect(Collectors.toList());
+    }
+    
+    public static <T> Optional<T> _toNullable(T obj) {
+        return Optional.ofNullable(obj);
+    }
+    
 }

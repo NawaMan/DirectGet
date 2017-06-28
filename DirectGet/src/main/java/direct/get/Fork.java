@@ -28,67 +28,67 @@ import lombok.experimental.ExtensionMethod;
  **/
 @ExtensionMethod({ Extensions.class })
 public class Fork {
-
-	private static final Failable.Consumer<Session, Throwable> joinSession = Session::join;
-	
-	private ThreadLocal<Session> forkSession = new ThreadLocal<>();
-	
-	/** Constructor. */
-	public Fork() {
-		
-	}
-	
-	<T extends Throwable> void setSession(Session fork) {
-		this.forkSession.set(fork);
-	}
-	
-	/** Run something. */
-	public Runnable run(Runnable runnable) {
-		val fork = new Session(runnable);
-		this.setSession(fork);
-		return fork.runnable();
-	}
-	
-	/** Join the latest run with this thread. */
-	public void join() throws Throwable {
-		this.forkSession.get()._do(joinSession.gracefully());
-	}
-
-	/** Fork session. */
-	public static class Session {
-		
-		private final AtomicReference<Throwable> problem = new AtomicReference<Throwable>(null);
-		
-		private final CountDownLatch latch = new CountDownLatch(1);
-		
-		private final Runnable runnable;
-		
-		/** Constructor */
-		public Session(Runnable runnable) {
-			this.runnable = runnable;
-		}
-		
-		/** Get the forked runnable - **NOT THE ORIGINAL RUNNABLE** */
-		public Runnable runnable() {
-			return ()->{
-				try {
-					runnable.run();
-				} catch (Throwable t) {
-					problem.set(t);
-				} finally {
-					latch.countDown();
-				}
-			};
-		}
-		
-		/** Join the latest run with the current thread. */
-		public void join() throws Throwable {
-			latch.await();
-			Throwable theProblem = problem.get();
-			if (theProblem != null) {
-				throw theProblem;
-			}
-		}
-		
-	}
+    
+    private static final Failable.Consumer<Session, Throwable> joinSession = Session::join;
+    
+    private ThreadLocal<Session> forkSession = new ThreadLocal<>();
+    
+    /** Constructor. */
+    public Fork() {
+        
+    }
+    
+    <T extends Throwable> void setSession(Session fork) {
+        this.forkSession.set(fork);
+    }
+    
+    /** Run something. */
+    public Runnable run(Runnable runnable) {
+        val fork = new Session(runnable);
+        this.setSession(fork);
+        return fork.runnable();
+    }
+    
+    /** Join the latest run with this thread. */
+    public void join() throws Throwable {
+        this.forkSession.get()._do(joinSession.gracefully());
+    }
+    
+    /** Fork session. */
+    public static class Session {
+        
+        private final AtomicReference<Throwable> problem = new AtomicReference<Throwable>(null);
+        
+        private final CountDownLatch latch = new CountDownLatch(1);
+        
+        private final Runnable runnable;
+        
+        /** Constructor */
+        public Session(Runnable runnable) {
+            this.runnable = runnable;
+        }
+        
+        /** Get the forked runnable - **NOT THE ORIGINAL RUNNABLE** */
+        public Runnable runnable() {
+            return () -> {
+                try {
+                    runnable.run();
+                } catch (Throwable t) {
+                    problem.set(t);
+                } finally {
+                    latch.countDown();
+                }
+            };
+        }
+        
+        /** Join the latest run with the current thread. */
+        public void join() throws Throwable {
+            latch.await();
+            Throwable theProblem = problem.get();
+            if (theProblem != null) {
+                throw theProblem;
+            }
+        }
+        
+    }
 }

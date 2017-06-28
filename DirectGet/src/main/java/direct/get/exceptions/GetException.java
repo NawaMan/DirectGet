@@ -23,12 +23,12 @@ import direct.get.Ref;
  * @author nawaman
  */
 public class GetException extends DirectGetRuntimeException {
-
-	private static final long serialVersionUID = -5821727183532729001L;
-	
-	private final Ref<?> ref;
-	
-	/** Constructor */
+    
+    private static final long serialVersionUID = -5821727183532729001L;
+    
+    private final Ref<?> ref;
+    
+    /** Constructor */
     public GetException(Ref<?> ref, Throwable cause) {
         super(ref.toString(), cause);
         this.ref = ref;
@@ -36,7 +36,7 @@ public class GetException extends DirectGetRuntimeException {
     
     /** @return the reference with the problem. */
     public Ref<?> getRef() {
-    	return ref;
+        return ref;
     }
     
 }

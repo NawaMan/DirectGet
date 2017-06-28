@@ -16,20 +16,17 @@
 package direct.get.exceptions;
 
 /**
- * This exception is thrown when there is an attempt to initialize the
- * Application Scope after it was aready been initialized.
+ * This exception wraps an exception from a failable.
  * 
  * @author nawaman
  */
-public class AppScopeAlreadyInitializedException extends DirectGetException {
+public class FailableException extends DirectGetRuntimeException {
     
-    private static final long serialVersionUID = 5582284564207362445L;
-    
-    /**
-     * Constructor.
-     */
-    public AppScopeAlreadyInitializedException() {
-        super();
+    private static final long serialVersionUID = 1L;
+
+    /** Constructor */
+    public FailableException(Throwable cause) {
+        super(cause);
     }
     
 }

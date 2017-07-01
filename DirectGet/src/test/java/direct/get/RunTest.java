@@ -33,9 +33,9 @@ public class RunTest {
     
     @Test
     public void testSameThreadSupplier() {
-        assertTrue(7 == Get.a(num) + 6);
-        assertTrue(16 == Run.with(num.providedWith(10)).run(() -> Get.a(num) + 6));
-        assertTrue(26 == Run.with(num.providedWith(20)).run(() -> Get.a(num) + 6));
+        assertTrue(7 == numPlus());
+        assertTrue(16 == Run.with(num.providedWith(10)).run(()-> numPlus()));
+        assertTrue(26 == Run.with(num.providedWith(20)).run(()-> numPlus()));
     }
     
     @Test(expected = IOException.class)
@@ -48,14 +48,14 @@ public class RunTest {
     @Test(expected = IOException.class)
     public void testSameThreadSupplier_withReturnAndException() throws Throwable {
     	val value = new AtomicBoolean(false);
-        Run.run(() -> {
+        Run.run(()->{
         	if (value.get()) {
                 throw new Throwable();
         	}
         });
 
         value.set(true);
-        Run.run(() -> {
+        Run.run(()->{
         	if (value.get()) {
                 throw new IOException();
         	}
@@ -66,10 +66,10 @@ public class RunTest {
     public void testDiffThreadSupplier() throws InterruptedException {
         val iAmHereFirst = new AtomicBoolean(false);
         val latch = new CountDownLatch(1);
-        Run.onNewThread().with(num.providedWith(10)).run(() -> {
+        Run.onNewThread().with(num.providedWith(10)).run(()->{
             Thread.sleep(200);
-            return Get.a(num) + 6;
-        }).thenAccept(result -> {
+            return numPlus();
+        }).thenAccept(result->{
             assertTrue(16 == result);
             assertTrue(iAmHereFirst.get());
             latch.countDown();
@@ -80,14 +80,18 @@ public class RunTest {
         
         latch.await();
     }
+
+	private int numPlus() {
+		return Get.a(num) + 6;
+	}
     
     @Test
     public void testDiffThreadSupplier_withException() throws InterruptedException {
         val latch = new CountDownLatch(1);
-        Run.onNewThread().with(num.providedWith(10)).run(() -> {
+        Run.onNewThread().with(num.providedWith(10)).run(()->{
             Thread.sleep(200);
             throw new IOException();
-        }).whenComplete((result, completionException) -> {
+        }).whenComplete((result, completionException)->{
             assertTrue(completionException.getCause() instanceof IOException);
             latch.countDown();
         });

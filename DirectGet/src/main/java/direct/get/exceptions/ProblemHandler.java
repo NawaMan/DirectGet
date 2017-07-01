@@ -72,6 +72,9 @@ public class ProblemHandler {
 	/** Handle the given problem. **/
 	public final void handle(Throwable problem) throws ProblemHandledException {
 		action.accept(problem);
+		if(problem instanceof ProblemHandledException) {
+			throw (ProblemHandledException)problem;
+		}
 		throw new ProblemHandledException(problem, this);
 	}
 	

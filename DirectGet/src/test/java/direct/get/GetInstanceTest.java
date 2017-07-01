@@ -102,7 +102,11 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRunNewThread_notInherit() throws Throwable {
         val fork = new Fork();
-        With(_newText).onNewThread().inheritNone().joinWith(fork).run(() -> {
+        With(_newText)
+        .onNewThread()
+        .inheritNone()
+        .joinWith(fork)
+        .run(() -> {
             assertEquals(orgText, Get.a(_text_));
         });
         fork.join();
@@ -111,17 +115,14 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRunNewThread_inherit() throws Throwable {
         val fork = new Fork();
-        Run.with(_text_.providedWith(newText)).and.with(_verboseLogger) // TODO
-                                                                        // -
-                                                                        // Create
-                                                                        // a
-                                                                        // separate
-                                                                        // test
-                                                                        // for
-                                                                        // this.
-                .and.onNewThread().inheritAll().joinWith(fork).start(() -> {
+        Run.with(_text_.providedWith(newText))
+        .and.with(_verboseLogger)
+        .and.onNewThread()
+        .inheritAll()
+        .joinWith(fork)
+        .start(() -> {
                     assertEquals(newText, Get.a(_text_));
-                });
+        });
         fork.join();
     }
     

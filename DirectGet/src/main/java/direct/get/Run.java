@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import direct.get.exceptions.FailableException;
 import lombok.val;
 
 /**
@@ -168,6 +169,31 @@ public class Run {
     public static NewThreadSessionBuilder onNewThread() {
         return new NewThreadSessionBuilder();
     }
+    
+    /** Run the session now. */
+    public static <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+    	val sessionBuilder = new SameThreadSessionBuilder();
+    	sessionBuilder.run(runnable);
+    }
+    
+    /** Run the session now. */
+    public static <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
+    	val sessionBuilder = new SameThreadSessionBuilder();
+    	sessionBuilder.run(runnable);
+    }
+    
+    /**
+     * Run the given supplier and return a value.
+     * 
+     * @throws T
+     */
+    public static <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+    	val sessionBuilder = new SameThreadSessionBuilder();
+        return sessionBuilder.run(supplier);
+    }
+    
+    
+    
     
     /** Alias type. */
     public static interface Wrapper extends Function<Runnable, Runnable> {
@@ -334,12 +360,12 @@ public class Run {
         }
         
         /** Run the session now. */
-        public void run(Runnable runnable) {
+        public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
             build().run(runnable);
         }
         
         /** Run the session now. */
-        public void start(Runnable runnable) {
+        public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
             build().run(runnable);
         }
         
@@ -466,13 +492,14 @@ public class Run {
         }
         
         /** Run something within this context. */
-        public void start(Runnable runnable) {
+        public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
             run(runnable);
         }
         
         /** Run something within this context. */
-        public void run(Runnable runnable) {
-            Runnable current = runnable;
+        @SuppressWarnings("unchecked")
+		public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+            Runnable current = runnable.gracefully();
             for (int i = wrappers.size(); i-- > 0;) {
                 val wrapper = wrappers.get(i);
                 val wrapped = wrapper.apply(current);
@@ -480,7 +507,16 @@ public class Run {
                     current = wrapped;
                 }
             }
-            current.run();
+            try {
+            	current.run();
+            } catch (FailableException e) {
+            	Throwable cause = e.getCause();
+            	if (cause instanceof RuntimeException) {
+            		throw (RuntimeException)cause;
+            	}
+            	
+				throw (T)cause;
+			}
         }
         
     }
@@ -497,7 +533,7 @@ public class Run {
         public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
             val result = new AtomicReference<R>();
             val thrown = new AtomicReference<Throwable>();
-            val runnable = (Runnable) () -> {
+            val runnable = (Failable.Runnable<T>) () -> {
                 try {
                     val theResult = supplier.get();
                     result.set(theResult);
@@ -526,7 +562,7 @@ public class Run {
         public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
             return CompletableFuture.supplyAsync(() -> {
                 val result = new AtomicReference<R>();
-                val runnable = (Runnable) () -> {
+                val runnable = (Failable.Runnable<T>) () -> {
                     try {
                         val theResult = supplier.get();
                         result.set(theResult);
@@ -534,7 +570,14 @@ public class Run {
                         throw new CompletionException(t);
                     }
                 };
-                super.run(runnable);
+                try {
+					super.run(runnable);
+				} catch (Throwable t) {
+					if (t instanceof RuntimeException) {
+						throw (RuntimeException)t;
+					}
+                    throw new CompletionException(t);
+				}
                 return result.get();
             });
         }

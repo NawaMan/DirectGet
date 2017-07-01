@@ -40,7 +40,18 @@ public class RunTest {
     
     @Test(expected = IOException.class)
     public void testSameThreadSupplier_withException() throws IOException {
-        Run.with().run(() -> {
+        Run.run(() -> {
+            throw new IOException();
+        });
+    }
+    
+    @Test(expected = IOException.class)
+    public void testSameThreadSupplier_withReturnAndException() throws IOException {
+    	val value = "Hey";
+        Run.run(() -> {
+        	if (value == null) {
+        		return;
+        	}
             throw new IOException();
         });
     }
@@ -70,8 +81,8 @@ public class RunTest {
         Run.onNewThread().with(num.providedWith(10)).run(() -> {
             Thread.sleep(200);
             throw new IOException();
-        }).whenComplete((result, exception) -> {
-            assertTrue(exception.getCause() instanceof IOException);
+        }).whenComplete((result, completionException) -> {
+            assertTrue(completionException.getCause() instanceof IOException);
             latch.countDown();
         });
         

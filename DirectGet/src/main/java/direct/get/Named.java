@@ -61,6 +61,16 @@ public interface Named {
         return instance.runnable(name, runnable);
     }
     
+    /** Add name to the given consumer. */
+    public static <T> Consumer<T> consumer(String name, java.util.function.Consumer<T> consumer) {
+        return instance.consumer(name, consumer);
+    }
+    
+    /** Add name to the given consumer. */
+    public static <T> Consumer<T> Consumer(String name, java.util.function.Consumer<T> consumer) {
+        return instance.consumer(name, consumer);
+    }
+    
     /** Named predicate. **/
     public static class Predicate<T> implements Named, java.util.function.Predicate<T> {
         private final String name;
@@ -162,6 +172,30 @@ public interface Named {
         }
         
     }
+
+    /** Named consumer. **/
+    public static class Consumer<T> implements Named, java.util.function.Consumer<T> {
+        private final String name;
+        private final java.util.function.Consumer<T> consumer;
+        
+        /** Constructors. */
+        public Consumer(String name, java.util.function.Consumer<T> consumer) {
+            this.name     = name;
+            this.consumer = consumer;
+        }
+        
+        public void accept(T value) {
+        	consumer.accept(value);
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public String toString() {
+            return "Consumer(" + name + ")";
+        }
+    }
     
     /**
      * This interface make it possible to the user of the class to use these
@@ -184,6 +218,11 @@ public interface Named {
             return new Supplier<T>(name, supplier);
         }
         
+        /** Add name to the given consumer. */
+        public default <T> Consumer<T> consumer(String name, java.util.function.Consumer<T> consumer) {
+            return new Consumer<T>(name, consumer);
+        }
+        
         /** Add name to the given predicate. */
         public default <T> Predicate<T> Predicate(String name, Predicate<T> check) {
             return instance.predicate(name, check);
@@ -197,6 +236,11 @@ public interface Named {
         /** Add name to the given runnable. */
         public default Runnable Runnable(String name, Runnable runnable) {
             return instance.runnable(name, runnable);
+        }
+        
+        /** Add name to the given consumer. */
+        public default <T> Consumer<T> Consumer(String name, java.util.function.Consumer<T> consumer) {
+            return new Consumer<T>(name, consumer);
         }
         
     }

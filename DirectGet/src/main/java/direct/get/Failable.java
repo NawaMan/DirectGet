@@ -16,6 +16,7 @@
 package direct.get;
 
 import direct.get.exceptions.FailableException;
+import direct.get.exceptions.ProblemHandler;
 
 /**
  * Failable actions.
@@ -31,7 +32,7 @@ public class Failable {
     @FunctionalInterface
     public static interface Runnable<T extends Throwable> {
         
-        /** Run this runnabe. */
+        /** Run this runnable. */
         public void run() throws T;
         
         /** Change to regular runnable. */
@@ -59,20 +60,33 @@ public class Failable {
                 }
             };
         }
+
+        /** Convert to a regular runnable that handle the problem using {@code ProblemHandler}. */
+        public default java.lang.Runnable handledly() {
+            return () -> {
+                try {
+                    run();
+                } catch (Throwable t) {
+                	Get.a(ProblemHandler.problemHandler).handle(t);
+                }
+            };
+        }
         
-        // TODO - Add Handler - also with default (from Get().a(ProblemHandler))
     }
     
+    /** Failable consumer. **/
     @FunctionalInterface
-    @SuppressWarnings("javadoc")
     public static interface Supplier<V, T extends Throwable> {
-        
+
+        /** Run this supplier. */
         public V get() throws T;
-        
+
+        /** Convert to a regular supplier and throw FailableException if there is an exception. */
         public default java.util.function.Supplier<V> toSupplier() {
             return gracefully();
         }
-        
+
+        /** Convert to a regular supplier and throw FailableException if there is an exception. */
         public default java.util.function.Supplier<V> gracefully() {
             return () -> {
                 try {
@@ -82,7 +96,8 @@ public class Failable {
                 }
             };
         }
-        
+
+        /** Convert to a regular supplier that completely ignore the exception throw from it. */
         public default java.util.function.Supplier<V> carelessly() {
             return () -> {
                 try {
@@ -92,18 +107,34 @@ public class Failable {
                 }
             };
         }
+        
+        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        public default java.util.function.Supplier<V> handledly() {
+            return () -> {
+                try {
+                    return get();
+                } catch (Throwable t) {
+                	Get.a(ProblemHandler.problemHandler).handle(t);
+                	return null;
+                }
+            };
+        }
+        
     }
     
+    /** Failable consumer. **/
     @FunctionalInterface
-    @SuppressWarnings("javadoc")
     public static interface Consumer<V, T extends Throwable> {
-        
+
+        /** Run this consumer. */
         public void accept(V value) throws T;
-        
+
+        /** Convert to a regular consumer and throw FailableException if there is an exception. */
         public default java.util.function.Consumer<V> toConsumer() {
             return gracefully();
         }
-        
+
+        /** Convert to a regular consumer and throw FailableException if there is an exception. */        
         public default java.util.function.Consumer<V> gracefully() {
             return v -> {
                 try {
@@ -113,12 +144,24 @@ public class Failable {
                 }
             };
         }
-        
+
+        /** Convert to a regular consumer that completely ignore the exception throw from it. */
         public default java.util.function.Consumer<V> carelessly() {
             return v -> {
                 try {
                     accept(v);
                 } catch (Throwable t) {
+                }
+            };
+        }
+        
+        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        public default java.util.function.Consumer<V> handledly() {
+            return value -> {
+                try {
+                    accept(value);
+                } catch (Throwable t) {
+                	Get.a(ProblemHandler.problemHandler).handle(t);
                 }
             };
         }

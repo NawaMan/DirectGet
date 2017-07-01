@@ -16,8 +16,7 @@
 package direct.get;
 
 /**
- * This class offer a way to make it easy to debug lambda by adding name to
- * them.
+ * This class offer a way to make it easy to debug lambda by adding name to them.
  * 
  * @author nawaman
  **/

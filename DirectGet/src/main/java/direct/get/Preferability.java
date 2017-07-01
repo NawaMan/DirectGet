@@ -164,13 +164,13 @@ public enum Preferability {
     
     private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProvidingStackMap stacks) {
-        val parentXRayString = parentScope._changeFrom(scopeToXRay);
+        val parentXRayString  = parentScope._changeFrom(scopeToXRay);
         val currentXRayString = currentScope._changeFrom(scopeToXRay);
-        val stackXRayString = stacks._changeFrom(stackToXRay);
+        val stackXRayString   = stacks._changeFrom(stackToXRay);
         return () -> {
-            val parentXRay = parentXRayString._changeBy(addingTabIndentation);
+            val parentXRay  = parentXRayString._changeBy(addingTabIndentation);
             val currentXRay = currentXRayString._changeBy(addingTabIndentation);
-            val stackXRay = stackXRayString._changeBy(addingTabIndentation);
+            val stackXRay   = stackXRayString._changeBy(addingTabIndentation);
             return "{" + "\n\tParent:" + parentXRay + "\n\tConfig:" + currentXRay + "\n\tStack :" + stackXRay + "\n}";
         };
     }

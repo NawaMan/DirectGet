@@ -46,13 +46,19 @@ public class RunTest {
     }
     
     @Test(expected = IOException.class)
-    public void testSameThreadSupplier_withReturnAndException() throws IOException {
-    	val value = "Hey";
+    public void testSameThreadSupplier_withReturnAndException() throws Throwable {
+    	val value = new AtomicBoolean(false);
         Run.run(() -> {
-        	if (value == null) {
-        		return;
+        	if (value.get()) {
+                throw new Throwable();
         	}
-            throw new IOException();
+        });
+
+        value.set(true);
+        Run.run(() -> {
+        	if (value.get()) {
+                throw new IOException();
+        	}
         });
     }
     

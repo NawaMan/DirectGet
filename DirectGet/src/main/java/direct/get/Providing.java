@@ -44,10 +44,11 @@ public class Providing<T> implements Supplier<T> {
      * @param supplier
      *            the supplier to get the value.
      */
-    public Providing(Ref<T> ref, Preferability preferability, Supplier<T> supplier) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public Providing(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
         this.ref = Objects.requireNonNull(ref);
         this.preferability = preferability._or(Preferability.Default);
-        this.supplier = supplier._or((Supplier<T>) () -> null);
+        this.supplier = supplier._or((Supplier)()->null);
     }
     
     /** @return the reference for this providing. */

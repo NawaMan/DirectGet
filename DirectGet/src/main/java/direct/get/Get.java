@@ -134,4 +134,75 @@ public final class Get {
         return value;
     }
     
+    /** @return the optional value associated with the given ref. */
+    public static <T> Optional<T> _the(Ref<T> ref) {
+        val optValue = App.Get()._the(ref);
+        return optValue;
+    }
+    
+    /** @return the optional value associated with the given class. */
+    public static <T> Optional<T> _the(Class<T> clzz) {
+        val ref = Ref.forClass(clzz);
+        val optValue = _the(ref);
+        return optValue;
+    }
+    
+    /** @return the value associated with the given class. */
+    public static <T> T the(Class<T> clzz) {
+        val ref = Ref.forClass(clzz);
+        val value = the(ref);
+        return value;
+    }
+    
+    /** @return the value associated with the given ref. */
+    public static <T> T the(Ref<T> ref) {
+        val optValue = _the(ref);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given class or return the elseValue
+     *         if no value associated with the class.
+     */
+    public static <T> T the(Class<T> clzz, T elseValue) {
+        val ref = Ref.forClass(clzz);
+        val value = the(ref, elseValue);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given ref or return the elseValue
+     *         if no value associated with the ref.
+     */
+    public static <T> T the(Ref<T> ref, T elseValue) {
+        try {
+            val optValue = _the(ref);
+            val value = optValue.orElse(elseValue);
+            return value;
+        } catch (GetException e) {
+            return elseValue;
+        }
+    }
+    
+    /**
+     * @return the value associated with the given class or return the from
+     *         elseSupplier if no value associated with the class.
+     */
+    public static <T> T the(Class<T> clzz, Supplier<T> elseSupplier) {
+        val ref = Ref.forClass(clzz);
+        val value = the(ref, elseSupplier);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given ref or return the from
+     *         elseSupplier if no value associated with the ref.
+     */
+    public static <T> T the(Ref<T> ref, Supplier<T> elseSupplier) {
+        val optValue = _the(ref);
+        val value = optValue.orElseGet(elseSupplier);
+        return value;
+    }
+    
 }

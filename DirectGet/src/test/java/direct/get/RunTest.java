@@ -91,9 +91,12 @@ public class RunTest {
         Run.onNewThread().with(num.providedWith(10)).run(()->{
             Thread.sleep(200);
             throw new IOException();
-        }).whenComplete((result, completionException)->{
-            assertTrue(completionException.getCause() instanceof IOException);
-            latch.countDown();
+        }).whenComplete((result, exception)->{
+        	try {
+        		assertTrue(exception instanceof IOException);
+        	} finally {
+        		latch.countDown();
+        	}
         });
         
         latch.await();

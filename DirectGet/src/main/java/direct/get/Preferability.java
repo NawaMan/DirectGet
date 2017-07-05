@@ -105,6 +105,12 @@ public enum Preferability {
                             getXRayString(ref, parentScope, currentScope, stacks));
                 });
         
+        val refProviding = ref.getProviding();
+        if (Dictate.is(refProviding)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProviding));
+            return refProviding;
+        }
+        
         val parentProviding = (parentScope != null) ? parentScope.getProviding(ref) : null;
         if (Dictate.is(parentProviding)) {
             alarm.ifPresent(it -> it.accept("Parent", parentProviding));
@@ -137,6 +143,10 @@ public enum Preferability {
             alarm.ifPresent(it -> it.accept("Parent", parentProviding));
             return parentProviding;
         }
+        if (Normal.is(refProviding)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProviding));
+            return refProviding;
+        }
         
         // At this point, non is normal.
         
@@ -151,6 +161,10 @@ public enum Preferability {
         if (Default.is(parentProviding)) {
             alarm.ifPresent(it -> it.accept("Parent", parentProviding));
             return parentProviding;
+        }
+        if (Default.is(refProviding)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProviding));
+            return refProviding;
         }
         
         return null;

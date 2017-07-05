@@ -16,8 +16,9 @@
 package direct.get;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -40,6 +41,9 @@ public final class GetInstance {
     private final Scope scope;
     
     private final ProvidingStackMap providingStacks = new ProvidingStackMap();
+    
+    @SuppressWarnings("rawtypes")
+	final Map<Ref, Object> caches = new HashMap<Ref, Object>();
     
     GetInstance(Scope scope) {
         this.scope = scope;
@@ -130,6 +134,77 @@ public final class GetInstance {
      *         elseSupplier if no value associated with the ref.
      */
     public <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
+        val optValue = _a(ref);
+        val value = optValue.orElseGet(elseSupplier);
+        return value;
+    }
+
+    /** @return the optional value associated with the given ref. */
+    public <T> Optional<T> _the(Ref<T> ref) {
+        val optValue = scope.doGet(ref);
+        return optValue;
+	}
+    
+    /** @return the optional value associated with the given class. */
+    public <T> Optional<T> _the(Class<T> clzz) {
+        val ref = Ref.forClass(clzz);
+        val optValue = _the(ref);
+        return optValue;
+    }
+    
+    /** @return the value associated with the given ref. */
+    public <T> T the(Class<T> clzz) {
+        val ref = Ref.forClass(clzz);
+        val value = a(ref);
+        return value;
+    }
+    
+    /** @return the value associated with the given class. */
+    public <T> T the(Ref<T> ref) {
+        val optValue = _a(ref);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given class or return the elseValue
+     *         if no value associated with the class.
+     */
+    public <T> T the(Class<T> clzz, T elseValue) {
+        val ref = Ref.forClass(clzz);
+        val value = a(ref, elseValue);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given ref or return the elseValue
+     *         if no value associated with the ref.
+     */
+    public <T> T the(Ref<T> ref, T elseValue) {
+        try {
+            val optValue = _a(ref);
+            val value = optValue.orElse(elseValue);
+            return value;
+        } catch (GetException e) {
+            return elseValue;
+        }
+    }
+    
+    /**
+     * @return the value associated with the given class or return the from
+     *         elseSupplier if no value associated with the class.
+     */
+    public <T> T the(Class<T> clzz, Supplier<T> elseSupplier) {
+        val ref = Ref.forClass(clzz);
+        val value = a(ref, elseSupplier);
+        return value;
+    }
+    
+    /**
+     * @return the value associated with the given ref or return the from
+     *         elseSupplier if no value associated with the ref.
+     */
+    public <T> T the(Ref<T> ref, Supplier<T> elseSupplier) {
         val optValue = _a(ref);
         val value = optValue.orElseGet(elseSupplier);
         return value;
@@ -250,8 +325,13 @@ public final class GetInstance {
         Preferability._ListenerEnabled_.set(false);
         try {
             val list = refsToInherit._toNullable().filter(notInteritNone)
-                    .map(test -> (List) getStackRefs().filter(test).map(this::getProviding)._toList())
-                    .orElse(Collections.emptyList());
+                    .map(test -> {
+                    	return (List) getStackRefs()
+                    			.filter(test)
+                    			.map(this::getProviding)
+                    			._toList();
+                    })
+                    .orElse(new ArrayList<Providing>());
             return (List<Providing>) list;
         } finally {
             Preferability._ListenerEnabled_.set(true);

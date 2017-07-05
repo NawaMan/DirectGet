@@ -245,21 +245,21 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     
     /** Create and return a reference to a target class. **/
     public static <T> Ref<T> of(Class<T> targetClass) {
-        return of(null, targetClass, (Supplier<T>) null);
+        return of(null, targetClass, Preferability.Default, (Supplier<T>) null);
     }
     
     /**
      * Create and return a reference to a target class with the default factory.
      **/
-    public static <T> Ref<T> of(Class<T> targetClass, Supplier<T> factory) {
-        return of(null, targetClass, factory);
+    public static <T> Ref<T> of(Class<T> targetClass, Supplier<? extends T> factory) {
+        return of(null, targetClass, Preferability.Default, factory);
     }
     
     /**
      * Create and return a reference to a target class with the default value.
      **/
     public static <T> Ref<T> of(Class<T> targetClass, T defaultValue) {
-        return of(null, targetClass, defaultValue);
+        return of(null, targetClass, Preferability.Default, defaultValue);
     }
     
     /**
@@ -267,7 +267,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * class.
      **/
     public static <T> Ref<T> of(String name, Class<T> targetClass) {
-        return of(name, targetClass, (Supplier<T>) null);
+        return of(name, targetClass, Preferability.Default, (Supplier<T>) null);
     }
     
     /**
@@ -275,7 +275,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * class with the default value.
      **/
     public static <T> Ref<T> of(String name, Class<T> targetClass, T defaultValue) {
-        return of(name, targetClass, (Supplier<T>) (() -> defaultValue));
+        return of(name, targetClass, Preferability.Default, (Supplier<T>) (() -> defaultValue));
     }
     
     /**
@@ -283,7 +283,37 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * class with the default factory.
      **/
     public static <T> Ref<T> of(String name, Class<T> targetClass, Supplier<T> factory) {
-        return new Direct<>((name != null) ? name : ("#" + Direct.id.incrementAndGet()), targetClass, factory);
+        return of(name, targetClass, Preferability.Default, factory);
+    }
+    
+    /**
+     * Create and return a reference to a target class with the default factory.
+     **/
+    public static <T> Ref<T> of(Class<T> targetClass, Preferability preferability, Supplier<T> factory) {
+        return of(null, targetClass, preferability, factory);
+    }
+    
+    /**
+     * Create and return a reference to a target class with the default value.
+     **/
+    public static <T> Ref<T> of(Class<T> targetClass, Preferability preferability, T defaultValue) {
+        return of(null, targetClass, preferability, defaultValue);
+    }
+    
+    /**
+     * Create and return a reference with a human readable name to a target
+     * class with the default value.
+     **/
+    public static <T> Ref<T> of(String name, Class<T> targetClass, Preferability preferability, T defaultValue) {
+        return of(name, targetClass, preferability, (Supplier<T>) (() -> defaultValue));
+    }
+    
+    /**
+     * Create and return a reference with a human readable name to a target
+     * class with the default factory.
+     **/
+    public static <T> Ref<T> of(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
+        return new Direct<>((name != null) ? name : ("#" + Direct.id.incrementAndGet()), targetClass, preferability, factory);
     }
     
     /**
@@ -298,10 +328,14 @@ public interface Ref<T> extends Comparable<Ref<T>> {
         
         private final Providing<T> providing;
         
-        Direct(String name, Class<T> targetClass, Supplier<T> factory) {
+        Direct(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
             super(targetClass);
+            val prefer = (preferability != null) ? Preferability.Default : preferability;
+            
             this.name = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
-            this.providing = (factory == null) ? null : new Providing<>(this, Preferability.Default, factory);
+			this.providing = (factory == null) 
+            		? null 
+            		: new Providing<>(this, prefer, factory);
         }
         
         /** @return the name of the reference */

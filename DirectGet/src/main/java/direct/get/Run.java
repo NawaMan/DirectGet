@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -162,12 +161,12 @@ public class Run {
     
     /** Make the run to be run on a new thread. */
     public static NewThreadSessionBuilder OnNewThread() {
-        return new NewThreadSessionBuilder();
+        return new SameThreadSessionBuilder().onNewThread();
     }
     
     /** Make the run to be run on a new thread. */
     public static NewThreadSessionBuilder onNewThread() {
-        return new NewThreadSessionBuilder();
+        return new SameThreadSessionBuilder().onNewThread();
     }
     
     /** Run the session now. */
@@ -228,7 +227,9 @@ public class Run {
                         predicate = ref -> builder.includedRefs.contains(ref);
                     }
                 } else {
-                    predicate = ref -> builder.includedRefs.contains(ref);
+                    predicate = ref -> {
+                    	return builder.includedRefs.contains(ref);
+                    };
                 }
             }
             val checker = predicate;
@@ -359,16 +360,6 @@ public class Run {
             return new SameThreadWrapperContext(wrappers);
         }
         
-        /** Run the session now. */
-        public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
-            build().run(runnable);
-        }
-        
-        /** Run the session now. */
-        public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
-            build().run(runnable);
-        }
-        
     }
     
     /**
@@ -401,6 +392,25 @@ public class Run {
          */
         public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
             return build().run(supplier);
+        }
+        
+        /**
+         * Run the given supplier and return a value.
+         * 
+         * @throws T
+         */
+        public <R, T extends Throwable> R start(Failable.Supplier<R, T> supplier) throws T {
+            return build().run(supplier);
+        }
+        
+        /** Run the session now. */
+        public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+            build().run(runnable);
+        }
+        
+        /** Run the session now. */
+        public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
+            build().run(runnable);
         }
         
     }
@@ -478,6 +488,26 @@ public class Run {
             return build().run(supplier);
         }
         
+        /** Run the given supplier and return a value. */
+        public <R, T extends Throwable> CompletableFuture<R> start(Failable.Supplier<R, T> supplier) {
+            return build().run(supplier);
+        }
+        
+        /** Run the session now. */
+        public <T extends Throwable> CompletableFuture<Void> run(Failable.Runnable<T> runnable) {
+        	return build().run(()->{
+        		runnable.run();
+        		return null;
+        	});
+        }
+        
+        /** Run the session now. */
+        public <T extends Throwable> CompletableFuture<Void> start(Failable.Runnable<T> runnable) throws T {
+        	return build().run(()->{
+        		runnable.run();
+        		return null;
+        	});
+        }
     }
     
     /** The contains the wrappers so that we can run something within them. */
@@ -559,27 +589,36 @@ public class Run {
         }
         
         /** Run the given supplier and return a value. */
-        public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
-            return CompletableFuture.supplyAsync(() -> {
-                val result = new AtomicReference<R>();
-                val runnable = (Failable.Runnable<T>) () -> {
-                    try {
-                        val theResult = supplier.get();
-                        result.set(theResult);
-                    } catch (Throwable t) {
-                        throw new CompletionException(t);
-                    }
-                };
+        @SuppressWarnings("unchecked")
+		public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
+        	CompletableFuture<R> future = new CompletableFuture<R>();
+            val runnable = (Failable.Runnable<T>) () -> {
                 try {
-					super.run(runnable);
-				} catch (Throwable t) {
-					if (t instanceof RuntimeException) {
-						throw (RuntimeException)t;
-					}
-                    throw new CompletionException(t);
-				}
-                return result.get();
-            });
+                    val theResult = supplier.get();
+                    future.complete(theResult);
+                } catch (Throwable t) {
+                	future.completeExceptionally(t);
+                }
+            };
+            Runnable current = runnable.gracefully();
+            for (int i = wrappers.size(); i-- > 0;) {
+                val wrapper = wrappers.get(i);
+                val wrapped = wrapper.apply(current);
+                if (wrapped != null) {
+                    current = wrapped;
+                }
+            }
+            try {
+            	current.run();
+            } catch (FailableException e) {
+            	Throwable cause = e.getCause();
+            	if (cause instanceof RuntimeException) {
+            		throw (RuntimeException)cause;
+            	}
+
+            	future.completeExceptionally((T)cause);
+			}
+            return future;
         }
         
     }

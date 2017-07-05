@@ -17,7 +17,6 @@ package direct.get.exceptions;
 
 import java.util.function.Consumer;
 
-import direct.get.Named;
 import direct.get.Ref;
 import direct.get.Get;
 
@@ -30,18 +29,15 @@ public class ProblemHandler {
 	
 	/** This handler print a stacktrace. */
 	public static final Ref<ProblemHandler> printStackTrace
-			= Ref.of(ProblemHandler.class,
-					()->new ProblemHandler(Named.consumer("PrintStackTrace", problem->problem.printStackTrace())));
+			= Ref.of(ProblemHandler.class, ()->new ProblemHandler(problem->problem.printStackTrace()));
 	
 	/** This handler ignore the problem. */
 	public static final Ref<ProblemHandler> ignoreProblem
-			= Ref.of(ProblemHandler.class,
-					()->new ProblemHandler(Named.consumer("IgnoreProblem", problem->{})));
+			= Ref.of(ProblemHandler.class, ()->new ProblemHandler(problem->{}));
 	
 	/** Default problem handler. */
 	public static final Ref<ProblemHandler> problemHandler
-			= Ref.of(ProblemHandler.class, Named.supplier("Default",
-					()->Get.a(printStackTrace)));
+			= Ref.of(ProblemHandler.class, ()->Get.a(printStackTrace));
 
 	
 	private final String name;

@@ -100,11 +100,9 @@ public class RetainTest {
 			Thread.sleep(100);
 			the(logs).add("log");
 			
-
-			Thread.sleep(1000);
 			fork.join();
 			
-			assertEquals("[log, log, log, log]", the(logs).toString());
+			assertEquals("[log, log]", the(logs).toString());
 		});
 	}
 

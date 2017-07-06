@@ -94,7 +94,6 @@ public enum Preferability {
      * Determine the providing for Get.
      * 
      * @return the providing.
-     * @see {@link directget.get.ProvidingOrderTest}
      */
     public static <T> Providing<T> determineProviding(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProvidingStackMap stacks) {

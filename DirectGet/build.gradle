@@ -1,5 +1,10 @@
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+group = 'directget'
+version = '0.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -11,4 +16,35 @@ repositories {
 dependencies {
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'directget'
+            artifactId 'get'
+            version '0.1'
+            
+            pom.withXml {
+                asNode().appendNode('description', 'Simple dependency injection library for Java.')
+            }
+            
+            from components.java
+        }
+    }
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }

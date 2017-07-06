@@ -96,7 +96,7 @@ public class Scope {
     }
     
     boolean hasBeenInitialized() {
-        return config != null;
+        return config != DEF_CONFIG;
     }
     
     /** @return the stacktrace when this scope is initialized. */

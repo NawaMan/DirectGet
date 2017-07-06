@@ -48,14 +48,28 @@ public class AppTest {
     @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testSecondInitialize() throws AppScopeAlreadyInitializedException {
         // This test prove that first initialize has no problem.
+    	assertFalse(App.isInitialized());
         try {
             App.initialize(null);
         } catch (AppScopeAlreadyInitializedException e) {
             fail("Oh no! Not from here.");
         }
         
+        assertTrue(App.isInitialized());
         // ... but the second time will throws an exception.
         App.initialize(null);
+    }
+    
+    @Test
+    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
+    public void testSecondInitialize_onlyAbsent() throws AppScopeAlreadyInitializedException {
+        // This test prove that first initialize has no problem.
+    	assertFalse(App.isInitialized());
+        App.initializeIfAbsent(null);
+        
+        assertTrue(App.isInitialized());
+        // ... but the second time will throws an exception.
+        App.initializeIfAbsent(null);
     }
     
 }

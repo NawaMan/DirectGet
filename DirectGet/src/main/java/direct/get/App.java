@@ -56,8 +56,8 @@ public final class App {
     
     /** @return {@code true} if the application scope has been initialized */
     public static boolean isInitialized() {
-        val isAbsent = scope.hasBeenInitialized();
-        return isAbsent;
+        val isInitialized = scope.hasBeenInitialized();
+        return isInitialized;
     }
     
     /** Private part */

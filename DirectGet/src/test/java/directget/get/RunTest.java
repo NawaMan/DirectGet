@@ -17,7 +17,7 @@ package directget.get;
 
 import static directget.get.Retain.retain;
 import static directget.get.Run.*;
-import static directget.get.exceptions.ProblemHandler.refProblemHandler;
+import static directget.get.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -30,6 +30,7 @@ import org.junit.Test;
 import directget.get.Get;
 import directget.get.Ref;
 import directget.get.Run;
+import directget.get.exceptions.ProblemHandledException;
 import directget.get.exceptions.ProblemHandler;
 import lombok.val;
 
@@ -114,9 +115,27 @@ public class RunTest {
         latch.await();
     }
     
+    @Test(expected=ProblemHandledException.class)
+    public void testHandleProlem() {
+        val pblmBuffer = new ArrayList<Throwable>();
+        try {
+            Run
+            .with(problemHandler.providedBy(retain(()->new ProblemHandler(pblmBuffer::add)).always()))
+            .handleProblem()
+            .run(()->{
+                throw new IOException();
+            });
+            
+            fail("It shoud never get here.");
+        } finally {
+            assertEquals("[java.io.IOException]", pblmBuffer.toString());
+        }
+    }
+    
     @Test
-    public void testIgnoreExceptions() throws IOException {
-        IgnoreException()
+    public void testIgnoreExceptions() {
+        Run
+        .ignoreException()
         .run(()->{
             throw new IOException();
         });

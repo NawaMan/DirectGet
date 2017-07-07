@@ -15,8 +15,11 @@
 //  ========================================================================
 package directget.get;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,7 +41,7 @@ class Extensions {
         return (obj == null) ? elseValue : obj;
     }
     
-    public static <T> T _or(T obj, Supplier<T> elseSupplier) {
+    public static <T> T _or(T obj, Supplier<? extends T> elseSupplier) {
         return (obj == null) ? elseSupplier.get() : obj;
     }
     
@@ -79,6 +82,20 @@ class Extensions {
     
     public static <T> Optional<T> _toNullable(T obj) {
         return Optional.ofNullable(obj);
+    }
+    
+    public static <T> List<T> _toUnmodifiableNonNullList(Collection<T> collection) {
+        if (collection == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(collection.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+    }
+    
+    public static <T> List<T> _toUnmodifiableNonNullList(Stream<T> stream) {
+        if (stream == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(stream.filter(Objects::nonNull).collect(Collectors.toList()));
     }
     
 }

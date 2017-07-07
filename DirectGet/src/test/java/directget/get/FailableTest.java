@@ -1,7 +1,7 @@
 package directget.get;
 
 import static directget.get.Retain.retain;
-import static directget.get.exceptions.ProblemHandler.refProblemHandler;
+import static directget.get.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import directget.get.exceptions.ProblemHandler;
 import lombok.val;
 
 public class FailableTest {
-   
+    
     @Test
     public void testRunnable_run() {
         val counter = new AtomicInteger(0);
@@ -34,21 +34,21 @@ public class FailableTest {
         runnable.handledly().run();
         assertEquals(5, counter.get());
     }
-   
+    
     @Test(expected=IOException.class)
     public void testRunnable_fail() throws IOException {
         Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
        
         runnable.run();
     }
-
+    
     @Test
     public void testRunnable_failCarelessly() {
         Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
        
         runnable.carelessly().run();
     }
-
+    
     @Test
     public void testRunnable_failGracefully() {
         Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
@@ -61,20 +61,21 @@ public class FailableTest {
         }
     }
     
-    @Test
+    @Test(expected=ProblemHandledException.class)
     public void testRunnable_failHandledly() {
         Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
         
         val pblmBuffer = new ArrayList<Throwable>();
-        Run
-        .with(refProblemHandler.providedBy(retain(()->new ProblemHandler(pblmBuffer::add)).always()))
-        .ignoreHandledProblem()
-        .run(()->{
-            runnable.handledly().run();
-            fail("Except an exception");
-        });
-        
-        assertEquals("[java.io.IOException]", pblmBuffer.toString());
+        try {
+            Run
+            .with(problemHandler.providedBy(retain(()->new ProblemHandler(pblmBuffer::add)).always()))
+            .run(()->{
+                runnable.handledly().run();
+                fail("Except an exception");
+            });
+        } finally {
+            assertEquals("[java.io.IOException]", pblmBuffer.toString());
+        }
     }
    
 }

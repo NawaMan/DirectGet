@@ -45,6 +45,8 @@ public class Failable {
             return () -> {
                 try {
                     run();
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }
@@ -67,7 +69,7 @@ public class Failable {
                 try {
                     run();
                 } catch (Throwable t) {
-                    Get.a(ProblemHandler.refProblemHandler).handle(t);
+                    Get.a(ProblemHandler.problemHandler).handle(t);
                 }
             };
         }
@@ -91,6 +93,8 @@ public class Failable {
             return () -> {
                 try {
                     return get();
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }
@@ -114,7 +118,7 @@ public class Failable {
                 try {
                     return get();
                 } catch (Throwable t) {
-                    Get.a(ProblemHandler.refProblemHandler).handle(t);
+                    Get.a(ProblemHandler.problemHandler).handle(t);
                     return null;
                 }
             };
@@ -139,6 +143,8 @@ public class Failable {
             return v -> {
                 try {
                     accept(v);
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }
@@ -161,7 +167,7 @@ public class Failable {
                 try {
                     accept(value);
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.refProblemHandler).handle(t);
+                	Get.a(ProblemHandler.problemHandler).handle(t);
                 }
             };
         }

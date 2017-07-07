@@ -150,7 +150,7 @@ public class RetainTest {
         val fork = new Fork();
         OnNewThread()
         .joinWith(fork)
-        .start(() -> {
+        .run(() -> {
             Thread.sleep(100);
             the(logs).add("log");
             assertEquals("[log]", the(logs).toString());
@@ -177,7 +177,10 @@ public class RetainTest {
             the(logs).clear();
             
             val fork = new Fork();
-            Run.onNewThread().joinWith(fork).inherit(logs).start(() -> {
+            OnNewThread()
+            .joinWith(fork)
+            .inherit(logs)
+            .run(() -> {
                 Thread.sleep(10);
                 the(logs).add("log");
             });

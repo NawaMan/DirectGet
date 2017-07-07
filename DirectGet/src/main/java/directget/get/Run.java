@@ -15,18 +15,18 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Extensions._or;
+import static directget.get.Extensions._toUnmodifiableNonNullList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import directget.get.exceptions.FailableException;
@@ -87,7 +87,7 @@ public class Run {
     /** Add the wrapper */
     @SuppressWarnings("rawtypes")
     public static SameThreadSessionBuilder with(Stream<Providing> providings) {
-        val sessionBuilder = new SameThreadSessionBuilder();
+        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
         sessionBuilder.with(runnable -> () -> {
             sessionBuilder.get().substitute(providings, runnable);
         });
@@ -153,10 +153,34 @@ public class Run {
     /** Add the wrapper */
     @SuppressWarnings("rawtypes")
     public static SameThreadSessionBuilder Use(Stream<Providing> providings) {
-        val sessionBuilder = new SameThreadSessionBuilder();
+        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
         sessionBuilder.with(runnable -> () -> {
             sessionBuilder.get().substitute(providings, runnable);
         });
+        return sessionBuilder;
+    }
+    
+    /** Mark that this run should handle the exception. */
+    public static SameThreadNoCheckExceptionSessionBuilder HandleProblem() {
+        return handleProblem();
+    }
+    
+    /** Mark that this run should handle the exception. */
+    public static SameThreadNoCheckExceptionSessionBuilder handleProblem() {
+        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder(null);
+        sessionBuilder.handleProblem();
+        return sessionBuilder;
+    }
+    
+    /** Mark that this run should handle the exception. */
+    public static SameThreadNoCheckExceptionSessionBuilder HandleThenIgnoreProblem() {
+        return handleThenIgnoreProblem();
+    }
+    
+    /** Mark that this run should ignore thrown exception. */
+    public static SameThreadNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
+        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder(null);
+        sessionBuilder.handleThenIgnoreProblem();
         return sessionBuilder;
     }
     
@@ -166,7 +190,7 @@ public class Run {
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public static SameThreadSessionBuilder IgnoreException() {
+    public static SameThreadNoCheckExceptionSessionBuilder IgnoreException() {
         return ignoreException();
     }
     
@@ -178,8 +202,8 @@ public class Run {
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public static SameThreadSessionBuilder ignoreException() {
-        val sessionBuilder = new SameThreadSessionBuilder();
+    public static SameThreadNoCheckExceptionSessionBuilder ignoreException() {
+        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder(null);
         sessionBuilder.ignoreException();
         return sessionBuilder;
     }
@@ -196,13 +220,7 @@ public class Run {
     
     /** Run the session now. */
     public static <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
-        val sessionBuilder = new SameThreadSessionBuilder();
-        sessionBuilder.run(runnable);
-    }
-    
-    /** Run the session now. */
-    public static <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
-        val sessionBuilder = new SameThreadSessionBuilder();
+        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
         sessionBuilder.run(runnable);
     }
     
@@ -212,16 +230,12 @@ public class Run {
      * @throws T
      */
     public static <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
-        val sessionBuilder = new SameThreadSessionBuilder();
+        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
         return sessionBuilder.run(supplier);
     }
     
-    
-    
-    
     /** Alias type. */
-    public static interface Wrapper extends Function<Runnable, Runnable> {
-    }
+    public static interface Wrapper extends Function<Runnable, Runnable> {}
     
     /** Wrapper for running on the new thread. */
     public static class NewThreadWrapper implements Wrapper {
@@ -276,12 +290,9 @@ public class Run {
         
         @SuppressWarnings("rawtypes")
         Function<Failable.Runnable, Runnable> failHandler = runnable->runnable.gracefully();
-        final List<Function<Runnable, Runnable>> wrappers = new ArrayList<>();
+        List<Function<Runnable, Runnable>>    wrappers    = new ArrayList<>();
         
         private Scope scope = App.scope;
-        
-        /** Another way to chain the invocation */
-        public final SessionBuilder<SB> and = this;
         
         /** Default constructor. */
         public SessionBuilder() {
@@ -374,6 +385,39 @@ public class Run {
             return (SB) this;
         }
         
+        private SameThreadNoCheckExceptionSessionBuilder toSameThreadNoCheckExceptionSessionBuilder() {
+            val builder = new SameThreadNoCheckExceptionSessionBuilder(scope);
+            builder.failHandler = this.failHandler;
+            builder.wrappers    = new ArrayList<>(this.wrappers);
+            return builder;
+        }
+        
+        /** Mark that this run should handle the exception. */
+        public SameThreadNoCheckExceptionSessionBuilder handleProblem() {
+            val builder
+                    = (this instanceof SameThreadNoCheckExceptionSessionBuilder)
+                    ? (SameThreadNoCheckExceptionSessionBuilder)this
+                    : toSameThreadNoCheckExceptionSessionBuilder();
+            builder.failHandler = Failable.Runnable::handledly;
+            return builder;
+        }
+        
+        /** Mark that this run should ignore thrown exception. */
+        public SameThreadNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
+            val builder
+                    = (this instanceof SameThreadNoCheckExceptionSessionBuilder)
+                    ? (SameThreadNoCheckExceptionSessionBuilder)this
+                    : toSameThreadNoCheckExceptionSessionBuilder();
+            
+            builder.failHandler = runnable->((Failable.Runnable<Throwable>)()->{
+                try {
+                    runnable.handledly().run();
+                } catch (ProblemHandledException e) {
+                }
+            }).gracefully();
+            return builder;
+        }
+        
         /** Mark that this run should ignore all the handled problem. */
         @SuppressWarnings("unchecked")
         public SB ignoreHandledProblem() {
@@ -387,10 +431,13 @@ public class Run {
         }
         
         /** Mark that this run should ignore thrown exception. */
-        @SuppressWarnings("unchecked")
-        public SB ignoreException() {
-            failHandler = Failable.Runnable::carelessly;
-            return (SB)this;
+        public SameThreadNoCheckExceptionSessionBuilder ignoreException() {
+            val builder
+                    = (this instanceof SameThreadNoCheckExceptionSessionBuilder)
+                    ? (SameThreadNoCheckExceptionSessionBuilder)this
+                    : toSameThreadNoCheckExceptionSessionBuilder();
+            builder.failHandler = Failable.Runnable::carelessly;
+            return builder;
         }
         
         /** Make the run to be run on a new thread. */
@@ -408,13 +455,15 @@ public class Run {
         
     }
     
+    /** This interface marks that SessionBuilder Synchronous. **/
+    public static interface Synchronous {
+        
+    }
+    
     /**
      * This class make building a run a bit easier.
      */
-    public static class SameThreadSessionBuilder extends SessionBuilder<SameThreadSessionBuilder> {
-        
-        /** Another way to chain the invocation */
-        public final SameThreadSessionBuilder and = this;
+    public static class SameThreadSessionBuilder extends SessionBuilder<SameThreadSessionBuilder> implements Synchronous {
         
         /** Default constructor. */
         public SameThreadSessionBuilder() {
@@ -440,23 +489,55 @@ public class Run {
             return build().run(supplier);
         }
         
-        /**
-         * Run the given supplier and return a value.
-         * 
-         * @throws T
-         */
-        public <R, T extends Throwable> R start(Failable.Supplier<R, T> supplier) throws T {
-            return build().run(supplier);
-        }
-        
         /** Run the session now. */
         public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
             build().run(runnable);
         }
         
+    }
+    
+    /**
+     * This class make building a run a bit easier.
+     */
+    public static class SameThreadNoCheckExceptionSessionBuilder
+            extends SessionBuilder<SameThreadSessionBuilder>
+            implements Synchronous {
+        
+        /** Constructor that take a scope. */
+        public SameThreadNoCheckExceptionSessionBuilder(Scope scope) {
+            super(scope);
+        }
+        
+        /** Build the session for later use. */
+        public SameThreadWrapperContext build() {
+            return new SameThreadWrapperContext(failHandler, wrappers);
+        }
+        
+        /** Run the given supplier and return a value. */
+        public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) {
+            try {
+                return build().run(supplier);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Throwable e) {
+                // NOTE: There should not be
+                System.err.println("If you see this in your console, report the bug #Run524");
+                e.printStackTrace();
+                return null;
+            }
+        }
+        
         /** Run the session now. */
-        public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
-            build().run(runnable);
+        public <T extends Throwable> void run(Failable.Runnable<T> runnable) {
+            try {
+                build().run(runnable);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Throwable e) {
+                // NOTE: There should not be
+                System.err.println("If you see this in your console, report the bug #Run538");
+                e.printStackTrace();
+            }
         }
         
     }
@@ -534,21 +615,8 @@ public class Run {
             return build().run(supplier);
         }
         
-        /** Run the given supplier and return a value. */
-        public <R, T extends Throwable> CompletableFuture<R> start(Failable.Supplier<R, T> supplier) {
-            return build().run(supplier);
-        }
-        
         /** Run the session now. */
         public <T extends Throwable> CompletableFuture<Void> run(Failable.Runnable<T> runnable) {
-            return build().run(()->{
-                runnable.run();
-                return null;
-            });
-        }
-        
-        /** Run the session now. */
-        public <T extends Throwable> CompletableFuture<Void> start(Failable.Runnable<T> runnable) throws T {
             return build().run(()->{
                 runnable.run();
                 return null;
@@ -563,11 +631,22 @@ public class Run {
         final Function<Failable.Runnable, Runnable> failHandler;
         final List<Function<Runnable, Runnable>> wrappers;
         
-        WrapperContext(@SuppressWarnings("rawtypes") Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
-            this.failHandler = Optional.ofNullable(failHandler).orElse(Failable.Runnable::gracefully);
-            this.wrappers = functions == null ? Collections.emptyList()
-                    : Collections
-                            .unmodifiableList(functions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        @SuppressWarnings("rawtypes") 
+        WrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+            this.failHandler = _or(failHandler, Failable.Runnable::gracefully);
+            this.wrappers    = _toUnmodifiableNonNullList(functions);
+        }
+        
+    }
+    
+    /** The contains the wrappers so that we can run something within them. */
+    public static class SameThreadWrapperContext extends WrapperContext {
+        
+        @SuppressWarnings("rawtypes")
+        SameThreadWrapperContext(
+                Function<Failable.Runnable, Runnable> failHandler,
+                List<Function<Runnable, Runnable>> functions) {
+            super(failHandler, functions);
         }
         
         /** Run something within this context. */
@@ -598,16 +677,9 @@ public class Run {
             }
         }
         
-    }
-    
-    /** The contains the wrappers so that we can run something within them. */
-    public static class SameThreadWrapperContext extends WrapperContext {
-        
-        @SuppressWarnings("rawtypes")
-        SameThreadWrapperContext(
-                Function<Failable.Runnable, Runnable> failHandler,
-                List<Function<Runnable, Runnable>> functions) {
-            super(failHandler, functions);
+        /** Run the given supplier and return a value. */
+        public <R, T extends Throwable> R start(Failable.Supplier<R, T> supplier) throws T {
+            return run(supplier);
         }
         
         /** Run the given supplier and return a value. */
@@ -617,7 +689,7 @@ public class Run {
                 val theResult = supplier.get();
                 result.set(theResult);
             };
-            super.run(runnable);
+            run(runnable);
             return result.get();
         }
         
@@ -629,6 +701,11 @@ public class Run {
         @SuppressWarnings("rawtypes")
         NewThreadWrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
             super(failHandler, functions);
+        }
+        
+        /** Run the given supplier and return a value. */
+        public <R, T extends Throwable> CompletableFuture<R> start(Failable.Supplier<R, T> supplier) {
+            return run(supplier);
         }
         
         /** Run the given supplier and return a value. */

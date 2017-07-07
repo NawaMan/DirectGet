@@ -1,5 +1,6 @@
 
 apply plugin: 'java'
+apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
@@ -28,16 +29,14 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+println (new File(".."))
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId 'directget'
             artifactId 'get'
             version '0.1'
-            
-            pom.withXml {
-                asNode().appendNode('description', 'Simple dependency injection library for Java.')
-            }
             
             from components.java
         }

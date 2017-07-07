@@ -15,10 +15,13 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Retain.retain;
 import static directget.get.Run.*;
+import static directget.get.exceptions.ProblemHandler.refProblemHandler;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +30,7 @@ import org.junit.Test;
 import directget.get.Get;
 import directget.get.Ref;
 import directget.get.Run;
+import directget.get.exceptions.ProblemHandler;
 import lombok.val;
 
 public class RunTest {
@@ -95,7 +99,6 @@ public class RunTest {
     public void testDiffThreadSupplier_withException() throws InterruptedException {
         val latch = new CountDownLatch(1);
         OnNewThread()
-        .with(num.providedWith(10))
         .run(()->{
             Thread.sleep(200);
             throw new IOException();
@@ -111,4 +114,22 @@ public class RunTest {
         latch.await();
     }
     
+    @Test
+    public void testIgnoreExceptions() throws IOException {
+        IgnoreException()
+        .run(()->{
+            throw new IOException();
+        });
+    }
+    
+    @Test
+    public void testIgnoreHandledProblem() throws IOException {
+        Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
+        
+        IgnoreHandledProblem()
+        .run(()->{
+            runnable.handledly().run();
+            fail("Except an exception here.");
+        });
+    }
 }

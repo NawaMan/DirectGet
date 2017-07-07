@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import directget.get.exceptions.FailableException;
+import directget.get.exceptions.ProblemHandledException;
 import lombok.val;
 
 /**
@@ -159,6 +160,30 @@ public class Run {
         return sessionBuilder;
     }
     
+    /** Mark that this run should ignore all the handled problem. */
+    public static SameThreadSessionBuilder IgnoreHandledProblem() {
+        return ignoreHandledProblem();
+    }
+    
+    /** Mark that this run should ignore thrown exception. */
+    public static SameThreadSessionBuilder IgnoreException() {
+        return ignoreException();
+    }
+    
+        /** Mark that this run should ignore all the handled problem. */
+    public static SameThreadSessionBuilder ignoreHandledProblem() {
+        val sessionBuilder = new SameThreadSessionBuilder();
+        sessionBuilder.ignoreHandledProblem();
+        return sessionBuilder;
+    }
+    
+    /** Mark that this run should ignore thrown exception. */
+    public static SameThreadSessionBuilder ignoreException() {
+        val sessionBuilder = new SameThreadSessionBuilder();
+        sessionBuilder.ignoreException();
+        return sessionBuilder;
+    }
+    
     /** Make the run to be run on a new thread. */
     public static NewThreadSessionBuilder OnNewThread() {
         return new SameThreadSessionBuilder().onNewThread();
@@ -249,6 +274,8 @@ public class Run {
     /** Builder for RunSession. **/
     public static abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
         
+        @SuppressWarnings("rawtypes")
+        Function<Failable.Runnable, Runnable> failHandler = runnable->runnable.gracefully();
         final List<Function<Runnable, Runnable>> wrappers = new ArrayList<>();
         
         private Scope scope = App.scope;
@@ -347,6 +374,25 @@ public class Run {
             return (SB) this;
         }
         
+        /** Mark that this run should ignore all the handled problem. */
+        @SuppressWarnings("unchecked")
+        public SB ignoreHandledProblem() {
+            failHandler = runnable->((Failable.Runnable<Throwable>)()->{
+                try {
+                    runnable.run();
+                } catch (ProblemHandledException e) {
+                }
+            }).gracefully();
+            return (SB)this;
+        }
+        
+        /** Mark that this run should ignore thrown exception. */
+        @SuppressWarnings("unchecked")
+        public SB ignoreException() {
+            failHandler = Failable.Runnable::carelessly;
+            return (SB)this;
+        }
+        
         /** Make the run to be run on a new thread. */
         public NewThreadSessionBuilder onNewThread() {
             val newThreadSessionBuilder = new NewThreadSessionBuilder();
@@ -357,7 +403,7 @@ public class Run {
         
         /** Build the session for later use. */
         public WrapperContext build() {
-            return new SameThreadWrapperContext(wrappers);
+            return new SameThreadWrapperContext(failHandler, wrappers);
         }
         
     }
@@ -382,7 +428,7 @@ public class Run {
         
         /** Build the session for later use. */
         public SameThreadWrapperContext build() {
-            return new SameThreadWrapperContext(wrappers);
+            return new SameThreadWrapperContext(failHandler, wrappers);
         }
         
         /**
@@ -480,7 +526,7 @@ public class Run {
         
         /** Build the session for later use. */
         public NewThreadWrapperContext build() {
-            return new NewThreadWrapperContext(wrappers);
+            return new NewThreadWrapperContext(failHandler, wrappers);
         }
         
         /** Run the given supplier and return a value. */
@@ -513,10 +559,13 @@ public class Run {
     /** The contains the wrappers so that we can run something within them. */
     public static class WrapperContext {
         
+        @SuppressWarnings("rawtypes")
+        final Function<Failable.Runnable, Runnable> failHandler;
         final List<Function<Runnable, Runnable>> wrappers;
         
-        WrapperContext(List<Function<Runnable, Runnable>> functions) {
-            wrappers = functions == null ? Collections.emptyList()
+        WrapperContext(@SuppressWarnings("rawtypes") Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+            this.failHandler = Optional.ofNullable(failHandler).orElse(Failable.Runnable::gracefully);
+            this.wrappers = functions == null ? Collections.emptyList()
                     : Collections
                             .unmodifiableList(functions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
         }
@@ -529,7 +578,7 @@ public class Run {
         /** Run something within this context. */
         @SuppressWarnings("unchecked")
         public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
-            Runnable current = runnable.gracefully();
+            Runnable current = failHandler.apply(runnable);
             for (int i = wrappers.size(); i-- > 0;) {
                 val wrapper = wrappers.get(i);
                 val wrapped = wrapper.apply(current);
@@ -554,28 +603,21 @@ public class Run {
     /** The contains the wrappers so that we can run something within them. */
     public static class SameThreadWrapperContext extends WrapperContext {
         
-        SameThreadWrapperContext(List<Function<Runnable, Runnable>> functions) {
-            super(functions);
+        @SuppressWarnings("rawtypes")
+        SameThreadWrapperContext(
+                Function<Failable.Runnable, Runnable> failHandler,
+                List<Function<Runnable, Runnable>> functions) {
+            super(failHandler, functions);
         }
         
         /** Run the given supplier and return a value. */
-        @SuppressWarnings("unchecked")
         public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
             val result = new AtomicReference<R>();
-            val thrown = new AtomicReference<Throwable>();
             val runnable = (Failable.Runnable<T>) () -> {
-                try {
-                    val theResult = supplier.get();
-                    result.set(theResult);
-                } catch (Throwable t) {
-                    thrown.set(t);
-                }
+                val theResult = supplier.get();
+                result.set(theResult);
             };
             super.run(runnable);
-            val theThrown = thrown.get();
-            if (theThrown != null) {
-                throw (T) theThrown;
-            }
             return result.get();
         }
         
@@ -584,8 +626,9 @@ public class Run {
     /** The contains the wrappers so that we can run something within them. */
     public static class NewThreadWrapperContext extends WrapperContext {
         
-        NewThreadWrapperContext(List<Function<Runnable, Runnable>> functions) {
-            super(functions);
+        @SuppressWarnings("rawtypes")
+        NewThreadWrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+            super(failHandler, functions);
         }
         
         /** Run the given supplier and return a value. */
@@ -600,7 +643,7 @@ public class Run {
                     future.completeExceptionally(t);
                 }
             };
-            Runnable current = runnable.gracefully();
+            Runnable current = failHandler.apply(runnable);
             for (int i = wrappers.size(); i-- > 0;) {
                 val wrapper = wrappers.get(i);
                 val wrapped = wrapper.apply(current);

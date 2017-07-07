@@ -67,7 +67,7 @@ public class Failable {
                 try {
                     run();
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.problemHandler).handle(t);
+                    Get.a(ProblemHandler.refProblemHandler).handle(t);
                 }
             };
         }
@@ -114,8 +114,8 @@ public class Failable {
                 try {
                     return get();
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.problemHandler).handle(t);
-                	return null;
+                    Get.a(ProblemHandler.refProblemHandler).handle(t);
+                    return null;
                 }
             };
         }
@@ -161,7 +161,7 @@ public class Failable {
                 try {
                     accept(value);
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.problemHandler).handle(t);
+                	Get.a(ProblemHandler.refProblemHandler).handle(t);
                 }
             };
         }

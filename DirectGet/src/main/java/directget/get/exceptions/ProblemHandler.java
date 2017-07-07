@@ -36,7 +36,7 @@ public class ProblemHandler {
             = Ref.of(ProblemHandler.class, ()->new ProblemHandler(problem->{}));
     
     /** Default problem handler. */
-    public static final Ref<ProblemHandler> problemHandler
+    public static final Ref<ProblemHandler> refProblemHandler
             = Ref.of(ProblemHandler.class, ()->Get.a(printStackTrace));
     
     private final String name;

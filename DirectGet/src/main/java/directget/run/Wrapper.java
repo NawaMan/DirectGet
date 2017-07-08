@@ -18,7 +18,7 @@ package directget.run;
 import java.util.function.Function;
 
 /**
- * Alias type of Function<Runnable, Runnable>.
+ * Alias type of Function&lt;Runnable, Runnable&gt;.
  * 
  * @author NawaMan
  **/

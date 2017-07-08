@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.exceptions;
+package directget.run.exceptions;
 
 import directget.get.Get;
 import directget.get.Ref;
@@ -23,7 +23,7 @@ import directget.get.Ref;
  * 
  * @author nawaman
  **/
-public class ProblemHandledException extends DirectGetRuntimeException {
+public class ProblemHandledException extends DirectRunRuntimeException {
     
     /** The ref to get current time. */
     public static Ref<Long> currentTime = Ref.of(Long.class, ()->System.currentTimeMillis());

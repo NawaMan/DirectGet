@@ -13,12 +13,15 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.run;
 
 import static directget.get.Retain.retain;
-import static directget.get.Run.*;
-import static directget.get.exceptions.ProblemHandler.problemHandler;
-import static org.junit.Assert.*;
+import static directget.run.Run.IgnoreHandledProblem;
+import static directget.run.Run.OnNewThread;
+import static directget.run.exceptions.ProblemHandler.problemHandler;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,9 +32,10 @@ import org.junit.Test;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.get.Run;
-import directget.get.exceptions.ProblemHandledException;
-import directget.get.exceptions.ProblemHandler;
+import directget.run.Failable;
+import directget.run.Run;
+import directget.run.exceptions.ProblemHandledException;
+import directget.run.exceptions.ProblemHandler;
 import lombok.val;
 
 public class RunTest {

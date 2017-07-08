@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import directget.get.exceptions.GetException;
+import directget.run.Named;
 import lombok.val;
 
 /***
@@ -84,7 +85,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     
     /** Create the providing that dictate the value of the given ref. */
     default public Providing<T> dictatedToA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
+        return new Providing<>(this, Preferability.Dictate, new NamedRefSupplier<T>(ref));
     }
     
     /** Create the providing that dictate the result of the given supplier. */
@@ -101,7 +102,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * Create the providing (normal preferability) the value of the given ref.
      */
     default public Providing<T> providedWithA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+        return new Providing<>(this, Preferability.Normal, new NamedRefSupplier<T>(ref));
     }
     
     /**
@@ -122,7 +123,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * given ref.
      */
     default public Providing<T> providedWithA(Preferability preferability, Ref<T> ref) {
-        return new Providing<>(this, preferability, new Named.RefSupplier<T>(ref));
+        return new Providing<>(this, preferability, new NamedRefSupplier<T>(ref));
     }
     
     /**
@@ -140,7 +141,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     
     /** Create the providing that default to the value of the given ref. */
     default public Providing<T> defaultedToA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+        return new Providing<>(this, Preferability.Normal, new NamedRefSupplier<T>(ref));
     }
     
     /**

@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.run;
 
 /**
  * This class offer a way to make it easy to debug lambda by adding name to them.
@@ -154,21 +154,6 @@ public interface Named {
         /** Constructor */
         public ValueSupplier(T value) {
             super(String.format(NAME, String.valueOf(value)), () -> value);
-        }
-        
-    }
-    
-    /** Supplier for a value of a ref. */
-    public static class RefSupplier<T> extends Supplier<T> {
-        
-        /** The name of the supplier. */
-        public static final String NAME = "FromRef";
-        /** The template for the name. */
-        public static final String NAME_TEMPLATE = NAME + "(%s)";
-        
-        /** Constructor */
-        public RefSupplier(Ref<T> ref) {
-            super(String.format(NAME_TEMPLATE, ref.toString()), () -> Get.a(ref));
         }
         
     }

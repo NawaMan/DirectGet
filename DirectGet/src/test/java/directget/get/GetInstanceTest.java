@@ -32,19 +32,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static directget.get.Preferability.Dictate;
-import static directget.get.Run.*;
+import static directget.run.Run.*;
 import static java.lang.Thread.*;
 
 import org.junit.Test;
 
 import directget.get.App;
-import directget.get.Fork;
 import directget.get.Get;
-import directget.get.Named;
 import directget.get.Preferability;
 import directget.get.Providing;
 import directget.get.Ref;
-import directget.get.Run;
+import directget.run.Fork;
+import directget.run.Named;
+import directget.run.Run;
+import directget.run.Wrapper;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {
@@ -87,11 +88,11 @@ public class GetInstanceTest implements Named.User {
         });
     }
     
-    private final Run.Wrapper _newText = runnable -> () -> {
+    private final Wrapper _newText = runnable -> () -> {
         App.Get().substitute(provideNewText, runnable);
     };
     
-    private final Run.Wrapper _verboseLogger = runnable -> Named.runnable("VERBOSE", () -> {
+    private final Wrapper _verboseLogger = runnable -> Named.runnable("VERBOSE", () -> {
         List providings = new ArrayList();
         Preferability.DetermineProvidingListener listener = new Preferability.DetermineProvidingListener() {
             @Override

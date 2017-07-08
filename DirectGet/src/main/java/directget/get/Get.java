@@ -21,8 +21,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import directget.get.Named.Predicate;
 import directget.get.exceptions.GetException;
+import directget.run.Named;
+import directget.run.Named.Predicate;
 import lombok.val;
 
 /**

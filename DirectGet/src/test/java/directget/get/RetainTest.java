@@ -3,8 +3,8 @@ package directget.get;
 import static directget.get.Get.a;
 import static directget.get.Get.the;
 import static directget.get.Retain.retain;
-import static directget.get.Run.OnNewThread;
-import static directget.get.Run.With;
+import static directget.run.Run.OnNewThread;
+import static directget.run.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import directget.get.Fork;
 import directget.get.Get;
 import directget.get.Ref;
 import directget.get.Retain;
-import directget.get.Run;
+import directget.run.Fork;
+import directget.run.Run;
 import lombok.val;
 
 public class RetainTest {

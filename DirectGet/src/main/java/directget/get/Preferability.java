@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import directget.run.Named;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

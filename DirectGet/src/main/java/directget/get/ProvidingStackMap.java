@@ -23,7 +23,7 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
     
     private static final long serialVersionUID = -8113998773064688984L;

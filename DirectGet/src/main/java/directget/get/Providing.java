@@ -26,7 +26,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  **/
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public class Providing<T> implements Supplier<T>, Wrapper {
     
     private final Ref<T> ref;

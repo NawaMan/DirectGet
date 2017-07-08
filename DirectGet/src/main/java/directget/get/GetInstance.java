@@ -36,7 +36,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public final class GetInstance {
     
     private final Scope scope;

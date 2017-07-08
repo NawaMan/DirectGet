@@ -15,12 +15,17 @@
 //  ========================================================================
 package directget.get;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -35,7 +40,10 @@ import lombok.val;
  * 
  * @author nawaman
  **/
-class Extensions {
+class utils {
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static final Function<Map, Map> newTreeMap = (Function<Map, Map>) TreeMap::new;
     
     public static <T> T _or(T obj, T elseValue) {
         return (obj == null) ? elseValue : obj;
@@ -61,6 +69,16 @@ class Extensions {
         if (obj != null) {
             action.accept(obj);
         }
+    }
+    
+    public static <K, V> Map<K, V> _toNonNullMap(Stream<V> stream,Function<V, K> keyMapper) {
+        return stream.filter(Objects::nonNull).collect(toMap(keyMapper, p -> p));
+    }
+    
+    public static <K, V> Map<K, V> _toUnmodifiableSortedMap(Map<K, V> map) {
+        @SuppressWarnings("unchecked")
+        Map<K, V> newProvidingMap = _or(_changeBy(map, newTreeMap), emptyMap());
+        return unmodifiableMap(newProvidingMap);
     }
     
     private static Function<Map.Entry<?, ?>, String> pairToString = each -> {

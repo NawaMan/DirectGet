@@ -35,7 +35,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public enum Preferability {
     
     /** Only use when no other is preferred. */

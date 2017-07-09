@@ -13,7 +13,9 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
+
+import directget.get.Ref;
 
 /**
  * Base implementation of references.

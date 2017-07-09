@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import directget.get.exceptions.GetException;
+import directget.get.supportive.DirectRef;
+import directget.get.supportive.ForClassRef;
 import directget.run.Named;
 import lombok.val;
 
@@ -87,11 +89,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * @return a new ref with the default value.
      */
     @SuppressWarnings("rawtypes")
-    default public RefDirect<T> by(String name, Supplier<? extends T> defaultSupplier) {
-        return new RefDirect<>(
+    default public DirectRef<T> by(String name, Supplier<? extends T> defaultSupplier) {
+        return new DirectRef<>(
                 this.getName(),
                 this.getTargetClass(),
-                ((RefDirect)this).getPreferability(),
+                ((DirectRef)this).getPreferability(),
                 new Named.Supplier<>(name, defaultSupplier));
     }
         
@@ -102,11 +104,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * @return a new ref with the default value.
      */
     @SuppressWarnings("rawtypes")
-    default public RefDirect<T> by(Supplier<? extends T> defaultSupplier) {
-        return new RefDirect<>(
+    default public DirectRef<T> by(Supplier<? extends T> defaultSupplier) {
+        return new DirectRef<>(
                 this.getName(),
                 this.getTargetClass(),
-                ((RefDirect)this).getPreferability(),
+                ((DirectRef)this).getPreferability(),
                 defaultSupplier);
     }
     
@@ -190,7 +192,7 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     
     /** @return the reference that represent the target class directly. */
     public static <T> Ref<T> forClass(Class<T> targetClass) {
-        return new RefForClass<>(targetClass);
+        return new ForClassRef<>(targetClass);
     }
     
     // -- Direct -------------------------------------------------------------
@@ -242,9 +244,9 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      * class with the default factory.
      **/
     public static <T, V extends T> Ref<T> of(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        val theName    = (name != null) ? name : ("#" + RefDirect.id.incrementAndGet());
+        val theName    = (name != null) ? name : ("#" + DirectRef.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
-        return new RefDirect<>(theName, targetClass, preferability, theFactory);
+        return new DirectRef<>(theName, targetClass, preferability, theFactory);
     }
     
 }

@@ -13,8 +13,11 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
+import directget.get.Preferability;
+import directget.get.Providing;
+import directget.get.Ref;
 import lombok.val;
 
 /**
@@ -23,11 +26,17 @@ import lombok.val;
  * 
  * @author nawaman
  */
-public final class RefForClass<T> extends AbstractRef<T> implements Ref<T> {
+public final class ForClassRef<T> extends AbstractRef<T> implements Ref<T> {
     
     private final Providing<T> providing;
     
-    RefForClass(Class<T> targetClass) {
+    /**
+     * Constructor.
+     * 
+     * @param targetClass
+     *          the target class.
+     */
+    public ForClassRef(Class<T> targetClass) {
         super(targetClass);
         this.providing = new Providing<>(this, Preferability.Default, () -> get());
     }

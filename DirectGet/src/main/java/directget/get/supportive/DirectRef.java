@@ -13,12 +13,15 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+import directget.get.Preferability;
+import directget.get.Providing;
+import directget.get.Ref;
 import lombok.val;
 
 /**
@@ -27,15 +30,36 @@ import lombok.val;
  * 
  * @author nawaman
  **/
-public class RefDirect<T> extends AbstractRef<T> implements Ref<T> {
+public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     
     static final AtomicLong id = new AtomicLong();
+
+    /**
+     * The new id.
+     * 
+     * @return the new id.
+     */
+    public static long getNewId() {
+        return  id.incrementAndGet();
+    }
     
     private final String name;
     
     private final Providing<T> providing;
     
-    RefDirect(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
+    /**
+     * Constructor.
+     * 
+     * @param name
+     *          the ref name.
+     * @param targetClass
+     *          the target class.
+     * @param preferability
+     *          the preferability.
+     * @param factory
+     *          the value factory.
+     */
+    public DirectRef(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
         super(targetClass);
         val prefer = (preferability != null) ? Preferability.Default : preferability;
         

@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
+import directget.get.supportive.ProvidingStackMap;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -216,7 +217,7 @@ public final class GetInstance {
     public void substitute(Stream<Providing> providings, Runnable runnable) {
         val problemHolder = new AtomicReference<RuntimeException>(null);
         try {
-            substitute(providings, runnable.toSupplier(problemHolder));
+            substitute(providings, runnable._toSupplier(problemHolder));
         } catch (Throwable t) {
             throw new RunWithSubstitutionException(t);
         }

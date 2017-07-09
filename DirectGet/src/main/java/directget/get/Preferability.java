@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import directget.get.supportive.ProvidingStackMap;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

@@ -126,7 +126,7 @@ class utils {
      *          the exception holder.
      * @return {@code null}
      */
-    public static <V> Supplier<V> toSupplier(Runnable runnable, AtomicReference<RuntimeException> exceptionHolder) {
+    public static <V> Supplier<V> _toSupplier(Runnable runnable, AtomicReference<RuntimeException> exceptionHolder) {
         return (Supplier<V>) (() -> {
             try {
                 runnable.run();

@@ -13,26 +13,30 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
-import directget.run.Named.Supplier;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import lombok.val;
 
 /**
- * Supplier for a value of a ref.
+ * This ThreadFactory create thread with unique name with id.
  * 
  * @author nawaman
- **/
-public class NamedRefSupplier<T> extends Supplier<T> {
+ */
+public class CounterThreadFactory implements ThreadFactory {
     
-    /** The name of the supplier. */
-    public static final String NAME = "FromRef";
-    /** The template for the name. */
-    public static final String NAME_TEMPLATE = NAME + "(%s)";
+    /** The default instance. */
+    public static final CounterThreadFactory instance = new CounterThreadFactory();
     
-    /** Constructor */
-    public NamedRefSupplier(Ref<T> ref) {
-        super(String.format(NAME_TEMPLATE, ref.toString()), () -> Get.a(ref));
+    private static AtomicInteger threadCount = new AtomicInteger(1);
+    
+    @Override
+    public Thread newThread(Runnable runnable) {
+        val thread = new Thread(runnable);
+        thread.setName("Thread#" + threadCount.getAndIncrement());
+        return thread;
     }
     
 }

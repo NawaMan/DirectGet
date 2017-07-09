@@ -18,10 +18,11 @@ package directget.get;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import directget.get.exceptions.GetException;
+import directget.get.supportive.CounterThreadFactory;
+import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.run.Named;
 import directget.run.Named.Predicate;
 import lombok.val;
@@ -33,32 +34,21 @@ import lombok.val;
  */
 public final class Get {
     
-    /**
-     * This predicate specifies that all of the references are to be inherited
-     */
+    /** This predicate specifies that all of the references are to be inherited */
     @SuppressWarnings("rawtypes")
     public static final Predicate<Ref> INHERIT_ALL = Named.Predicate("InheritAll", ref -> true);
     
-    /**
-     * This predicate specifies that none of the references are to be inherited
-     */
+    /** This predicate specifies that none of the references are to be inherited */
     @SuppressWarnings("rawtypes")
     public static final Predicate<Ref> INHERIT_NONE = Named.Predicate("InheritNone", ref -> false);
     
-    private static AtomicInteger threadCount = new AtomicInteger(1);
     
     /** The reference to the thread factory. */
-    public static final Ref<ThreadFactory> _ThreadFactory_ = Ref.of(ThreadFactory.class, ()-> runnable->{
-        val thread = new Thread(runnable);
-        thread.setName("Thread#" + threadCount.getAndIncrement());
-        return thread;
-    });
+    public static final Ref<ThreadFactory> _ThreadFactory_ = Ref.of(ThreadFactory.class, CounterThreadFactory.instance);
     
     /** The reference to the executor. */
-    public static final Ref<Executor> _Executor_ = Ref.of(Executor.class, () -> (Executor) (runnable -> {
-        val newThread = Get.a(_ThreadFactory_).newThread(runnable);
-        newThread.start();
-    }));
+    public static final Ref<Executor> _Executor_ = Ref.of(Executor.class).by(()->GetThreadFactoryExecutor.instance);
+    
     
     private Get() {
         

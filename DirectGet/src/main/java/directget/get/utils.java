@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -114,6 +115,30 @@ class utils {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(stream.filter(Objects::nonNull).collect(Collectors.toList()));
+    }
+    
+    /**
+     * Convert the given runnable to a supplier and in case of exception, assigned it in the exceptionHolder.
+     * 
+     * @param runnable
+     *          the runnable.
+     * @param exceptionHolder
+     *          the exception holder.
+     * @return {@code null}
+     */
+    public static <V> Supplier<V> toSupplier(Runnable runnable, AtomicReference<RuntimeException> exceptionHolder) {
+        return (Supplier<V>) (() -> {
+            try {
+                runnable.run();
+            } catch (RuntimeException e) {
+                if (exceptionHolder != null) {
+                    exceptionHolder.set(e);
+                } else {
+                    throw e;
+                }
+            }
+            return null;
+        });
     }
     
 }

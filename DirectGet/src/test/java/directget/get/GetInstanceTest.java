@@ -55,7 +55,7 @@ public class GetInstanceTest implements Named.User {
     private String orgText = "The Text";
     private String newText = "New Text!!!";
     
-    private Ref<String> _text_ = Ref.of("TheText", String.class, supplier("OrginalText", () -> orgText));
+    private Ref<String> _text_ = Ref.of("TheText", String.class).by("OrginalText", () -> orgText);
     
     private Stream<Providing> provideNewText = Stream
             .of(new Providing<>(_text_, Dictate, supplier("NewText", () -> newText)));
@@ -69,7 +69,7 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
-        Ref<StringBuffer> aBuffer = Ref.of("aList", StringBuffer.class, () -> theBuffer);
+        Ref<StringBuffer> aBuffer = Ref.of("aList", StringBuffer.class, theBuffer);
         assertTrue(App.Get()._a(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
     }
     

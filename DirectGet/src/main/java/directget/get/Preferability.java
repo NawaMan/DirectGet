@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import directget.run.Named;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -70,8 +69,7 @@ public enum Preferability {
     }
     
     /** */
-    public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class,
-            Named.supplier("NULL", () -> (DetermineProvidingListener) null));
+    public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     

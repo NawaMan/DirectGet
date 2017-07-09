@@ -36,13 +36,11 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class, retain(() -> new StringList()).forCurrentThread());
+    static final Ref<StringList> logs = Ref.of(StringList.class).by(retain(()->new StringList()).forCurrentThread());
     
-    static final Ref<String> username = Ref.of(String.class, () -> {
-        return orgName;
-    });
+    static final Ref<String> username = Ref.of(orgName);
     
-    static final Ref<Integer> usernameLength = Ref.of(Integer.class, Retain.valueOf(()->{
+    static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(Retain.valueOf(()->{
         a(logs).add("Calculate username length.");
         return a(username).length();
     }).forSame(username));

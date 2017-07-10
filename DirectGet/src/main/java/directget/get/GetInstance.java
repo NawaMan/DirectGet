@@ -15,10 +15,10 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get._ThreadFactory_;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
+import directget.get.supportive.ProvidingStackMap;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -36,15 +37,13 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public final class GetInstance {
     
     private final Scope scope;
     
     private final ProvidingStackMap providingStacks = new ProvidingStackMap();
     
-    @SuppressWarnings("rawtypes")
-    final Map<Ref, Object> caches = new HashMap<Ref, Object>();
     
     GetInstance(Scope scope) {
         this.scope = scope;
@@ -214,23 +213,16 @@ public final class GetInstance {
     /**
      * Substitute the given providings and run the runnable.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     public void substitute(Stream<Providing> providings, Runnable runnable) {
-        val problem = new AtomicReference<RuntimeException>(null);
+        val problemHolder = new AtomicReference<RuntimeException>(null);
         try {
-            substitute(providings, (Supplier) (() -> {
-                try {
-                    runnable.run();
-                } catch (RuntimeException e) {
-                    problem.set(e);
-                }
-                return null;
-            }));
+            substitute(providings, runnable._toSupplier(problemHolder));
         } catch (Throwable t) {
             throw new RunWithSubstitutionException(t);
         }
         
-        val theProblem = problem.get();
+        val theProblem = problemHolder.get();
         if (theProblem != null) {
             throw theProblem;
         }
@@ -310,7 +302,7 @@ public final class GetInstance {
         val newGet = new GetInstance(scope);
         val providings = prepareProvidings(refsToInherit);
         
-        val newThread = a(Get._ThreadFactory_);
+        val newThread = the(_ThreadFactory_);
         return newThread.newThread(() -> {
             scope.threadGet.set(newGet);
             val providingsList = providings;

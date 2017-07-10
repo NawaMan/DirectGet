@@ -36,11 +36,11 @@ public class Retain {
     
     /** Ref for current thread. */
     final static Ref<Thread> currentThread
-            = Ref.of(Thread.class, ()->Thread.currentThread());
+            = Ref.of(Thread.class).by(()->Thread.currentThread());
     
     /** Ref for current time in milliseconds. */
     final static Ref<Long> currentTimeMillis
-            = Ref.of(Long.class, ()->Long.valueOf(System.currentTimeMillis()));
+            = Ref.of(Long.class).by(()->Long.valueOf(System.currentTimeMillis()));
     
     /**
      * Create a retainer builder for the given supplier.
@@ -195,7 +195,7 @@ public class Retain {
     //== Supplementary class ==========================================================================================
     
     /** The retainer. */
-    public static interface Retainer<V> extends Supplier<V>  {
+    public static interface Retainer<V> extends Supplier<V> {
         
         /** Reset the value */
         public void reset();

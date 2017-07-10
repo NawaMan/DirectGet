@@ -36,7 +36,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId 'directget'
             artifactId 'get'
-            version '0.1'
+            version '0.1-SNAPSHOT'
             
             from components.java
         }

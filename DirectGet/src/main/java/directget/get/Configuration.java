@@ -15,15 +15,9 @@
 //  ========================================================================
 package directget.get;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.toMap;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -40,10 +34,10 @@ import lombok.experimental.ExtensionMethod;
                                                // the alternative to have it on
                                                // every method is
                                                // just as bad if not worse.
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public final class Configuration {
     
-    private static final Function<Map, Map> newTreeMap = (Function<Map, Map>) TreeMap::new;
+    private static final Function<Providing, Ref> byProvidingRef = Providing::getRef;
     
     private final Map<Ref, Providing> providings;
     
@@ -64,12 +58,11 @@ public final class Configuration {
     
     /** Constructor. */
     public Configuration(Stream<Providing> providings) {
-        this(providings.filter(Objects::nonNull).collect(toMap(Providing::getRef, p -> p)));
+        this(providings._toNonNullMap(byProvidingRef));
     }
     
     private Configuration(Map<Ref, Providing> providings) {
-    	Map<Ref, Providing> newProvidingMap = providings._changeBy(newTreeMap)._or(emptyMap());
-        this.providings = unmodifiableMap(newProvidingMap);
+        this.providings = providings._toUnmodifiableSortedMap();
     }
     
     /** @return all the refs specified by this configuration. */

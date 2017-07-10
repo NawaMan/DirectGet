@@ -46,7 +46,7 @@ public class RefTest {
     @SuppressWarnings("rawtypes")
     public void testRef_directWithDefault() {
         List theList = new ArrayList();
-        Ref<List> ref = Ref.of(List.class, () -> theList);
+        Ref<List> ref = Ref.of(List.class, theList);
         assertTrue(ref._get().isPresent());
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }

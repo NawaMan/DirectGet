@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.run;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,7 +26,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  **/
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public class Fork {
     
     private static final Failable.Consumer<Session, Throwable> joinSession = Session::join;

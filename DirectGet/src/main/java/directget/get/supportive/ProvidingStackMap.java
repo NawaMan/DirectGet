@@ -13,18 +13,25 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
+import directget.get.Providing;
+import directget.get.Ref;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
+/**
+ * StackMap for Providing.
+ * 
+ * @author nawaman
+ */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtensionMethod({ Extensions.class })
-class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
+@ExtensionMethod({ utils.class })
+public class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
     
     private static final long serialVersionUID = -8113998773064688984L;
     
@@ -41,6 +48,13 @@ class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
         return stack;
     }
     
+    /**
+     * Peek the top of the stack for the ref.
+     * 
+     * @param ref
+     *          the ref.
+     * @return the providing.
+     */
     public <T> Providing<T> peek(Ref<T> ref) {
         if (!containsKey(ref)) {
             return null;
@@ -52,6 +66,11 @@ class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
         return stack.peek();
     }
     
+    /**
+     * Returns the X-Ray status of the stack.
+     * 
+     * @return the X-Ray.
+     */
     public String toXRayString() {
         val isEmpty = this.isEmpty();
         if (isEmpty) {

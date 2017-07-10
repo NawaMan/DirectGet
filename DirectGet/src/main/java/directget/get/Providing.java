@@ -18,6 +18,7 @@ package directget.get;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import directget.run.Wrapper;
 import lombok.experimental.ExtensionMethod;
 
 /**
@@ -25,8 +26,8 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  **/
-@ExtensionMethod({ Extensions.class })
-public class Providing<T> implements Supplier<T> {
+@ExtensionMethod({ utils.class })
+public class Providing<T> implements Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
     
@@ -68,6 +69,12 @@ public class Providing<T> implements Supplier<T> {
     
     public String toString() {
         return "Providing (" + preferability + ":" + ref + "): " + supplier;
+    }
+
+    @Override
+    public Runnable apply(Runnable t) {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

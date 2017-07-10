@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import directget.get.supportive.ProvidingStackMap;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -34,7 +35,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ Extensions.class })
+@ExtensionMethod({ utils.class })
 public enum Preferability {
     
     /** Only use when no other is preferred. */
@@ -69,8 +70,7 @@ public enum Preferability {
     }
     
     /** */
-    public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class,
-            Named.supplier("NULL", () -> (DetermineProvidingListener) null));
+    public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     

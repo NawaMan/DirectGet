@@ -32,19 +32,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static directget.get.Preferability.Dictate;
-import static directget.get.Run.*;
+import static directget.run.Run.*;
 import static java.lang.Thread.*;
 
 import org.junit.Test;
 
 import directget.get.App;
-import directget.get.Fork;
 import directget.get.Get;
-import directget.get.Named;
 import directget.get.Preferability;
 import directget.get.Providing;
 import directget.get.Ref;
-import directget.get.Run;
+import directget.run.Fork;
+import directget.run.Named;
+import directget.run.Run;
+import directget.run.Wrapper;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {
@@ -54,7 +55,7 @@ public class GetInstanceTest implements Named.User {
     private String orgText = "The Text";
     private String newText = "New Text!!!";
     
-    private Ref<String> _text_ = Ref.of("TheText", String.class, supplier("OrginalText", () -> orgText));
+    private Ref<String> _text_ = Ref.of("TheText", String.class).by("OrginalText", () -> orgText);
     
     private Stream<Providing> provideNewText = Stream
             .of(new Providing<>(_text_, Dictate, supplier("NewText", () -> newText)));
@@ -68,7 +69,7 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
-        Ref<StringBuffer> aBuffer = Ref.of("aList", StringBuffer.class, () -> theBuffer);
+        Ref<StringBuffer> aBuffer = Ref.of("aList", StringBuffer.class, theBuffer);
         assertTrue(App.Get()._a(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
     }
     
@@ -87,11 +88,11 @@ public class GetInstanceTest implements Named.User {
         });
     }
     
-    private final Run.Wrapper _newText = runnable -> () -> {
+    private final Wrapper _newText = runnable -> () -> {
         App.Get().substitute(provideNewText, runnable);
     };
     
-    private final Run.Wrapper _verboseLogger = runnable -> Named.runnable("VERBOSE", () -> {
+    private final Wrapper _verboseLogger = runnable -> Named.runnable("VERBOSE", () -> {
         List providings = new ArrayList();
         Preferability.DetermineProvidingListener listener = new Preferability.DetermineProvidingListener() {
             @Override
@@ -125,13 +126,14 @@ public class GetInstanceTest implements Named.User {
     public void testRunNewThread_inherit() throws Throwable {
         val fork = new Fork();
         
-        Run.with(_text_.providedWith(newText))
-        .and.with(_verboseLogger)
-        .and.onNewThread()
+        Run
+        .with(_text_.providedWith(newText))
+        .with(_verboseLogger)
+        .onNewThread()
         .inheritAll()
         .joinWith(fork)
-        .start(()->{
-        	assertEquals(newText, Get.a(_text_));
+        .run(()->{
+            assertEquals(newText, Get.a(_text_));
         });
         
         fork.join();

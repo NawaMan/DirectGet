@@ -3,8 +3,8 @@ package directget.get;
 import static directget.get.Get.a;
 import static directget.get.Get.the;
 import static directget.get.Retain.retain;
-import static directget.get.Run.OnNewThread;
-import static directget.get.Run.With;
+import static directget.run.Run.OnNewThread;
+import static directget.run.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import directget.get.Fork;
 import directget.get.Get;
 import directget.get.Ref;
 import directget.get.Retain;
-import directget.get.Run;
+import directget.run.Fork;
+import directget.run.Run;
 import lombok.val;
 
 public class RetainTest {
@@ -36,13 +36,11 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class, retain(() -> new StringList()).forCurrentThread());
+    static final Ref<StringList> logs = Ref.of(StringList.class).by(retain(()->new StringList()).forCurrentThread());
     
-    static final Ref<String> username = Ref.of(String.class, () -> {
-        return orgName;
-    });
+    static final Ref<String> username = Ref.of(orgName);
     
-    static final Ref<Integer> usernameLength = Ref.of(Integer.class, Retain.valueOf(()->{
+    static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(Retain.valueOf(()->{
         a(logs).add("Calculate username length.");
         return a(username).length();
     }).forSame(username));
@@ -150,7 +148,7 @@ public class RetainTest {
         val fork = new Fork();
         OnNewThread()
         .joinWith(fork)
-        .start(() -> {
+        .run(() -> {
             Thread.sleep(100);
             the(logs).add("log");
             assertEquals("[log]", the(logs).toString());
@@ -177,7 +175,10 @@ public class RetainTest {
             the(logs).clear();
             
             val fork = new Fork();
-            Run.onNewThread().joinWith(fork).inherit(logs).start(() -> {
+            OnNewThread()
+            .joinWith(fork)
+            .inherit(logs)
+            .run(() -> {
                 Thread.sleep(10);
                 the(logs).add("log");
             });

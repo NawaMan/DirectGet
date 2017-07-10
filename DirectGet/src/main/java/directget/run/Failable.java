@@ -13,10 +13,11 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.run;
 
-import directget.get.exceptions.FailableException;
-import directget.get.exceptions.ProblemHandler;
+import directget.get.Get;
+import directget.run.exceptions.FailableException;
+import directget.run.exceptions.ProblemHandler;
 
 /**
  * Failable actions.
@@ -45,6 +46,8 @@ public class Failable {
             return () -> {
                 try {
                     run();
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }
@@ -67,7 +70,7 @@ public class Failable {
                 try {
                     run();
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.problemHandler).handle(t);
+                    Get.a(ProblemHandler.problemHandler).handle(t);
                 }
             };
         }
@@ -91,6 +94,8 @@ public class Failable {
             return () -> {
                 try {
                     return get();
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }
@@ -114,8 +119,8 @@ public class Failable {
                 try {
                     return get();
                 } catch (Throwable t) {
-                	Get.a(ProblemHandler.problemHandler).handle(t);
-                	return null;
+                    Get.a(ProblemHandler.problemHandler).handle(t);
+                    return null;
                 }
             };
         }
@@ -139,6 +144,8 @@ public class Failable {
             return v -> {
                 try {
                     accept(v);
+                } catch (RuntimeException t) {
+                    throw t;
                 } catch (Throwable t) {
                     throw new FailableException(t);
                 }

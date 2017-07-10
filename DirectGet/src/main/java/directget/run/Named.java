@@ -13,7 +13,10 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.run;
+
+import directget.get.Get;
+import directget.get.Ref;
 
 /**
  * This class offer a way to make it easy to debug lambda by adding name to them.
@@ -158,7 +161,7 @@ public interface Named {
         
     }
     
-    /** Supplier for a value of a ref. */
+    /** Supplier for a value of a ref. **/
     public static class RefSupplier<T> extends Supplier<T> {
         
         /** The name of the supplier. */

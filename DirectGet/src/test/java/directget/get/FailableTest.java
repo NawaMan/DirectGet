@@ -1,13 +1,16 @@
 package directget.get;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import directget.get.exceptions.FailableException;
+import directget.run.Failable;
+import directget.run.exceptions.FailableException;
 import lombok.val;
 
 public class FailableTest {

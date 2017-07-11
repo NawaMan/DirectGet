@@ -61,7 +61,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
      */
     public DirectRef(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
         super(targetClass);
-        val prefer = (preferability != null) ? Preferability.Default : preferability;
+        val prefer = (preferability != null) ? preferability : Preferability.Default;
         
         this.name = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
         this.providing = (factory == null) 

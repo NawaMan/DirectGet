@@ -233,32 +233,42 @@ public final class GetInstance {
      */
     @SuppressWarnings("rawtypes")
     synchronized public <V> V substitute(Stream<Providing> providings, Supplier<V> supplier) {
-        List<Ref> addedRefs = null;
+        List<Ref> substitutedRefs = null;
         try {
-            Iterable<Providing> iterable = () -> providings.iterator();
-            for (Providing providing : iterable) {
-                if (providing == null) {
-                    continue;
-                }
-                
-                val ref = providing.getRef();
-                val stack = providingStacks.get(ref);
-                stack.push(providing);
-                if (addedRefs == null) {
-                    addedRefs = new ArrayList<>();
-                }
-                addedRefs.add(ref);
-            }
-            
+            substitutedRefs = substituteProvidings(providings, substitutedRefs);
             val result = supplier.get();
             return result;
         } finally {
-            if (addedRefs != null) {
-                addedRefs.forEach(ref -> {
-                    val stack = providingStacks.get(ref);
-                    stack.pop();
-                });
+            resetSubstitution(substitutedRefs);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private List<Ref> substituteProvidings(Stream<Providing> providings, List<Ref> addedRefs) {
+        Iterable<Providing> iterable = () -> providings.iterator();
+        for (Providing providing : iterable) {
+            if (providing == null) {
+                continue;
             }
+            
+            val ref = providing.getRef();
+            val stack = providingStacks.get(ref);
+            stack.push(providing);
+            if (addedRefs == null) {
+                addedRefs = new ArrayList<>();
+            }
+            addedRefs.add(ref);
+        }
+        return addedRefs;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private void resetSubstitution(List<Ref> addedRefs) {
+        if (addedRefs != null) {
+            addedRefs.forEach(ref -> {
+                val stack = providingStacks.get(ref);
+                stack.pop();
+            });
         }
     }
     

@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.the;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -35,9 +36,10 @@ import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
+import directget.run.Run;
 
 public class ProvidingOrderTest {
-    
+
     public static final String NOT_IMPLEMENT_YET = "NOT_IMPLEMENT_YET";
     
     // The order
@@ -525,6 +527,37 @@ public class ProvidingOrderTest {
         Providing<String> _scope = scopeDictate;
         Providing<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, false, "ScopeParentDictate");
+    }
+    
+    // == Non default ref value =======================================================================================
+
+    
+    private static final String REF_DICTATE = "RefDictate";
+    private static final Ref<String> dictatedRef = Ref.of(String.class, Preferability.Dictate, REF_DICTATE);
+    
+    @Test
+    public void testRefDictate() {
+        assertEquals(REF_DICTATE, the(dictatedRef));
+        
+        Run.with(dictatedRef.dictatedTo("SubstitueDictate")).run(()->{
+            assertEquals(REF_DICTATE, the(dictatedRef));
+        });
+    }
+    
+    private static final String REF_NORMAL = "RefNormal";
+    private static final Ref<String> normalRef = Ref.of(String.class, Preferability.Normal, REF_NORMAL);
+    
+    @Test
+    public void testRefNormal() {
+        assertEquals(REF_NORMAL, the(normalRef));
+        
+        Run.with(normalRef.dictatedTo("SubstitueDictate")).run(()->{
+            assertEquals("SubstitueDictate", the(normalRef));
+        });
+
+        Run.with(normalRef.providedWith("SubstitueNormal")).run(()->{
+            assertEquals("SubstitueNormal", the(normalRef));
+        });
     }
     
 }

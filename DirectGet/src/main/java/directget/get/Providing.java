@@ -17,6 +17,7 @@ package directget.get;
 
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import directget.run.Wrapper;
 import lombok.experimental.ExtensionMethod;
@@ -72,9 +73,12 @@ public class Providing<T> implements Supplier<T>, Wrapper {
     }
 
     @Override
-    public Runnable apply(Runnable t) {
-        // TODO Auto-generated method stub
-        return null;
+    public Runnable apply(Runnable runnable) {
+        return ()->{
+            @SuppressWarnings("rawtypes")
+            Stream<Providing> stream = Stream.of(this);
+            App.Get().substitute(stream, runnable);
+        };
     }
     
 }

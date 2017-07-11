@@ -286,8 +286,9 @@ public final class GetInstance {
      * Run the given runnable on a new thread that inherits the providings of
      * those given refs.
      **/
-    @SuppressWarnings("rawtypes")
-    public void runNewThread(List<Ref> refsToInherit, Runnable runnable) {
+    public void runNewThread(
+            @SuppressWarnings("rawtypes") List<Ref> refsToInherit,
+            Runnable runnable) {
         val thread = newThread(refsToInherit, runnable);
         thread.start();
     }
@@ -296,8 +297,9 @@ public final class GetInstance {
      * Run the given runnable on a new thread that inherits the substitution
      * from the current Get (all Ref that pass the predicate test).
      **/
-    @SuppressWarnings("rawtypes")
-    public void runNewThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+    public void runNewThread(
+            @SuppressWarnings("rawtypes") Predicate<Ref> refsToInherit,
+            Runnable runnable) {
         val thread = newThread(refsToInherit, runnable);
         thread.start();
     }

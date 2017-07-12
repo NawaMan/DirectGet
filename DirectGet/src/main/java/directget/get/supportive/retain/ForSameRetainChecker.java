@@ -46,7 +46,8 @@ public class ForSameRetainChecker<T, V> implements Predicate<V> {
         this.ref = ref;
         refValue = new AtomicReference<T>(Get.a(ref));
     }
-    
+
+    /** @return the reference ref.  **/
     public Ref<T> getRef() {
         return ref;
     }

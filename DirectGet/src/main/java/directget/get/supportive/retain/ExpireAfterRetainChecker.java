@@ -35,7 +35,6 @@ import lombok.val;
  */
 public class ExpireAfterRetainChecker<V> implements Predicate<V> {
     
-    private final Supplier<V> supplier;
     private final Retainer<V> retainer;
     private final long time;
     private final TimeUnit unit;
@@ -49,7 +48,6 @@ public class ExpireAfterRetainChecker<V> implements Predicate<V> {
      * @param unit
      */
     public ExpireAfterRetainChecker(AtomicReference<Retainer<V>> rerainerRef, Supplier<V> supplier, long time, TimeUnit unit) {
-        this.supplier = supplier;
         this.time     = time;
         this.unit     = unit;
         this.retainer = new GlobalRetainer<V>(supplier, this);
@@ -60,10 +58,12 @@ public class ExpireAfterRetainChecker<V> implements Predicate<V> {
         timer.start();
     }
     
+    /** @return the time period. */
     public long getTime() {
         return time;
     }
-    
+
+    /** @return the time unuit. */
     public TimeUnit getTimeUnit() {
         return unit;
     }

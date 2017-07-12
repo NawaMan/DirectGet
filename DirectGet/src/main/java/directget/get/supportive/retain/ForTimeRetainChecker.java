@@ -55,11 +55,12 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
         this.time = time;
         this.unit = unit;
     }
-    
+    /** @return the time period. */
     public long getTime() {
         return time;
     }
-    
+
+    /** @return the time unuit. */
     public TimeUnit getTimeUnit() {
         return unit;
     }

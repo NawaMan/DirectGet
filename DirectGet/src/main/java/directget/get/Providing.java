@@ -58,6 +58,11 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         this.supplier = supplier._or((Supplier)()->null);
     }
     
+    /**
+     * Returns the supplier underlining this providing.
+     * 
+     * @return the supplier.
+     */
     public final Supplier<T> getSupplier() {
         return this.supplier;
     }
@@ -127,9 +132,7 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         return new Providing<>(ref, preferability, new Named.RefSupplier<T>(ref));
     }
     
-    /**
-     * @return the new providing similar to this one except the supplied by the given supplier.
-     **/
+    /** @return the new providing similar to this one except the supplied by the given supplier. **/
     public Providing<T> butBy(Supplier<T> supplier) {
         return new Providing<>(ref, preferability, supplier);
     }
@@ -148,47 +151,58 @@ public class Providing<T> implements Supplier<T>, Wrapper {
             : (Retainer<T>)Retain.valueOf(supplier).globally().always());
         return retainer;
     }
-    
+
+    /** @return the new providing similar to this one except that it retains globally. **/
     public Providing<T> butGlobally() {
         return but(getRetainer().butGlobally());
     }
-    
+
+    /** @return the new providing similar to this one except that it retains locally. **/
     public Providing<T> butLocally() {
         return but(getRetainer().butLocally());
     }
-     
+
+    /** @return the new providing similar to this one except that it always retains its value. **/
     public Providing<T> butAlways() {
         return but(getRetainer().butAlways());
     }
-    
+
+    /** @return the new providing similar to this one except that it never retains its value. **/
     public Providing<T> butNever() {
         return but(getRetainer().butNever());
     }
-    
+
+    /** @return the new providing similar to this one except that it retains its value with in current thread. **/
     public Providing<T> butForCurrentThread() {
         return but(getRetainer().forCurrentThread());
     }
-    
+
+    /** @return the new providing similar to this one except that it retains its value follow the give reference value ('same' rule). **/
     public <R> Providing<T> butForSame(Ref<R> ref) {
         return but(getRetainer().forSame(ref));
     }
-    
+
+    /** @return the new providing similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
     public <R> Providing<T> butForEquivalent(Ref<R> ref) {
         return but(getRetainer().forEquivalent(ref));
     }
-    
+
+    /** @return the new providing similar to this one except that it retains its value for a given time period (in millisecond). **/
     public <R> Providing<T> butForTime(long time) {
         return but(getRetainer().forTime(time));
     }
-    
+
+    /** @return the new providing similar to this one except that it retains its value for a given time period. **/
     public <R> Providing<T> butForTime(long time, TimeUnit unit) {
         return but(getRetainer().forTime(time, unit));
     }
-    
+
+    /** @return the new providing similar to this one except that its retained value expired after a given time period (in millisecond). **/
     public <R> Providing<T> butExpireAfter(long time) {
         return but(getRetainer().forTime(time));
     }
-    
+
+    /** @return the new providing similar to this one except that its retained value expired after a given time period. **/
     public <R> Providing<T> butExpireAfter(long time, TimeUnit unit) {
         return but(getRetainer().forTime(time, unit));
     }

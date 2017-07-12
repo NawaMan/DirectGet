@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import directget.get.Ref;
-import directget.get.supportive.retain.Retain.Retainer;
 import lombok.val;
 
 /**
@@ -189,19 +188,21 @@ public class Retain {
             }
             return getCloner().apply(supplier, newShouldRetain.get());
         }
-        
+
+        /** @return the new retainer similar to this one except that it retains globally. **/
         public Retainer<V> butGlobally() {
             if (this instanceof GlobalRetainer) {
                 return this;
             }
-            return new GlobalRetainer(supplier, shouldRetain);
+            return new GlobalRetainer<V>(supplier, shouldRetain);
         }
-        
+
+        /** @return the new retainer similar to this one except that it retains locally. **/
         public Retainer<V> butLocally() {
             if (this instanceof LocalRetainer) {
                 return this;
             }
-            return new LocalRetainer(supplier, shouldRetain);
+            return new LocalRetainer<V>(supplier, shouldRetain);
         }
         
         /** @return the retainer similar to this one but always retain. */
@@ -224,20 +225,24 @@ public class Retain {
             return newRetainer;
         }
 
+        /** @return the new providing similar to this one except that it retains its value with in current thread. **/
         public Retainer<V> forCurrentThread() {
             boolean                 isLocal          = (this instanceof LocalRetainer);
             Predicate<Predicate<V>> sameShouldRetain = shouldRetain -> isLocal && (shouldRetain == RetainerBuilder.ALWAYS);
+            @SuppressWarnings("unchecked")
             Supplier<Predicate<V>>  newShouldRetain  = ()->(Predicate<V>)RetainerBuilder.ALWAYS;
             
             if (sameShouldRetain.test(shouldRetain)) {
                 return this;
             }
             
-            Retainer<V> newRetainer = new LocalRetainer(supplier, newShouldRetain.get());
+            Retainer<V> newRetainer = new LocalRetainer<V>(supplier, newShouldRetain.get());
             return newRetainer;
         }
 
+        /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('same' rule). **/
         public <R> Retainer<V> forSame(Ref<R> ref) {
+            @SuppressWarnings("rawtypes")
             Predicate<Predicate<V>> sameShouldRetain
                     = shouldRetain ->
                             (shouldRetain instanceof ForSameRetainChecker)
@@ -248,7 +253,9 @@ public class Retain {
             return newRetainer;
         }
 
+        /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
         public <R> Retainer<V> forEquivalent(Ref<R> ref) {
+            @SuppressWarnings("rawtypes")
             Predicate<Predicate<V>> sameShouldRetain
                     = shouldRetain ->
                             (shouldRetain instanceof ForEquivalentRetainChecker)
@@ -259,11 +266,14 @@ public class Retain {
             return newRetainer;
         }
 
+        /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
         public <R> Retainer<V> forTime(long time) {
             return forTime(time, TimeUnit.MILLISECONDS);
         }
 
+        /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
         public <R> Retainer<V> forTime(long time, TimeUnit unit) {
+            @SuppressWarnings("rawtypes")
             Predicate<Predicate<V>> sameShouldRetain
                     = shouldRetain ->
                             (shouldRetain instanceof ForTimeRetainChecker)
@@ -275,12 +285,15 @@ public class Retain {
             return newRetainer;
         }
 
+        /** @return the new retainer similar to this one except that its retained value expired after a given time period (in millisecond). **/
         public <R> Retainer<V> expireAfter(long time) {
             return expireAfter(time, TimeUnit.MILLISECONDS);
         }
 
+        /** @return the new retainer similar to this one except that its retained value expired after a given time period. **/
         public <R> Retainer<V> expireAfter(long time, TimeUnit unit) {
             AtomicReference<Retainer<V>> rerainerRef = new AtomicReference<Retain.Retainer<V>>(null);
+            @SuppressWarnings("rawtypes")
             Predicate<Predicate<V>> sameShouldRetain
                     = shouldRetain ->
                             (shouldRetain instanceof ExpireAfterRetainChecker)

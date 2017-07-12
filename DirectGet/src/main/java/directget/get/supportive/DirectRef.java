@@ -124,29 +124,27 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     
     //== Wither =======================================================================================================
     
-    /**
-     * @return the new providing similar to this one except the preferability of dictate.
-     **/
+    DirectRef<T> but(Preferability newPreferability) {
+        return new DirectRef<T>(name, getTargetClass(), newPreferability, providing);
+    }
+    
+    /** @return the new providing similar to this one except the preferability of dictate. **/
     public DirectRef<T> butDictate() {
-        return new DirectRef(name, getTargetClass(), Preferability.Dictate, providing.getSupplier());
+        return but(Preferability.Dictate);
     }
     
-    /**
-     * @return the new providing similar to this one except the preferability of normal.
-     **/
+    /** @return the new providing similar to this one except the preferability of normal. **/
     public DirectRef<T> butNormal() {
-        return new DirectRef(name, getTargetClass(), Preferability.Normal, providing.getSupplier());
+        return but(Preferability.Normal);
     }
     
-    /**
-     * @return the new providing similar to this one except the preferability of default.
-     **/
+    /** @return the new providing similar to this one except the preferability of default. **/
     public DirectRef<T> butDefault() {
-        return new DirectRef(name, getTargetClass(), Preferability.Default, providing.getSupplier());
+        return but(Preferability.Default);
     }
     
     DirectRef<T> but(Providing<T> newProviding) {
-        return new DirectRef(name, getTargetClass(), Preferability.Normal, newProviding.getSupplier());
+        return new DirectRef<T>(name, getTargetClass(), Preferability.Normal, newProviding.getSupplier());
     }
     
     /**
@@ -166,6 +164,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     /**
      * @return the new providing similar to this one except the supplied by the given supplier.
      **/
+    @SuppressWarnings("unchecked")
     public DirectRef<T> by(Supplier<? extends T> supplier) {
         if (providing == null) {
             return new DirectRef<>(name, getTargetClass(), getPreferability(), supplier);
@@ -184,49 +183,60 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     }
     
     DirectRef<T> but(Retainer<T> newRetainer) {
-        return new DirectRef(name, getTargetClass(), Preferability.Normal, newRetainer);
+        return new DirectRef<T>(name, getTargetClass(), Preferability.Normal, newRetainer);
     }
-    
+
+    /** @return the new ref similar to this one except that it retains globally. **/
     public DirectRef<T> globally() {
         return but(getRetainer().butGlobally());
     }
-    
+
+    /** @return the new ref similar to this one except that it retains locally. **/
     public DirectRef<T> locally() {
         return but(getRetainer().butLocally());
     }
-     
+    
+    /** @return the new ref similar to this one except that it always retains its value. **/
     public DirectRef<T> always() {
         return but(getRetainer().butAlways());
     }
     
+    /** @return the new ref similar to this one except that it never retains its value. **/
     public DirectRef<T> never() {
         return but(getRetainer().butNever());
     }
     
+    /** @return the new ref similar to this one except that it retains its value with in current thread. **/
     public DirectRef<T> forCurrentThread() {
         return but(getRetainer().forCurrentThread());
     }
-    
+
+    /** @return the new ref similar to this one except that it retains its value follow the give reference value ('same' rule). **/
     public <R> DirectRef<T> forSame(Ref<R> ref) {
         return but(getRetainer().forSame(ref));
     }
-    
+
+    /** @return the new ref similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
     public <R> DirectRef<T> forEquivalent(Ref<R> ref) {
         return but(getRetainer().forEquivalent(ref));
     }
     
+    /** @return the new ref similar to this one except that it retains its value for a given time period (in millisecond). **/
     public <R> DirectRef<T> forTime(long time) {
         return but(getRetainer().forTime(time));
     }
-    
+
+    /** @return the new ref similar to this one except that it retains its value for a given time period. **/
     public <R> DirectRef<T> forTime(long time, TimeUnit unit) {
         return but(getRetainer().forTime(time, unit));
     }
-    
+
+    /** @return the new ref similar to this one except that its retained value expired after a given time period (in millisecond). **/
     public <R> DirectRef<T> expireAfter(long time) {
         return but(getRetainer().forTime(time));
     }
-    
+
+    /** @return the new ref similar to this one except that its retained value expired after a given time period. **/
     public <R> DirectRef<T> expireAfter(long time, TimeUnit unit) {
         return but(getRetainer().forTime(time, unit));
     }

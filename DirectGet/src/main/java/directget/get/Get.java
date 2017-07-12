@@ -54,6 +54,10 @@ public final class Get {
         
     }
     
+    static <T> Providing<T> getProvider(Ref<T> ref) {
+        return App.Get().getProviding(ref);
+    }
+    
     /** @return the optional value associated with the given ref. */
     public static <T> Optional<T> _a(Ref<T> ref) {
         val optValue = App.Get()._a(ref);

@@ -16,10 +16,15 @@
 package directget.get;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import directget.get.supportive.retain.Retain;
+import directget.get.supportive.retain.Retain.Retainer;
+import directget.run.Named;
 import directget.run.Wrapper;
+import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
@@ -53,6 +58,10 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         this.supplier = supplier._or((Supplier)()->null);
     }
     
+    public final Supplier<T> getSupplier() {
+        return this.supplier;
+    }
+    
     /** @return the reference for this providing. */
     public final Ref<T> getRef() {
         return ref;
@@ -79,6 +88,109 @@ public class Providing<T> implements Supplier<T>, Wrapper {
             Stream<Providing> stream = Stream.of(this);
             App.Get().substitute(stream, runnable);
         };
+    }
+    
+    //== Wither =======================================================================================================
+    
+    /**
+     * @return the new providing similar to this one except the preferability of dictate.
+     **/
+    public Providing<T> butDictate() {
+        return new Providing<>(ref, Preferability.Dictate, supplier);
+    }
+    
+    /**
+     * @return the new providing similar to this one except the preferability of normal.
+     **/
+    public Providing<T> butNormal() {
+        return new Providing<>(ref, Preferability.Normal, supplier);
+    }
+    
+    /**
+     * @return the new providing similar to this one except the preferability of default.
+     **/
+    public Providing<T> butDefault() {
+        return new Providing<>(ref, Preferability.Default, supplier);
+    }
+    
+    /**
+     * @return the new providing similar to this one except with the value.
+     **/
+    public Providing<T> butWith(T value) {
+        return new Providing<>(ref, preferability, new Named.ValueSupplier<T>(value));
+    }
+    
+    /**
+     * @return the new providing similar to this one except with the value.
+     **/
+    public Providing<T> butWithA(Ref<T> ref) {
+        return new Providing<>(ref, preferability, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * @return the new providing similar to this one except the supplied by the given supplier.
+     **/
+    public Providing<T> butBy(Supplier<T> supplier) {
+        return new Providing<>(ref, preferability, supplier);
+    }
+
+    Providing<T> but(Supplier<T> newRetainer) {
+        if (newRetainer == supplier) {
+            return this;
+        }
+        return new Providing<>(ref, preferability, newRetainer);
+    }
+    
+    Retainer<T> getRetainer() {
+        val retainer
+            = ((supplier instanceof Retainer)
+            ? ((Retainer<T>)supplier)
+            : (Retainer<T>)Retain.valueOf(supplier).globally().always());
+        return retainer;
+    }
+    
+    public Providing<T> butGlobally() {
+        return but(getRetainer().butGlobally());
+    }
+    
+    public Providing<T> butLocally() {
+        return but(getRetainer().butLocally());
+    }
+     
+    public Providing<T> butAlways() {
+        return but(getRetainer().butAlways());
+    }
+    
+    public Providing<T> butNever() {
+        return but(getRetainer().butNever());
+    }
+    
+    public Providing<T> butForCurrentThread() {
+        return but(getRetainer().forCurrentThread());
+    }
+    
+    public <R> Providing<T> butForSame(Ref<R> ref) {
+        return but(getRetainer().forSame(ref));
+    }
+    
+    public <R> Providing<T> butForEquivalent(Ref<R> ref) {
+        return but(getRetainer().forEquivalent(ref));
+    }
+    
+    public <R> Providing<T> butForTime(long time) {
+        return but(getRetainer().forTime(time));
+    }
+    
+    public <R> Providing<T> butForTime(long time, TimeUnit unit) {
+        return but(getRetainer().forTime(time, unit));
+    }
+    
+    public <R> Providing<T> butExpireAfter(long time) {
+        return but(getRetainer().forTime(time));
+    }
+    
+    public <R> Providing<T> butExpireAfter(long time, TimeUnit unit) {
+        return but(getRetainer().forTime(time, unit));
     }
     
 }

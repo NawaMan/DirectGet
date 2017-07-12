@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.run;
 
-import static directget.get.Retain.retain;
+import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.Run.IgnoreHandledProblem;
 import static directget.run.Run.OnNewThread;
 import static directget.run.exceptions.ProblemHandler.problemHandler;

@@ -1,6 +1,6 @@
 package directget.run;
 
-import static directget.get.Retain.retain;
+import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

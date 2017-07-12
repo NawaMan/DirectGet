@@ -13,18 +13,18 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive.retain;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import javax.swing.Timer;
-
+import directget.get.Ref;
+import directget.get.supportive.retain.Retain.Retainer;
 import lombok.val;
 
 /**
@@ -37,10 +37,6 @@ public class Retain {
     /** Ref for current thread. */
     final static Ref<Thread> currentThread
             = Ref.of(Thread.class).by(()->Thread.currentThread());
-    
-    /** Ref for current time in milliseconds. */
-    final static Ref<Long> currentTimeMillis
-            = Ref.of(Long.class).by(()->Long.valueOf(System.currentTimeMillis()));
     
     /**
      * Create a retainer builder for the given supplier.
@@ -111,34 +107,19 @@ public class Retain {
          *   the last call.
          **/
         public <T> Supplier<V> forSame(Ref<T> ref) {
-            val refValue = new AtomicReference<T>(Get.a(ref));
-            Predicate<V> shouldRetain = value->{
-                val newValue = Get.a(ref);
-                val isSame = newValue == refValue.get();
-                if (!isSame) {
-                    refValue.set(newValue);
-                }
-                return isSame;
-            };
+            Predicate<V> shouldRetain = new ForSameRetainChecker<T, V>(ref);
             return isGlobal
                     ? new GlobalRetainer<V>(supplier, shouldRetain)
                     : new LocalRetainer<V>(supplier,  shouldRetain);
         }
+
         
         /** 
          * Create and return a supplier that cache its value until the value of the given ref does not equal
          *   the last call.
          **/
         public <T> Supplier<V> forEquivalent(Ref<T> ref) {
-            val refValue = new AtomicReference<T>(Get.a(ref));
-            Predicate<V> shouldRetain = value->{
-                val newValue = Get.a(ref);
-                val isEquivalent = Objects.equals(newValue, refValue.get());
-                if (!isEquivalent) {
-                    refValue.set(newValue);
-                }
-                return isEquivalent;
-            };
+            Predicate<V> shouldRetain = new ForEquivalentRetainChecker<T, V>(ref);
             return isGlobal
                     ? new GlobalRetainer<V>(supplier, shouldRetain)
                     : new LocalRetainer<V>(supplier,  shouldRetain); 
@@ -151,15 +132,7 @@ public class Retain {
         
         /** Create and return a supplier that cache its value until for a specific amount of time. **/
         public <T> Supplier<V> forTime(long time, TimeUnit unit) {
-            val expiredValue = new AtomicLong(Get.a(currentTimeMillis) + unit.toMillis(time));
-            Predicate<V> shouldRetain = value->{
-                val currentTime = Get.a(currentTimeMillis);
-                val hasExpires = currentTime >= expiredValue.get();
-                if (hasExpires) {
-                    expiredValue.set(Get.a(currentTimeMillis) + unit.toMillis(time));
-                }
-                return !hasExpires;
-            };
+            Predicate<V> shouldRetain = new ForTimeRetainChecker<V>(time, unit);
             return isGlobal
                     ? new GlobalRetainer<V>(supplier, shouldRetain)
                     : new LocalRetainer<V>(supplier,  shouldRetain); 
@@ -176,18 +149,14 @@ public class Retain {
          * Note: This retainer actively reset the cache. It only allow for global retainer.
          * NOTE: For local retainer, this method will return forTime retainer. 
          **/
-        @SuppressWarnings("unchecked")
         public <T> Supplier<V> expireAfter(long time, TimeUnit unit) {
             if (!isGlobal) {
                 return forTime(time, unit);
             }
             
-            val retanerRef = new AtomicReference<Retainer<V>>();
-            val timer = new Timer((int) unit.toMillis(time), evt-> retanerRef.get().reset() );
-            timer.setRepeats(true);
-            retanerRef.set(new GlobalRetainer<V>(supplier, (Predicate<V>)ALWAYS));
-            timer.start();
-            return retanerRef.get();
+            val rerainerRef = new AtomicReference<Retainer<V>>();
+            new ExpireAfterRetainChecker<V>(rerainerRef, supplier, time, unit);
+            return rerainerRef.get();
         }
         
     }
@@ -195,28 +164,143 @@ public class Retain {
     //== Supplementary class ==========================================================================================
     
     /** The retainer. */
-    public static interface Retainer<V> extends Supplier<V> {
+    public static abstract class Retainer<V> implements Supplier<V> {
+        
+        final Supplier<V> supplier;
+        
+        final Predicate<V> shouldRetain;
+
+        /** Constructs a global retainer. */
+        Retainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
+            this.supplier     = supplier;
+            this.shouldRetain = shouldRetain;
+        }
         
         /** Reset the value */
-        public void reset();
+        public abstract void reset();
         
-        public V get();
+        public abstract V get();
+        
+        abstract BiFunction<Supplier<V>, Predicate<V>, Retainer<V>> getCloner();
+        
+        Retainer<V> newRetainer(Predicate<Predicate<V>> sameShouldRetain, Supplier<Predicate<V>> newShouldRetain) {
+            if (sameShouldRetain.test(this.shouldRetain)) {
+                return this;
+            }
+            return getCloner().apply(supplier, newShouldRetain.get());
+        }
+        
+        public Retainer<V> butGlobally() {
+            if (this instanceof GlobalRetainer) {
+                return this;
+            }
+            return new GlobalRetainer(supplier, shouldRetain);
+        }
+        
+        public Retainer<V> butLocally() {
+            if (this instanceof LocalRetainer) {
+                return this;
+            }
+            return new LocalRetainer(supplier, shouldRetain);
+        }
+        
+        /** @return the retainer similar to this one but always retain. */
+        @SuppressWarnings({ "unchecked" })
+        public Retainer<V> butAlways() {
+            Predicate<Predicate<V>> sameShouldRetain = shouldRetain -> (shouldRetain == RetainerBuilder.ALWAYS);
+            Supplier<Predicate<V>>  newShouldRetain  = ()->(Predicate<V>)RetainerBuilder.ALWAYS;
+            
+            Retainer<V> newRetainer = newRetainer(sameShouldRetain, newShouldRetain);
+            return newRetainer;
+        }
+
+        /** @return the retainer similar to this one but never retain. */
+        @SuppressWarnings({ "unchecked" })
+        public Retainer<V> butNever() {
+            Predicate<Predicate<V>> sameShouldRetain = shouldRetain -> (shouldRetain == RetainerBuilder.NEVER);
+            Supplier<Predicate<V>>  newShouldRetain  = ()->(Predicate<V>)RetainerBuilder.NEVER;
+            
+            Retainer<V> newRetainer = newRetainer(sameShouldRetain, newShouldRetain);
+            return newRetainer;
+        }
+
+        public Retainer<V> forCurrentThread() {
+            boolean                 isLocal          = (this instanceof LocalRetainer);
+            Predicate<Predicate<V>> sameShouldRetain = shouldRetain -> isLocal && (shouldRetain == RetainerBuilder.ALWAYS);
+            Supplier<Predicate<V>>  newShouldRetain  = ()->(Predicate<V>)RetainerBuilder.ALWAYS;
+            
+            if (sameShouldRetain.test(shouldRetain)) {
+                return this;
+            }
+            
+            Retainer<V> newRetainer = new LocalRetainer(supplier, newShouldRetain.get());
+            return newRetainer;
+        }
+
+        public <R> Retainer<V> forSame(Ref<R> ref) {
+            Predicate<Predicate<V>> sameShouldRetain
+                    = shouldRetain ->
+                            (shouldRetain instanceof ForSameRetainChecker)
+                         && ((ForSameRetainChecker)shouldRetain).getRef().equals(ref);
+            Supplier<Predicate<V>> newShouldRetain = ()->new ForSameRetainChecker<R, V>(ref);
+            
+            Retainer<V> newRetainer = newRetainer(sameShouldRetain, newShouldRetain);
+            return newRetainer;
+        }
+
+        public <R> Retainer<V> forEquivalent(Ref<R> ref) {
+            Predicate<Predicate<V>> sameShouldRetain
+                    = shouldRetain ->
+                            (shouldRetain instanceof ForEquivalentRetainChecker)
+                         && ((ForEquivalentRetainChecker)shouldRetain).getRef().equals(ref);
+            Supplier<Predicate<V>> newShouldRetain = ()->new ForEquivalentRetainChecker<R, V>(ref);
+            
+            Retainer<V> newRetainer = newRetainer(sameShouldRetain, newShouldRetain);
+            return newRetainer;
+        }
+
+        public <R> Retainer<V> forTime(long time) {
+            return forTime(time, TimeUnit.MILLISECONDS);
+        }
+
+        public <R> Retainer<V> forTime(long time, TimeUnit unit) {
+            Predicate<Predicate<V>> sameShouldRetain
+                    = shouldRetain ->
+                            (shouldRetain instanceof ForTimeRetainChecker)
+                         && ((ForTimeRetainChecker)shouldRetain).getTime()     == time
+                         && ((ForTimeRetainChecker)shouldRetain).getTimeUnit() == unit;
+            Supplier<Predicate<V>> newShouldRetain = ()->new ForTimeRetainChecker<V>(time, unit);
+            
+            Retainer<V> newRetainer = newRetainer(sameShouldRetain, newShouldRetain);
+            return newRetainer;
+        }
+
+        public <R> Retainer<V> expireAfter(long time) {
+            return expireAfter(time, TimeUnit.MILLISECONDS);
+        }
+
+        public <R> Retainer<V> expireAfter(long time, TimeUnit unit) {
+            AtomicReference<Retainer<V>> rerainerRef = new AtomicReference<Retain.Retainer<V>>(null);
+            Predicate<Predicate<V>> sameShouldRetain
+                    = shouldRetain ->
+                            (shouldRetain instanceof ExpireAfterRetainChecker)
+                         && ((ExpireAfterRetainChecker)shouldRetain).getTime()     == time
+                         && ((ExpireAfterRetainChecker)shouldRetain).getTimeUnit() == unit;
+            Supplier<Predicate<V>> newShouldRetain = ()->new ExpireAfterRetainChecker<V>(rerainerRef, supplier, time, unit);
+            newRetainer(sameShouldRetain, newShouldRetain);
+            return rerainerRef.get();
+        }
         
     }
     
     /** The global retainer. */
-    public static class GlobalRetainer<V> implements Retainer<V> {
-        
-        private final Supplier<V> supplier;
-        
-        private final Predicate<V> shouldRetain;
+    public static class GlobalRetainer<V> extends Retainer<V> {
         
         private final AtomicReference<Optional<V>> cache = new AtomicReference<Optional<V>>(null);
         
         /** Constructs a global retainer. */
         public GlobalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
-            this.supplier     = supplier;
-            this.shouldRetain = shouldRetain;
+            super(supplier, shouldRetain);
         }
         
         @Override
@@ -244,21 +328,22 @@ public class Retain {
             return newValue;
         }
         
+        public BiFunction<Supplier<V>, Predicate<V>, Retainer<V>> getCloner() {
+            return (supplier, showRetain)->{
+                return new GlobalRetainer<V>(supplier, showRetain);
+            };
+        }
+        
     }
     
     /** The local (thread) retainer. */
-    public static class LocalRetainer<V> implements Retainer<V> {
-        
-        private final Supplier<V> supplier;
-        
-        private final Predicate<V> shouldRetain;
+    public static class LocalRetainer<V> extends Retainer<V> {
         
         private final ThreadLocal<Optional<V>> cache = ThreadLocal.withInitial(()->null);
         
-        /** Constructs a local retainer. */
+        /** Constructs a global retainer. */
         public LocalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
-            this.supplier     = supplier;
-            this.shouldRetain = shouldRetain;
+            super(supplier, shouldRetain);
         }
         
         @Override
@@ -284,6 +369,19 @@ public class Retain {
             val newValue = supplier.get();
             cache.set(Optional.ofNullable(newValue));
             return newValue;
+        }
+        
+        public BiFunction<Supplier<V>, Predicate<V>, Retainer<V>> getCloner() {
+            return (supplier, showRetain)->{
+                return new LocalRetainer<V>(supplier, showRetain);
+            };
+        }
+        
+        Retainer<V> newRetainer(Predicate<Predicate<V>> sameShouldRetain, Function<Predicate<V>, Predicate<V>> newShouldRetain) {
+            if (sameShouldRetain.test(this.shouldRetain)) {
+                return this;
+            }
+            return getCloner().apply(supplier, newShouldRetain.apply(this.shouldRetain));
         }
         
     }

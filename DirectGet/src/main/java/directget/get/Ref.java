@@ -112,6 +112,11 @@ public interface Ref<T> extends Comparable<Ref<T>> {
                 defaultSupplier);
     }
     
+    /** Create a providing that dictate the current. */
+    default public Providing<T> dictateCurrent() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Dictate, currentProviding.getSupplier());
+    }
     
     /** Create a providing that dictate the given value. */
     default public Providing<T> dictatedTo(T value) {
@@ -126,6 +131,12 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     /** Create the providing that dictate the result of the given supplier. */
     default public Providing<T> dictatedBy(Supplier<T> supplier) {
         return new Providing<>(this, Preferability.Dictate, supplier);
+    }
+
+    /** Create a providing that provide the current. */
+    default public Providing<T> provideCurrent() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Normal, currentProviding.getSupplier());
     }
     
     /** Create the providing (normal preferability) the given value. */
@@ -167,6 +178,12 @@ public interface Ref<T> extends Comparable<Ref<T>> {
      */
     default public Providing<T> providedBy(Preferability preferability, Supplier<T> supplier) {
         return new Providing<>(this, preferability, supplier);
+    }
+
+    /** Create a providing that provide the current. */
+    default public Providing<T> defaultToCurrent() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Default, currentProviding.getSupplier());
     }
     
     /** Create the providing that default to the given value. */

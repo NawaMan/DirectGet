@@ -16,12 +16,15 @@
 package directget.get.supportive;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import directget.get.Preferability;
 import directget.get.Providing;
 import directget.get.Ref;
+import directget.get.supportive.retain.Retain;
+import directget.get.supportive.retain.Retain.Retainer;
 import lombok.val;
 
 /**
@@ -116,6 +119,116 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     @Override
     public final String toString() {
         return "Ref<" + this.name + ":" + this.getTargetClass().getName() + ">";
+    }
+
+    
+    //== Wither =======================================================================================================
+    
+    /**
+     * @return the new providing similar to this one except the preferability of dictate.
+     **/
+    public DirectRef<T> butDictate() {
+        return new DirectRef(name, getTargetClass(), Preferability.Dictate, providing.getSupplier());
+    }
+    
+    /**
+     * @return the new providing similar to this one except the preferability of normal.
+     **/
+    public DirectRef<T> butNormal() {
+        return new DirectRef(name, getTargetClass(), Preferability.Normal, providing.getSupplier());
+    }
+    
+    /**
+     * @return the new providing similar to this one except the preferability of default.
+     **/
+    public DirectRef<T> butDefault() {
+        return new DirectRef(name, getTargetClass(), Preferability.Default, providing.getSupplier());
+    }
+    
+    DirectRef<T> but(Providing<T> newProviding) {
+        return new DirectRef(name, getTargetClass(), Preferability.Normal, newProviding.getSupplier());
+    }
+    
+    /**
+     * @return the new providing similar to this one except with the value.
+     **/
+    public DirectRef<T> with(T value) {
+        return but(providing.butWith(value));
+    }
+    
+    /**
+     * @return the new providing similar to this one except with the value.
+     **/
+    public DirectRef<T> withA(Ref<T> ref) {
+        return but(providing.butWithA(ref));
+    }
+    
+    /**
+     * @return the new providing similar to this one except the supplied by the given supplier.
+     **/
+    public DirectRef<T> by(Supplier<? extends T> supplier) {
+        if (providing == null) {
+            return new DirectRef<>(name, getTargetClass(), getPreferability(), supplier);
+        }
+        
+        return but(providing.butBy((Supplier<T>)supplier));
+    }
+    
+    Retainer<T> getRetainer() {
+        val supplier = providing.getSupplier();
+        val retainer
+            = ((supplier instanceof Retainer)
+            ? ((Retainer<T>)supplier)
+            : (Retainer<T>)Retain.valueOf(supplier).globally().always());
+        return retainer;
+    }
+    
+    DirectRef<T> but(Retainer<T> newRetainer) {
+        return new DirectRef(name, getTargetClass(), Preferability.Normal, newRetainer);
+    }
+    
+    public DirectRef<T> globally() {
+        return but(getRetainer().butGlobally());
+    }
+    
+    public DirectRef<T> locally() {
+        return but(getRetainer().butLocally());
+    }
+     
+    public DirectRef<T> always() {
+        return but(getRetainer().butAlways());
+    }
+    
+    public DirectRef<T> never() {
+        return but(getRetainer().butNever());
+    }
+    
+    public DirectRef<T> forCurrentThread() {
+        return but(getRetainer().forCurrentThread());
+    }
+    
+    public <R> DirectRef<T> forSame(Ref<R> ref) {
+        return but(getRetainer().forSame(ref));
+    }
+    
+    public <R> DirectRef<T> forEquivalent(Ref<R> ref) {
+        return but(getRetainer().forEquivalent(ref));
+    }
+    
+    public <R> DirectRef<T> forTime(long time) {
+        return but(getRetainer().forTime(time));
+    }
+    
+    public <R> DirectRef<T> forTime(long time, TimeUnit unit) {
+        return but(getRetainer().forTime(time, unit));
+    }
+    
+    public <R> DirectRef<T> expireAfter(long time) {
+        return but(getRetainer().forTime(time));
+    }
+    
+    public <R> DirectRef<T> expireAfter(long time, TimeUnit unit) {
+        return but(getRetainer().forTime(time, unit));
     }
     
 }

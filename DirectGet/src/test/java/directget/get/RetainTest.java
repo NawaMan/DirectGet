@@ -2,7 +2,7 @@ package directget.get;
 
 import static directget.get.Get.a;
 import static directget.get.Get.the;
-import static directget.get.Retain.retain;
+import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.Run.OnNewThread;
 import static directget.run.Run.With;
 import static org.junit.Assert.assertEquals;
@@ -11,12 +11,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.get.Retain;
+import directget.get.supportive.retain.Retain;
 import directget.run.Fork;
 import directget.run.Run;
 import lombok.val;
@@ -193,8 +194,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_time() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(() -> new StringList())
-        .forTime(200, TimeUnit.MILLISECONDS)))
+        With(logs.dictatedBy(Retain.valueOf(() -> new StringList()).forTime(200, TimeUnit.MILLISECONDS)))
         .run(() -> {
             the(logs).clear();
             
@@ -217,7 +217,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_expire() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(StringList::new).globally().expireAfter(200, TimeUnit.MILLISECONDS)))
+        With(logs.dictatedBy(StringList::new).butGlobally().butExpireAfter(200, TimeUnit.MILLISECONDS))
         .run(()->{
             the(logs).clear();
             
@@ -237,5 +237,25 @@ public class RetainTest {
             assertEquals("[log]", the(logs).toString());
         });
     }
+    
+    @Test
+    public void testRetain_but() {
+        val counter = Ref.of(AtomicInteger.class).by(()->new AtomicInteger()).globally().always();
+        val ref     = Ref.of(String.class).by(()->"Value#" + the(counter).getAndIncrement());
+        assertEquals("Value#0", the(ref).toString());
+        assertEquals("Value#1", the(ref).toString());
+        
+        OnNewThread().run(()->{
+            assertEquals("Value#2", the(ref).toString());
+        });
+        
+        With(counter.dictateCurrent().butForCurrentThread())
+        .run(()->{
+            assertEquals("Value#0", the(ref).toString());
+        });
+        
+        assertEquals("Value#3", the(ref).toString());
+    }
+    
     
 }

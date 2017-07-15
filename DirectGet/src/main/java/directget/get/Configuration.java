@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import directget.get.supportive.directget_internal_utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -34,7 +35,7 @@ import lombok.experimental.ExtensionMethod;
                                                // the alternative to have it on
                                                // every method is
                                                // just as bad if not worse.
-@ExtensionMethod({ utils.class })
+@ExtensionMethod({ directget_internal_utilities.class })
 public final class Configuration {
     
     private static final Function<Providing, Ref> byProvidingRef = Providing::getRef;

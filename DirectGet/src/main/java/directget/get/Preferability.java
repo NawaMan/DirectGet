@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import directget.get.supportive.ProvidingStackMap;
+import directget.get.supportive.directget_internal_utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -35,7 +36,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ utils.class })
+@ExtensionMethod({ directget_internal_utilities.class })
 public enum Preferability {
     
     /** Only use when no other is preferred. */

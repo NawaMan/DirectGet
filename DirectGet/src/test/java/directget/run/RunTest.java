@@ -15,7 +15,6 @@
 //  ========================================================================
 package directget.run;
 
-import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.Run.IgnoreHandledProblem;
 import static directget.run.Run.OnNewThread;
 import static directget.run.exceptions.ProblemHandler.problemHandler;
@@ -32,8 +31,6 @@ import org.junit.Test;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.run.Failable;
-import directget.run.Run;
 import directget.run.exceptions.ProblemHandledException;
 import directget.run.exceptions.ProblemHandler;
 import lombok.val;
@@ -124,7 +121,7 @@ public class RunTest {
         val pblmBuffer = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.providedBy(retain(()->new ProblemHandler(pblmBuffer::add)).always()))
+            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).butAlways())
             .handleProblem()
             .run(()->{
                 throw new IOException();

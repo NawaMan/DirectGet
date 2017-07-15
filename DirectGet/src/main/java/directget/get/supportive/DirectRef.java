@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 import directget.get.Preferability;
 import directget.get.Providing;
 import directget.get.Ref;
-import directget.get.supportive.retain.Retain;
-import directget.get.supportive.retain.Retain.Retainer;
+import directget.get.supportive.retain.Retainer;
+import directget.get.supportive.retain.RetainerBuilder;
 import lombok.val;
 
 /**
@@ -178,7 +178,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
         val retainer
             = ((supplier instanceof Retainer)
             ? ((Retainer<T>)supplier)
-            : (Retainer<T>)Retain.valueOf(supplier).globally().always());
+            : (Retainer<T>)new RetainerBuilder<T>(supplier).globally().always());
         return retainer;
     }
     
@@ -223,22 +223,22 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     
     /** @return the new ref similar to this one except that it retains its value for a given time period (in millisecond). **/
     public <R> DirectRef<T> forTime(long time) {
-        return but(getRetainer().forTime(time));
+        return but(getRetainer().forTime(null, time));
     }
 
     /** @return the new ref similar to this one except that it retains its value for a given time period. **/
     public <R> DirectRef<T> forTime(long time, TimeUnit unit) {
-        return but(getRetainer().forTime(time, unit));
+        return but(getRetainer().forTime(null, time, unit));
+    }
+    
+    /** @return the new ref similar to this one except that it retains its value for a given time period (in millisecond). **/
+    public <R> DirectRef<T> forTime(Long startMilliseconds, long time) {
+        return but(getRetainer().forTime(startMilliseconds, time));
     }
 
-    /** @return the new ref similar to this one except that its retained value expired after a given time period (in millisecond). **/
-    public <R> DirectRef<T> expireAfter(long time) {
-        return but(getRetainer().forTime(time));
-    }
-
-    /** @return the new ref similar to this one except that its retained value expired after a given time period. **/
-    public <R> DirectRef<T> expireAfter(long time, TimeUnit unit) {
-        return but(getRetainer().forTime(time, unit));
+    /** @return the new ref similar to this one except that it retains its value for a given time period. **/
+    public <R> DirectRef<T> forTime(Long startMilliseconds, long time, TimeUnit unit) {
+        return but(getRetainer().forTime(startMilliseconds, time, unit));
     }
     
 }

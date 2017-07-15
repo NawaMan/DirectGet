@@ -2,22 +2,17 @@ package directget.get;
 
 import static directget.get.Get.a;
 import static directget.get.Get.the;
-import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.Run.OnNewThread;
 import static directget.run.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import directget.get.Get;
-import directget.get.Ref;
-import directget.get.supportive.retain.Retain;
 import directget.run.Fork;
 import directget.run.Run;
 import lombok.val;
@@ -37,14 +32,14 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class).by(retain(()->new StringList()).forCurrentThread());
+    static final Ref<StringList> logs = Ref.of(StringList.class).by(StringList::new).forCurrentThread();
     
     static final Ref<String> username = Ref.of(orgName);
     
-    static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(Retain.valueOf(()->{
+    static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(()->{
         a(logs).add("Calculate username length.");
         return a(username).length();
-    }).forSame(username));
+    }).forSame(username);
     
     @Test
     public void testRetainRef_same() {
@@ -81,10 +76,12 @@ public class RetainTest {
     
     @Test
     public void testRetainRef_equal() {
-        With(usernameLength.providedBy(Retain.valueOf(()->{
-            a(logs).add("Calculate username length.");
-            return a(username).length();
-        }).forEquivalent(username))).run(() -> {
+        With(usernameLength.providedBy(()->{
+                a(logs).add("Calculate username length.");
+                return a(username).length();
+            }).butForEquivalent(username)
+        )
+        .run(() -> {
             the(logs).clear();
             assertTrue(orgName.length() == a(usernameLength));
             assertEquals("[Calculate username length.]", the(logs).toString());
@@ -116,7 +113,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_always() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(() -> new StringList()).always()))
+        With(logs.dictatedBy(StringList::new).butAlways())
         .run(()->{
             the(logs).clear();
             
@@ -130,7 +127,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_never() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(() -> new StringList()).globally().never()))
+        With(logs.dictatedBy(StringList::new).butGlobally().butNever())
         .run(()->{
             the(logs).clear();
             
@@ -171,7 +168,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_globally() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(() -> new StringList()).globally().always()))
+        With(logs.dictatedBy(StringList::new).butGlobally().butAlways())
         .run(()->{
             the(logs).clear();
             
@@ -194,7 +191,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_time() throws Throwable {
-        With(logs.dictatedBy(Retain.valueOf(() -> new StringList()).forTime(200, TimeUnit.MILLISECONDS)))
+        With(logs.dictatedBy(StringList::new).butForTime(200, TimeUnit.MILLISECONDS))
         .run(() -> {
             the(logs).clear();
             
@@ -207,29 +204,6 @@ public class RetainTest {
             assertEquals("[log, log]", the(logs).toString());
             
             Thread.sleep(200);
-            
-            assertEquals("[]", the(logs).toString());
-            
-            the(logs).add("log");
-            assertEquals("[log]", the(logs).toString());
-        });
-    }
-    
-    @Test
-    public void testRetain_expire() throws Throwable {
-        With(logs.dictatedBy(StringList::new).butGlobally().butExpireAfter(200, TimeUnit.MILLISECONDS))
-        .run(()->{
-            the(logs).clear();
-            
-            the(logs).add("log");
-            assertEquals("[log]", the(logs).toString());
-            
-            Thread.sleep(100);
-            
-            the(logs).add("log");
-            assertEquals("[log, log]", the(logs).toString());
-            
-            Thread.sleep(1000);
             
             assertEquals("[]", the(logs).toString());
             

@@ -20,8 +20,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import directget.get.supportive.retain.Retain;
-import directget.get.supportive.retain.Retain.Retainer;
+import directget.get.supportive.directget_internal_utilities;
+import directget.get.supportive.retain.Retainer;
+import directget.get.supportive.retain.RetainerBuilder;
 import directget.run.Named;
 import directget.run.Wrapper;
 import lombok.val;
@@ -32,7 +33,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  **/
-@ExtensionMethod({ utils.class })
+@ExtensionMethod({ directget_internal_utilities.class })
 public class Providing<T> implements Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
@@ -148,7 +149,7 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         val retainer
             = ((supplier instanceof Retainer)
             ? ((Retainer<T>)supplier)
-            : (Retainer<T>)Retain.valueOf(supplier).globally().always());
+            : (Retainer<T>)new RetainerBuilder<T>(supplier).globally().always());
         return retainer;
     }
 
@@ -189,22 +190,22 @@ public class Providing<T> implements Supplier<T>, Wrapper {
 
     /** @return the new providing similar to this one except that it retains its value for a given time period (in millisecond). **/
     public <R> Providing<T> butForTime(long time) {
-        return but(getRetainer().forTime(time));
+        return but(getRetainer().forTime(null, time));
     }
 
     /** @return the new providing similar to this one except that it retains its value for a given time period. **/
     public <R> Providing<T> butForTime(long time, TimeUnit unit) {
-        return but(getRetainer().forTime(time, unit));
+        return but(getRetainer().forTime(null, time, unit));
     }
 
-    /** @return the new providing similar to this one except that its retained value expired after a given time period (in millisecond). **/
-    public <R> Providing<T> butExpireAfter(long time) {
-        return but(getRetainer().forTime(time));
+    /** @return the new providing similar to this one except that it retains its value for a given time period (in millisecond). **/
+    public <R> Providing<T> butForTime(Long startMilliseconds, long time) {
+        return but(getRetainer().forTime(startMilliseconds, time));
     }
 
-    /** @return the new providing similar to this one except that its retained value expired after a given time period. **/
-    public <R> Providing<T> butExpireAfter(long time, TimeUnit unit) {
-        return but(getRetainer().forTime(time, unit));
+    /** @return the new providing similar to this one except that it retains its value for a given time period. **/
+    public <R> Providing<T> butForTime(Long startMilliseconds, long time, TimeUnit unit) {
+        return but(getRetainer().forTime(startMilliseconds, time, unit));
     }
     
 }

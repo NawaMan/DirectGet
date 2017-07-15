@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.ProvidingStackMap;
+import directget.get.supportive.directget_internal_utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -37,7 +38,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  */
-@ExtensionMethod({ utils.class })
+@ExtensionMethod({ directget_internal_utilities.class })
 public final class GetInstance {
     
     private final Scope scope;

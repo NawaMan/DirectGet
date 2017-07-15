@@ -1,6 +1,5 @@
 package directget.run;
 
-import static directget.get.supportive.retain.Retain.retain;
 import static directget.run.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,8 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import directget.run.Failable;
-import directget.run.Run;
 import directget.run.exceptions.FailableException;
 import directget.run.exceptions.ProblemHandledException;
 import directget.run.exceptions.ProblemHandler;
@@ -72,7 +69,7 @@ public class FailableTest {
         val pblmBuffer = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.providedBy(retain(()->new ProblemHandler(pblmBuffer::add)).always()))
+            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).butAlways())
             .run(()->{
                 runnable.handledly().run();
                 fail("Except an exception");

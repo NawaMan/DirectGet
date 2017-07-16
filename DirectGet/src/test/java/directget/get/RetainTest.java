@@ -79,7 +79,7 @@ public class RetainTest {
         With(usernameLength.providedBy(()->{
                 a(logs).add("Calculate username length.");
                 return a(username).length();
-            }).butForEquivalent(username)
+            }).retained().forEquivalent(username)
         )
         .run(() -> {
             the(logs).clear();
@@ -113,7 +113,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_always() throws Throwable {
-        With(logs.dictatedBy(StringList::new).butAlways())
+        With(logs.dictatedBy(StringList::new).retained().forAlways())
         .run(()->{
             the(logs).clear();
             
@@ -127,7 +127,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_never() throws Throwable {
-        With(logs.dictatedBy(StringList::new).butGlobally().butNever())
+        With(logs.dictatedBy(StringList::new).retained().globally().forNever())
         .run(()->{
             the(logs).clear();
             
@@ -168,7 +168,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_globally() throws Throwable {
-        With(logs.dictatedBy(StringList::new).butGlobally().butAlways())
+        With(logs.dictatedBy(StringList::new).retained().globally().forAlways())
         .run(()->{
             the(logs).clear();
             
@@ -191,7 +191,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_time() throws Throwable {
-        With(logs.dictatedBy(StringList::new).butForTime(200, TimeUnit.MILLISECONDS))
+        With(logs.dictatedBy(StringList::new).retained().forTime(200, TimeUnit.MILLISECONDS))
         .run(() -> {
             the(logs).clear();
             
@@ -223,7 +223,7 @@ public class RetainTest {
             assertEquals("Value#2", the(ref).toString());
         });
         
-        With(counter.dictateCurrent().butForCurrentThread())
+        With(counter.dictateCurrent().retained().forCurrentThread())
         .run(()->{
             assertEquals("Value#0", the(ref).toString());
         });

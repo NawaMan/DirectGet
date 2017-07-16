@@ -36,11 +36,11 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ directget_internal_utilities.class })
 public class Providing<T> implements Supplier<T>, Wrapper {
     
-    private final Ref<T> ref;
+    final Ref<T> ref;
     
-    private final Preferability preferability;
+    final Preferability preferability;
     
-    private final Supplier<T> supplier;
+    final Supplier<T> supplier;
     
     /**
      * Constructor.
@@ -137,13 +137,6 @@ public class Providing<T> implements Supplier<T>, Wrapper {
     public Providing<T> butBy(Supplier<T> supplier) {
         return new Providing<>(ref, preferability, supplier);
     }
-
-    Providing<T> but(Supplier<T> newRetainer) {
-        if (newRetainer == supplier) {
-            return this;
-        }
-        return new Providing<>(ref, preferability, newRetainer);
-    }
     
     Retainer<T> getRetainer() {
         val retainer
@@ -152,60 +145,10 @@ public class Providing<T> implements Supplier<T>, Wrapper {
             : (Retainer<T>)new RetainerBuilder<T>(supplier).globally().always());
         return retainer;
     }
-
-    /** @return the new providing similar to this one except that it retains globally. **/
-    public Providing<T> butGlobally() {
-        return but(getRetainer().butGlobally());
-    }
-
-    /** @return the new providing similar to this one except that it retains locally. **/
-    public Providing<T> butLocally() {
-        return but(getRetainer().butLocally());
-    }
-
-    /** @return the new providing similar to this one except that it always retains its value. **/
-    public Providing<T> butAlways() {
-        return but(getRetainer().butAlways());
-    }
-
-    /** @return the new providing similar to this one except that it never retains its value. **/
-    public Providing<T> butNever() {
-        return but(getRetainer().butNever());
-    }
-
-    /** @return the new providing similar to this one except that it retains its value with in current thread. **/
-    public Providing<T> butForCurrentThread() {
-        return but(getRetainer().forCurrentThread());
-    }
-
-    /** @return the new providing similar to this one except that it retains its value follow the give reference value ('same' rule). **/
-    public <R> Providing<T> butForSame(Ref<R> ref) {
-        return but(getRetainer().forSame(ref));
-    }
-
-    /** @return the new providing similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
-    public <R> Providing<T> butForEquivalent(Ref<R> ref) {
-        return but(getRetainer().forEquivalent(ref));
-    }
-
-    /** @return the new providing similar to this one except that it retains its value for a given time period (in millisecond). **/
-    public <R> Providing<T> butForTime(long time) {
-        return but(getRetainer().forTime(null, time));
-    }
-
-    /** @return the new providing similar to this one except that it retains its value for a given time period. **/
-    public <R> Providing<T> butForTime(long time, TimeUnit unit) {
-        return but(getRetainer().forTime(null, time, unit));
-    }
-
-    /** @return the new providing similar to this one except that it retains its value for a given time period (in millisecond). **/
-    public <R> Providing<T> butForTime(Long startMilliseconds, long time) {
-        return but(getRetainer().forTime(startMilliseconds, time));
-    }
-
-    /** @return the new providing similar to this one except that it retains its value for a given time period. **/
-    public <R> Providing<T> butForTime(Long startMilliseconds, long time, TimeUnit unit) {
-        return but(getRetainer().forTime(startMilliseconds, time, unit));
+    
+    public final ProvidingWithRetain<T> retained() {
+        return new ProvidingWithRetain<T>(ref, preferability, supplier);
     }
     
 }
+

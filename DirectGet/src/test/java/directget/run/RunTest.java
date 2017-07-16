@@ -121,7 +121,7 @@ public class RunTest {
         val pblmBuffer = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).butAlways())
+            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
             .handleProblem()
             .run(()->{
                 throw new IOException();

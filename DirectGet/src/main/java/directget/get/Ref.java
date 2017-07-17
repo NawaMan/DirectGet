@@ -79,130 +79,6 @@ public interface Ref<T> extends Comparable<Ref<T>> {
         return this.toString().compareTo(o.toString());
     }
     
-    /**
-     * Create another ref of the same type and preferibility but with the given default supplier.
-     * 
-     * @param name
-     *          the supplier name.
-     * @param defaultSupplier
-     *          the default supplier
-     * @return a new ref with the default value.
-     */
-    @SuppressWarnings("rawtypes")
-    default public DirectRef<T> by(String name, Supplier<? extends T> defaultSupplier) {
-        return new DirectRef<>(
-                this.getName(),
-                this.getTargetClass(),
-                ((DirectRef)this).getPreferability(),
-                new Named.Supplier<>(name, defaultSupplier));
-    }
-        
-    /**
-     * Create another ref of the same type and preferibility but with the given default supplier.
-     * 
-     * @param defaultSupplier the default supplier
-     * @return a new ref with the default value.
-     */
-    @SuppressWarnings("rawtypes")
-    default public DirectRef<T> by(Supplier<? extends T> defaultSupplier) {
-        return new DirectRef<>(
-                this.getName(),
-                this.getTargetClass(),
-                ((DirectRef)this).getPreferability(),
-                defaultSupplier);
-    }
-    
-    /** Create a providing that dictate the current. */
-    default public Providing<T> dictateCurrent() {
-        val currentProviding = Get.getProvider(this);
-        return new Providing<>(this, Preferability.Dictate, currentProviding.getSupplier());
-    }
-    
-    /** Create a providing that dictate the given value. */
-    default public Providing<T> dictatedTo(T value) {
-        return new Providing<>(this, Preferability.Dictate, new Named.ValueSupplier<T>(value));
-    }
-    
-    /** Create the providing that dictate the value of the given ref. */
-    default public Providing<T> dictatedToA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
-    }
-    
-    /** Create the providing that dictate the result of the given supplier. */
-    default public Providing<T> dictatedBy(Supplier<T> supplier) {
-        return new Providing<>(this, Preferability.Dictate, supplier);
-    }
-
-    /** Create a providing that provide the current. */
-    default public Providing<T> provideCurrent() {
-        val currentProviding = Get.getProvider(this);
-        return new Providing<>(this, Preferability.Normal, currentProviding.getSupplier());
-    }
-    
-    /** Create the providing (normal preferability) the given value. */
-    default public Providing<T> providedWith(T value) {
-        return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
-    }
-    
-    /**
-     * Create the providing (normal preferability) the value of the given ref.
-     */
-    default public Providing<T> providedWithA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the providing (normal preferability) the result of the given
-     * supplier.
-     */
-    default public Providing<T> providedBy(Supplier<T> supplier) {
-        return new Providing<>(this, Preferability.Normal, supplier);
-    }
-    
-    /** Create the providing (using the given preferability) the given value. */
-    default public Providing<T> providedWith(Preferability preferability, T value) {
-        return new Providing<>(this, preferability, new Named.ValueSupplier<T>(value));
-    }
-    
-    /**
-     * Create the providing (using the given preferability) the value of the
-     * given ref.
-     */
-    default public Providing<T> providedWithA(Preferability preferability, Ref<T> ref) {
-        return new Providing<>(this, preferability, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the providing (using the given preferability) the result of the
-     * given supplier.
-     */
-    default public Providing<T> providedBy(Preferability preferability, Supplier<T> supplier) {
-        return new Providing<>(this, preferability, supplier);
-    }
-
-    /** Create a providing that provide the current. */
-    default public Providing<T> defaultToCurrent() {
-        val currentProviding = Get.getProvider(this);
-        return new Providing<>(this, Preferability.Default, currentProviding.getSupplier());
-    }
-    
-    /** Create the providing that default to the given value. */
-    default public Providing<T> defaultedTo(T value) {
-        return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
-    }
-    
-    /** Create the providing that default to the value of the given ref. */
-    default public Providing<T> defaultedToA(Ref<T> ref) {
-        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the providing that default to the result of the given supplier.
-     */
-    default public Providing<T> defaultedToBy(Supplier<T> supplier) {
-        return new Providing<>(this, Preferability.Normal, supplier);
-    }
-    
     // == Basic implementations ===============================================
     
     // -- ForClass -------------------------------------------------------------
@@ -264,6 +140,200 @@ public interface Ref<T> extends Comparable<Ref<T>> {
         val theName    = (name != null) ? name : ("#" + DirectRef.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
         return new DirectRef<>(theName, targetClass, preferability, theFactory);
+    }
+    
+    //== For default ==================================================================================================
+    
+    default public DirectRef<T> with(T defaultValue) {
+        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
+        return providedWith(preferability, defaultValue);
+    }
+    
+    default public DirectRef<T> withA(Ref<T> ref) {
+        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
+        return providedWithA(preferability, ref);
+    }
+    
+    /**
+     * Create another ref of the same type and preferibility but with the given default supplier.
+     * 
+     * @param defaultSupplier the default supplier
+     * @return a new ref with the default value.
+     */
+    @SuppressWarnings("unchecked")
+    default public DirectRef<T> by(Supplier<? extends T> defaultSupplier) {
+        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
+        return providedBy(preferability, (Supplier<T>) defaultSupplier);
+    }
+    
+    /** Create a providing that dictate the given value. */
+    default public DirectRef<T> dictatedTo(T value) {
+        return providedBy(Preferability.Dictate, new Named.ValueSupplier<T>(value));
+    }
+    
+    /** Create the providing that dictate the value of the given ref. */
+    default public DirectRef<T> dictatedToA(Ref<T> ref) {
+        return providedBy(Preferability.Dictate, new Named.RefSupplier<T>(ref));
+    }
+    
+    /** Create the providing that dictate the result of the given supplier. */
+    default public DirectRef<T> dictatedBy(Supplier<T> supplier) {
+        return providedBy(Preferability.Dictate, (Supplier<T>)supplier);
+    }
+    
+    /** Create the providing (normal preferability) the given value. */
+    default public DirectRef<T> providedWith(T value) {
+        return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    /**
+     * Create the providing (normal preferability) the value of the given ref.
+     */
+    default public DirectRef<T> providedWithA(Ref<T> ref) {
+        return providedBy(Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing (normal preferability) the result of the given
+     * supplier.
+     */
+    default public DirectRef<T> providedBy(Supplier<T> supplier) {
+        return providedBy(Preferability.Normal, supplier);
+    }
+    
+    /** Create the providing (using the given preferability) the given value. */
+    default public DirectRef<T> providedWith(Preferability preferability, T value) {
+        return providedBy(preferability, new Named.ValueSupplier<T>(value));
+    }
+    
+    /**
+     * Create the providing (using the given preferability) the value of the
+     * given ref.
+     */
+    default public DirectRef<T> providedWithA(Preferability preferability, Ref<T> ref) {
+        return providedBy(preferability, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing (using the given preferability) the result of the
+     * given supplier.
+     */
+    default public DirectRef<T> providedBy(Preferability preferability, Supplier<T> supplier) {
+        return new DirectRef<>(
+                this.getName(),
+                this.getTargetClass(),
+                preferability,
+                supplier);
+    }
+    
+    /** Create the providing that default to the given value. */
+    default public DirectRef<T> defaultedTo(T value) {
+        return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    /** Create the providing that default to the value of the given ref. */
+    default public DirectRef<T> defaultedToA(Ref<T> ref) {
+        return providedBy(Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing that default to the result of the given supplier.
+     */
+    default public DirectRef<T> defaultedToBy(Supplier<T> supplier) {
+        return providedBy(Preferability.Normal, supplier);
+    }
+    
+    //== For substitution =============================================================================================
+    
+    /** Create a providing that dictate the current. */
+    default public Providing<T> butDictate() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Dictate, currentProviding.getSupplier());
+    }
+
+    /** Create a providing that provide the current with Normal preferability. */
+    default public Providing<T> butProvideNormally() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Normal, currentProviding.getSupplier());
+    }
+
+    /** Create a providing that provide the current with Default preferability. */
+    default public Providing<T> butDefault() {
+        val currentProviding = Get.getProvider(this);
+        return new Providing<>(this, Preferability.Default, currentProviding.getSupplier());
+    }
+    
+    /** Create a providing that dictate the given value. */
+    default public Providing<T> butDictatedTo(T value) {
+        return new Providing<>(this, Preferability.Dictate, new Named.ValueSupplier<T>(value));
+    }
+    
+    /** Create the providing that dictate the value of the given ref. */
+    default public Providing<T> butDictatedToA(Ref<T> ref) {
+        return new Providing<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
+    }
+    
+    /** Create the providing that dictate the result of the given supplier. */
+    default public Providing<T> butDictatedBy(Supplier<T> supplier) {
+        return new Providing<>(this, Preferability.Dictate, supplier);
+    }
+    
+    /** Create the providing (normal preferability) the given value. */
+    default public Providing<T> butProvidedWith(T value) {
+        return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    /**
+     * Create the providing (normal preferability) the value of the given ref.
+     */
+    default public Providing<T> butProvidedWithA(Ref<T> ref) {
+        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing (normal preferability) the result of the given
+     * supplier.
+     */
+    default public Providing<T> butProvidedBy(Supplier<T> supplier) {
+        return new Providing<>(this, Preferability.Normal, supplier);
+    }
+    
+    /** Create the providing (using the given preferability) the given value. */
+    default public Providing<T> butProvidedWith(Preferability preferability, T value) {
+        return new Providing<>(this, preferability, new Named.ValueSupplier<T>(value));
+    }
+    
+    /**
+     * Create the providing (using the given preferability) the value of the
+     * given ref.
+     */
+    default public Providing<T> butProvidedWithA(Preferability preferability, Ref<T> ref) {
+        return new Providing<>(this, preferability, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing (using the given preferability) the result of the
+     * given supplier.
+     */
+    default public Providing<T> butProvidedBy(Preferability preferability, Supplier<T> supplier) {
+        return new Providing<>(this, preferability, supplier);
+    }
+    
+    /** Create the providing that default to the given value. */
+    default public Providing<T> butDefaultedTo(T value) {
+        return new Providing<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
+    }
+    
+    /** Create the providing that default to the value of the given ref. */
+    default public Providing<T> butDefaultedToA(Ref<T> ref) {
+        return new Providing<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    }
+    
+    /**
+     * Create the providing that default to the result of the given supplier.
+     */
+    default public Providing<T> butDefaultedToBy(Supplier<T> supplier) {
+        return new Providing<>(this, Preferability.Normal, supplier);
     }
     
 }

@@ -16,16 +16,12 @@
 package directget.get;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import directget.get.supportive.directget_internal_utilities;
-import directget.get.supportive.retain.Retainer;
-import directget.get.supportive.retain.RetainerBuilder;
 import directget.run.Named;
 import directget.run.Wrapper;
-import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
@@ -96,6 +92,10 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         };
     }
     
+    public final ProvidingWithRetainer<T> retained() {
+        return new ProvidingWithRetainer<T>(ref, preferability, supplier);
+    }
+    
     //== Wither =======================================================================================================
     
     /**
@@ -136,18 +136,6 @@ public class Providing<T> implements Supplier<T>, Wrapper {
     /** @return the new providing similar to this one except the supplied by the given supplier. **/
     public Providing<T> butBy(Supplier<T> supplier) {
         return new Providing<>(ref, preferability, supplier);
-    }
-    
-    Retainer<T> getRetainer() {
-        val retainer
-            = ((supplier instanceof Retainer)
-            ? ((Retainer<T>)supplier)
-            : (Retainer<T>)new RetainerBuilder<T>(supplier).globally().always());
-        return retainer;
-    }
-    
-    public final ProvidingWithRetain<T> retained() {
-        return new ProvidingWithRetain<T>(ref, preferability, supplier);
     }
     
 }

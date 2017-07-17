@@ -42,8 +42,8 @@ public class RunTest {
     @Test
     public void testSameThreadSupplier() {
         assertTrue(7 == numPlus());
-        assertTrue(16 == Run.with(num.providedWith(10)).run(()-> numPlus()));
-        assertTrue(26 == Run.with(num.providedWith(20)).run(()-> numPlus()));
+        assertTrue(16 == Run.with(num.butProvidedWith(10)).run(()-> numPlus()));
+        assertTrue(26 == Run.with(num.butProvidedWith(20)).run(()-> numPlus()));
     }
     
     @Test(expected = IOException.class)
@@ -76,7 +76,7 @@ public class RunTest {
         val iAmHereFirst = new AtomicBoolean(false);
         val latch = new CountDownLatch(1);
         OnNewThread()
-        .with(num.providedWith(10))
+        .with(num.butProvidedWith(10))
         .run(()->{
             Thread.sleep(200);
             return numPlus();
@@ -121,7 +121,7 @@ public class RunTest {
         val pblmBuffer = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
+            .with(problemHandler.butProvidedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
             .handleProblem()
             .run(()->{
                 throw new IOException();

@@ -55,7 +55,7 @@ public class GetInstanceTest implements Named.User {
     private String orgText = "The Text";
     private String newText = "New Text!!!";
     
-    private Ref<String> _text_ = Ref.of("TheText", String.class).by("OrginalText", () -> orgText);
+    private Ref<String> _text_ = Ref.of("TheText", String.class).with(orgText);
     
     private Stream<Providing> provideNewText = Stream
             .of(new Providing<>(_text_, Dictate, supplier("NewText", () -> newText)));
@@ -127,7 +127,7 @@ public class GetInstanceTest implements Named.User {
         val fork = new Fork();
         
         Run
-        .with(_text_.providedWith(newText))
+        .with(_text_.butProvidedWith(newText))
         .with(_verboseLogger)
         .onNewThread()
         .inheritAll()

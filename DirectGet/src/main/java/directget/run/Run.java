@@ -121,6 +121,8 @@ public class Run {
         return sessionBuilder;
     }
     
+    // TODO - change or add "Async"
+    // TODO - new thread must be more generic so it can be implment by RIU
     /** Make the run to be run on a new thread. */
     public static NewThreadSessionBuilder OnNewThread() {
         return new SameThreadSessionBuilder().onNewThread();

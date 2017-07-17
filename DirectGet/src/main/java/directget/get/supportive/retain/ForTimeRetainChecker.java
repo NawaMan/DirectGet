@@ -28,6 +28,7 @@ import directget.get.supportive.directget_internal_utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
+// TODO - Make it more intuitive like     .retained().until(... time ...).repeatEvery();
 /**
  * Constrcutor.
  * 

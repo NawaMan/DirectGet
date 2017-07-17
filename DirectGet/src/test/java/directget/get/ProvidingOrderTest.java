@@ -539,7 +539,7 @@ public class ProvidingOrderTest {
     public void testRefDictate() {
         assertEquals(REF_DICTATE, the(dictatedRef));
         
-        Run.with(dictatedRef.dictatedTo("SubstitueDictate")).run(()->{
+        Run.with(dictatedRef.butDictatedTo("SubstitueDictate")).run(()->{
             assertEquals(REF_DICTATE, the(dictatedRef));
         });
     }
@@ -551,11 +551,11 @@ public class ProvidingOrderTest {
     public void testRefNormal() {
         assertEquals(REF_NORMAL, the(normalRef));
         
-        Run.with(normalRef.dictatedTo("SubstitueDictate")).run(()->{
+        Run.with(normalRef.butDictatedTo("SubstitueDictate")).run(()->{
             assertEquals("SubstitueDictate", the(normalRef));
         });
 
-        Run.with(normalRef.providedWith("SubstitueNormal")).run(()->{
+        Run.with(normalRef.butProvidedWith("SubstitueNormal")).run(()->{
             assertEquals("SubstitueNormal", the(normalRef));
         });
     }

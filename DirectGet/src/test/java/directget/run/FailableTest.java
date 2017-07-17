@@ -69,7 +69,7 @@ public class FailableTest {
         val pblmBuffer = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.providedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
+            .with(problemHandler.butProvidedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
             .run(()->{
                 runnable.handledly().run();
                 fail("Except an exception");

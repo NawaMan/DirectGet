@@ -32,14 +32,14 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class).by(StringList::new).forCurrentThread();
+    static final Ref<StringList> logs = Ref.of(StringList.class).by(StringList::new).retained().forCurrentThread();
     
     static final Ref<String> username = Ref.of(orgName);
     
     static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(()->{
         a(logs).add("Calculate username length.");
         return a(username).length();
-    }).forSame(username);
+    }).retained().forSame(username);
     
     @Test
     public void testRetainRef_same() {
@@ -50,7 +50,7 @@ public class RetainTest {
         assertTrue(orgName.length() == a(usernameLength));
         assertEquals("[Calculate username length.]", the(logs).toString());
         
-        Run.with(username.providedWith(anotherName)).run(() -> {
+        Run.with(username.butProvidedWith(anotherName)).run(() -> {
             assertTrue(anotherName.length() == a(usernameLength));
             assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
             
@@ -58,7 +58,7 @@ public class RetainTest {
             assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
         });
         
-        Run.with(username.providedWith(newName)).run(() -> {
+        Run.with(username.butProvidedWith(newName)).run(() -> {
             assertTrue(newName.length() == a(usernameLength));
             assertEquals("[Calculate username length., Calculate username length., Calculate username length.]",
                     the(logs).toString());
@@ -76,10 +76,12 @@ public class RetainTest {
     
     @Test
     public void testRetainRef_equal() {
-        With(usernameLength.providedBy(()->{
+        With(usernameLength
+            .butProvidedBy(()->{
                 a(logs).add("Calculate username length.");
                 return a(username).length();
-            }).retained().forEquivalent(username)
+            })
+            .retained().forEquivalent(username)
         )
         .run(() -> {
             the(logs).clear();
@@ -89,7 +91,7 @@ public class RetainTest {
             assertTrue(orgName.length() == a(usernameLength));
             assertEquals("[Calculate username length.]", the(logs).toString());
             
-            Run.with(username.providedWith(anotherName)).run(() -> {
+            Run.with(username.butProvidedWith(anotherName)).run(() -> {
                 assertTrue(anotherName.length() == a(usernameLength));
                 assertEquals("[Calculate username length.]", the(logs).toString());
                 
@@ -97,7 +99,7 @@ public class RetainTest {
                 assertEquals("[Calculate username length.]", the(logs).toString());
             });
             
-            Run.with(username.providedWith(newName)).run(() -> {
+            Run.with(username.butProvidedWith(newName)).run(() -> {
                 assertTrue(newName.length() == a(usernameLength));
                 assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
                 
@@ -113,7 +115,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_always() throws Throwable {
-        With(logs.dictatedBy(StringList::new).retained().forAlways())
+        With(logs.butDictatedBy(StringList::new).retained().forAlways())
         .run(()->{
             the(logs).clear();
             
@@ -127,7 +129,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_never() throws Throwable {
-        With(logs.dictatedBy(StringList::new).retained().globally().forNever())
+        With(logs.butDictatedBy(StringList::new).retained().globally().forNever())
         .run(()->{
             the(logs).clear();
             
@@ -168,7 +170,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_globally() throws Throwable {
-        With(logs.dictatedBy(StringList::new).retained().globally().forAlways())
+        With(logs.butDictatedBy(StringList::new).retained().globally().forAlways())
         .run(()->{
             the(logs).clear();
             
@@ -191,7 +193,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_time() throws Throwable {
-        With(logs.dictatedBy(StringList::new).retained().forTime(200, TimeUnit.MILLISECONDS))
+        With(logs.butDictatedBy(StringList::new).retained().forTime(200, TimeUnit.MILLISECONDS))
         .run(() -> {
             the(logs).clear();
             
@@ -214,7 +216,7 @@ public class RetainTest {
     
     @Test
     public void testRetain_but() {
-        val counter = Ref.of(AtomicInteger.class).by(()->new AtomicInteger()).globally().always();
+        val counter = Ref.of(AtomicInteger.class).by(()->new AtomicInteger()).retained().globally().forAlways();
         val ref     = Ref.of(String.class).by(()->"Value#" + the(counter).getAndIncrement());
         assertEquals("Value#0", the(ref).toString());
         assertEquals("Value#1", the(ref).toString());
@@ -223,7 +225,7 @@ public class RetainTest {
             assertEquals("Value#2", the(ref).toString());
         });
         
-        With(counter.dictateCurrent().retained().forCurrentThread())
+        With(counter.butDictate().retained().forCurrentThread())
         .run(()->{
             assertEquals("Value#0", the(ref).toString());
         });

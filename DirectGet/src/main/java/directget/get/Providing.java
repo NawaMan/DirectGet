@@ -92,6 +92,7 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         };
     }
     
+    /** @return the retainer. */
     public final ProvidingWithRetainer<T> retained() {
         return new ProvidingWithRetainer<T>(ref, preferability, supplier);
     }

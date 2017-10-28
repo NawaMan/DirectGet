@@ -66,16 +66,16 @@ public class FailableTest {
     public void testRunnable_failHandledly() {
         Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
         
-        val pblmBuffer = new ArrayList<Throwable>();
+        val problemCollection = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.butProvidedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
+            .with(problemHandler.butProvidedBy(()->new ProblemHandler(problemCollection::add)).retained().forAlways())
             .run(()->{
                 runnable.handledly().run();
                 fail("Except an exception");
             });
         } finally {
-            assertEquals("[java.io.IOException]", pblmBuffer.toString());
+            assertEquals("[java.io.IOException]", problemCollection.toString());
         }
     }
    

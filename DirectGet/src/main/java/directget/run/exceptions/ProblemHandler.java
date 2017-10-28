@@ -16,6 +16,7 @@
 package directget.run.exceptions;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import directget.get.Get;
 import directget.get.Ref;
@@ -42,6 +43,13 @@ public class ProblemHandler {
     private final String name;
     
     private final Consumer<Throwable> action;
+    
+    
+    /** Factory method to create 
+     */
+    public static Supplier<ProblemHandler> of(Consumer<Throwable> action) {
+        return ()->new ProblemHandler(action);
+    }
     
     /**
      * Construction with an action.

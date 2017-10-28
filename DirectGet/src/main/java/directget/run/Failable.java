@@ -33,6 +33,11 @@ public class Failable {
     @FunctionalInterface
     public static interface Runnable<T extends Throwable> {
         
+        /** Convenient factory method to allow lambda */
+        public static <T extends Throwable> Runnable<T> of(Runnable<T> runnable) {
+            return runnable;
+        }
+        
         /** Run this runnable. */
         public void run() throws T;
         
@@ -80,6 +85,11 @@ public class Failable {
     /** Failable consumer. **/
     @FunctionalInterface
     public static interface Supplier<V, T extends Throwable> {
+
+        /** Convenient factory method to allow lambda */
+        public static <V, T extends Throwable> Supplier<V, T> of(Supplier<V, T> supplier) {
+            return supplier;
+        }
         
         /** Run this supplier. */
         public V get() throws T;
@@ -130,6 +140,11 @@ public class Failable {
     /** Failable consumer. **/
     @FunctionalInterface
     public static interface Consumer<V, T extends Throwable> {
+
+        /** Convenient factory method to allow lambda */
+        public static <V, T extends Throwable> Consumer<V, T> of(Consumer<V, T> consumer) {
+            return consumer;
+        }
         
         /** Run this consumer. */
         public void accept(V value) throws T;

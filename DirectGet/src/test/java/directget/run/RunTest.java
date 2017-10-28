@@ -41,9 +41,9 @@ public class RunTest {
     
     @Test
     public void testSameThreadSupplier() {
-        assertTrue(7 == numPlus());
-        assertTrue(16 == Run.with(num.butProvidedWith(10)).run(()-> numPlus()));
-        assertTrue(26 == Run.with(num.butProvidedWith(20)).run(()-> numPlus()));
+        assertTrue(7 == numPlusSix());
+        assertTrue(16 == Run.with(num.butProvidedWith(10)).run(()-> numPlusSix()));
+        assertTrue(26 == Run.with(num.butProvidedWith(20)).run(()-> numPlusSix()));
     }
     
     @Test(expected = IOException.class)
@@ -55,20 +55,18 @@ public class RunTest {
     
     @Test(expected = IOException.class)
     public void testSameThreadSupplier_withReturnAndException() throws Throwable {
-        val value = new AtomicBoolean(false);
-        Run.run(()->{
-            if (value.get()) {
-                throw new Throwable();
-            }
-        });
-        
-        value.set(true);
-        Run
-        .run(()->{
-            if (value.get()) {
+        val toThrow = new AtomicBoolean();
+        val theRunnable = Failable.Runnable.of(()->{
+            if (toThrow.get()) {
                 throw new IOException();
             }
         });
+        
+        toThrow.set(false);
+        Run.run(theRunnable);
+        
+        toThrow.set(true);
+        Run.run(theRunnable);
     }
     
     @Test
@@ -79,7 +77,7 @@ public class RunTest {
         .with(num.butProvidedWith(10))
         .run(()->{
             Thread.sleep(200);
-            return numPlus();
+            return numPlusSix();
         })
         .thenAccept(result->{
             assertTrue(16 == result);
@@ -93,7 +91,7 @@ public class RunTest {
         latch.await();
     }
     
-    private int numPlus() {
+    private int numPlusSix() {
         return Get.a(num) + 6;
     }
     
@@ -118,10 +116,10 @@ public class RunTest {
     
     @Test(expected=ProblemHandledException.class)
     public void testHandleProlem() {
-        val pblmBuffer = new ArrayList<Throwable>();
+        val problemCollection = new ArrayList<Throwable>();
         try {
             Run
-            .with(problemHandler.butProvidedBy(()->new ProblemHandler(pblmBuffer::add)).retained().forAlways())
+            .with(problemHandler.butProvidedBy(ProblemHandler.of(problemCollection::add)).retained().forAlways())
             .handleProblem()
             .run(()->{
                 throw new IOException();
@@ -129,7 +127,7 @@ public class RunTest {
             
             fail("It shoud never get here.");
         } finally {
-            assertEquals("[java.io.IOException]", pblmBuffer.toString());
+            assertEquals("[java.io.IOException]", problemCollection.toString());
         }
     }
     

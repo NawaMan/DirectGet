@@ -144,11 +144,13 @@ public interface Ref<T> extends Comparable<Ref<T>> {
     
     //== For default ==================================================================================================
     
+    /** Set the default value for this ref. */
     default public DirectRef<T> with(T defaultValue) {
         val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
         return providedWith(preferability, defaultValue);
     }
     
+    /** Set the default value to the value of the given ref.. */
     default public DirectRef<T> withA(Ref<T> ref) {
         val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
         return providedWithA(preferability, ref);

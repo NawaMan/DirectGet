@@ -1,6 +1,5 @@
 package directget.get;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import directget.get.supportive.retain.Retainer;
@@ -8,10 +7,20 @@ import directget.get.supportive.retain.RetainerBuilder;
 import directget.get.supportive.retain.WithRetainer;
 import lombok.val;
 
+/**
+ * Providing with a retainer.
+ * 
+ * @author NawaMan
+ *
+ * @param <T>
+ */
 public class ProvidingWithRetainer<T> extends Providing<T> implements WithRetainer<T, ProvidingWithRetainer<T>> {
 
-    
-    public ProvidingWithRetainer(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
+    /** Constructor. */
+    public ProvidingWithRetainer(
+            Ref<T>                ref, 
+            Preferability         preferability, 
+            Supplier<? extends T> supplier) {
         super(ref, preferability, supplier);
     }
 

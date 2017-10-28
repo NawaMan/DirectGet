@@ -29,7 +29,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-println (new File(".."))
+tasks.withType(Javadoc).all { enabled = false }
 
 publishing {
     publications {

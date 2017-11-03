@@ -5,11 +5,17 @@ import java.util.function.Supplier;
 
 import directget.get.Ref;
 
-public 
-interface WithRetainer<T, WR extends WithRetainer<T, WR>> {
-
+/**
+ * This interface is for classes that has a retainer.
+ * 
+ * @author NawaMan
+ **/
+public interface WithRetainer<T, WR extends WithRetainer<T, WR>> {
+	
+	/** Returns the retainer. */
     public Retainer<T> getRetainer();
 
+    /** Change the supplier. */
     WR __but(Supplier<T> newSupplier);
 
     

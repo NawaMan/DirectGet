@@ -1,3 +1,18 @@
+//  ========================================================================
+//  Copyright (c) 2017 Nawapunth Manusitthipol.
+//  ------------------------------------------------------------------------
+//  All rights reserved. This program and the accompanying materials
+//  are made available under the terms of the Eclipse Public License v1.0
+//  and Apache License v2.0 which accompanies this distribution.
+//
+//      The Eclipse Public License is available at
+//      http://www.eclipse.org/legal/epl-v10.html
+//
+//      The Apache License v2.0 is available at
+//      http://www.opensource.org/licenses/apache2.0.php
+//
+//  You may elect to redistribute this code under either of these licenses.
+//  ========================================================================
 package directget.get.supportive.retain;
 
 import java.util.concurrent.TimeUnit;
@@ -28,7 +43,7 @@ public class RetainerBuilder<V> {
         return this;
     }
     
-    /** Make the retainer local. */
+    /** Make the retainer local - local thread. */
     public RetainerBuilder<V> locally() {
         isGlobal = false;
         return this;
@@ -42,7 +57,7 @@ public class RetainerBuilder<V> {
                 : new LocalRetainer<V>(supplier,  (Predicate<V>)ALWAYS);
     }
     
-    /** Create and return a supplier that cache its value forever. */
+    /** Create and return a supplier that never cache its. */
     @SuppressWarnings("unchecked")
     public Supplier<V> never() {
         return isGlobal
@@ -50,7 +65,7 @@ public class RetainerBuilder<V> {
                 : new LocalRetainer<V>(supplier,  (Predicate<V>)NEVER);
     }
     
-    /** Create and return a supplier that cache its value for each thread. */
+    /** Create and return a supplier that cache its value for each thread (alias for locally().always()). */
     public Supplier<V> forCurrentThread() {
         return locally().always();
     }

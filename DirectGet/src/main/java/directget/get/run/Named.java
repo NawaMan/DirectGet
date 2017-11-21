@@ -1,5 +1,5 @@
 //  ========================================================================
-//  Copyright (c) 2017 The Direct Solution Software Builder.
+//  Copyright (c) 2017 Nawapunth Manusitthipol.
 //  ------------------------------------------------------------------------
 //  All rights reserved. This program and the accompanying materials
 //  are made available under the terms of the Eclipse Public License v1.0

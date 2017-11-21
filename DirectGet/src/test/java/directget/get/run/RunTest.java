@@ -1,5 +1,5 @@
 //  ========================================================================
-//  Copyright (c) 2017 The Direct Solution Software Builder.
+//  Copyright (c) 2017 Nawapunth Manusitthipol.
 //  ------------------------------------------------------------------------
 //  All rights reserved. This program and the accompanying materials
 //  are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run;
+package directget.get.run;
 
 import static directget.get.run.Run.IgnoreHandledProblem;
 import static directget.get.run.Run.OnNewThread;

@@ -27,7 +27,7 @@ import lombok.val;
 /***
  * Scope holds a configuration which specify providings.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class Scope {
     

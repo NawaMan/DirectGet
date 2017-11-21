@@ -18,7 +18,7 @@ package directget.get.run.exceptions;
 /**
  * This exception wraps an exception from a failable.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class FailableException extends DirectRunRuntimeException {
     

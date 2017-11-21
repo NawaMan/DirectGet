@@ -18,7 +18,7 @@ package directget.get.run.exceptions;
 /**
  * General unchecked exception for DirectGet.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public abstract class DirectRunRuntimeException extends RuntimeException {
     

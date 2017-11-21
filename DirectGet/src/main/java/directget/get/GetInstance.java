@@ -36,7 +36,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * Get is a service to allow access to other service.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 @ExtensionMethod({ Utilities.class })
 public final class GetInstance {

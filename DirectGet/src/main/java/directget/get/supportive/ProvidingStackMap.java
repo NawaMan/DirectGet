@@ -27,7 +27,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * StackMap for Providing.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @ExtensionMethod({ Utilities.class })

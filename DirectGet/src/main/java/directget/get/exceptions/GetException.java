@@ -20,7 +20,7 @@ import directget.get.Ref;
 /**
  * This exception holds the exceptional result for Get.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class GetException extends DirectGetRuntimeException {
     

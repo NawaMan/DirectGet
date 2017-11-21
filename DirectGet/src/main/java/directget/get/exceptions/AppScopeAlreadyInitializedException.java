@@ -19,7 +19,7 @@ package directget.get.exceptions;
  * This exception is thrown when there is an attempt to initialize the
  * Application Scope after it was aready been initialized.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class AppScopeAlreadyInitializedException extends DirectGetException {
     

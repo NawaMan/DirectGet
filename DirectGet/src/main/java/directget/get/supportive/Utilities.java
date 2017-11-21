@@ -41,7 +41,7 @@ import lombok.val;
  * 
  * NOTE: This is intent for internal use only.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 public class Utilities {
     

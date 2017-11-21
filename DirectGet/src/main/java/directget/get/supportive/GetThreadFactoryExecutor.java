@@ -23,7 +23,7 @@ import lombok.val;
 /**
  * This executor create thread using the Get._ThreadFactory_.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class GetThreadFactoryExecutor implements Executor {
     

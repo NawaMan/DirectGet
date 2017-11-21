@@ -22,7 +22,7 @@ import directget.get.run.exceptions.ProblemHandler;
 /**
  * Failable actions.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class Failable {
     

@@ -28,7 +28,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * This class contains the providings for a scope.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 @SuppressWarnings({ "rawtypes", "unchecked" }) // OK, OK. I know is really bad
                                                // to put it here but

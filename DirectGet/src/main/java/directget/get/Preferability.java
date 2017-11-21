@@ -34,7 +34,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * This enum is used to specify the preferability of a providing.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 @ExtensionMethod({ Utilities.class })
 public enum Preferability {

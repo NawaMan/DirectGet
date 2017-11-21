@@ -19,7 +19,7 @@ package directget.get.exceptions;
  * This exception wrap the exception throw while trying to run with a
  * substitution.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class RunWithSubstitutionException extends DirectGetRuntimeException {
     

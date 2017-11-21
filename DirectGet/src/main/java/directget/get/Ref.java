@@ -30,7 +30,7 @@ import lombok.val;
  * @param <T>
  *            the type of the reference.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public interface Ref<T> extends Comparable<Ref<T>> {
     

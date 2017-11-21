@@ -30,7 +30,7 @@ import lombok.val;
 /**
  * This class provide access to the application scope.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public final class Get {
     

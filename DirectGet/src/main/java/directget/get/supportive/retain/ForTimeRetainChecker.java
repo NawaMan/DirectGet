@@ -32,7 +32,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * Constrcutor.
  * 
- * @author nawaman
+ * @author NawaMan
  *
  * @param <V> the type that is retained.
  */

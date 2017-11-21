@@ -27,7 +27,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * Instance of this class holds data for providing.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 @ExtensionMethod({ Utilities.class })
 public class Providing<T> implements Supplier<T>, Wrapper {

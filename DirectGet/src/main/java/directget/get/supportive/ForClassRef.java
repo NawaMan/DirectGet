@@ -24,7 +24,7 @@ import lombok.val;
  * This implements allow reference to a specific class. All instance of this
  * reference for the same class refer to the same thing.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public final class ForClassRef<T> extends AbstractRef<T> implements Ref<T> {
     

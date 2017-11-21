@@ -29,7 +29,7 @@ import lombok.val;
  * This reference implementation allows multiple references to a class to
  * mean different things.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     

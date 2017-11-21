@@ -21,7 +21,7 @@ import directget.get.Ref;
 /**
  * This throwable indicates that there was some problem but it has been handled.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 public class ProblemHandledException extends DirectRunRuntimeException {
     

@@ -24,7 +24,7 @@ import directget.get.Ref;
 /**
  * Handler of a problem.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class ProblemHandler {
     

@@ -21,7 +21,7 @@ import directget.get.Ref;
 /**
  * This class offer a way to make it easy to debug lambda by adding name to them.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 // https://stackoverflow.com/questions/42876840/namingtostring-lambda-expressions-for-debugging-purpose/42876841#42876841
 // https://stackoverflow.com/questions/23704355/creating-string-representation-of-lambda-expression/23705160#23705160

@@ -27,7 +27,7 @@ import lombok.val;
 /**
  * This class offer a natural way to run something.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 public class Run {
     

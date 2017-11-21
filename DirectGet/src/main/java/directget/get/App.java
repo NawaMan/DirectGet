@@ -23,7 +23,7 @@ import lombok.val;
  * 
  * IMPORTANT NOTE: This class is complicated to test. So you should have a really really good reason to change it!!!
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public final class App {
     

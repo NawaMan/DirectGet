@@ -20,7 +20,7 @@ import directget.get.Ref;
 /**
  * Base implementation of references.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 public abstract class AbstractRef<T> implements Ref<T> {
     

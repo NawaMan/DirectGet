@@ -24,7 +24,7 @@ import lombok.experimental.ExtensionMethod;
 /**
  * This class offer a natural way to fork an execution.
  * 
- * @author nawaman
+ * @author NawaMan
  **/
 @ExtensionMethod({ utils.class })
 public class Fork {

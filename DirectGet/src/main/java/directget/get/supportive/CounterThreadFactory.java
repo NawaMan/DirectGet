@@ -23,7 +23,7 @@ import lombok.val;
 /**
  * This ThreadFactory create thread with unique name with id.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public class CounterThreadFactory implements ThreadFactory {
     

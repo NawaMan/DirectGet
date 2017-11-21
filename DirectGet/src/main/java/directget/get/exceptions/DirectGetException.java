@@ -18,7 +18,7 @@ package directget.get.exceptions;
 /**
  * General checked exception for DirectGet.
  * 
- * @author nawaman
+ * @author NawaMan
  */
 public abstract class DirectGetException extends Exception {
     

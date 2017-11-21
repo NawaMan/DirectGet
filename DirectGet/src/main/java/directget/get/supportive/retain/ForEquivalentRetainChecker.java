@@ -26,7 +26,7 @@ import lombok.val;
 /**
  * Retain checker that check another if the current value equals to the previous.
  * 
- * @author nawaman
+ * @author NawaMan
  *
  * @param <T> the type to watch for.
  * @param <V> the type that is retained.

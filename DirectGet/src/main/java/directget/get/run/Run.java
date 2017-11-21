@@ -13,15 +13,15 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run;
+package directget.get.run;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
 import directget.get.Scope;
-import directget.run.session.NewThreadSessionBuilder;
-import directget.run.session.SameThreadNoCheckExceptionSessionBuilder;
-import directget.run.session.SameThreadSessionBuilder;
+import directget.get.run.session.NewThreadSessionBuilder;
+import directget.get.run.session.SameThreadNoCheckExceptionSessionBuilder;
+import directget.get.run.session.SameThreadSessionBuilder;
 import lombok.val;
 
 /**

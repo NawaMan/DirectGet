@@ -13,35 +13,16 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.exceptions;
+package directget.get.run;
+
+import java.util.function.Function;
 
 /**
- * General unchecked exception for DirectGet.
+ * Alias type of Function&lt;Runnable, Runnable&gt;.
  * 
- * @author nawaman
- */
-public abstract class DirectRunRuntimeException extends RuntimeException {
-    
-    private static final long serialVersionUID = 202231858308724170L;
-    
-    /** Constructor */
-    public DirectRunRuntimeException() {
-        super();
-    }
-    
-    /** Constructor */
-    public DirectRunRuntimeException(String message) {
-        super(message);
-    }
-    
-    /** Constructor */
-    public DirectRunRuntimeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-    
-    /** Constructor */
-    public DirectRunRuntimeException(Throwable cause) {
-        super(cause);
-    }
+ * @author NawaMan
+ **/
+@FunctionalInterface
+public interface Wrapper extends Function<Runnable, Runnable> {
     
 }

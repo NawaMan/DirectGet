@@ -13,19 +13,34 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.exceptions;
+package directget.get.run.exceptions;
 
 /**
- * This exception wraps an exception from a failable.
+ * General unchecked exception for DirectGet.
  * 
  * @author nawaman
  */
-public class FailableException extends DirectRunRuntimeException {
+public abstract class DirectRunRuntimeException extends RuntimeException {
     
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 202231858308724170L;
     
     /** Constructor */
-    public FailableException(Throwable cause) {
+    public DirectRunRuntimeException() {
+        super();
+    }
+    
+    /** Constructor */
+    public DirectRunRuntimeException(String message) {
+        super(message);
+    }
+    
+    /** Constructor */
+    public DirectRunRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
+    /** Constructor */
+    public DirectRunRuntimeException(Throwable cause) {
         super(cause);
     }
     

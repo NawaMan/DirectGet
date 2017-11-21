@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
+package directget.get.run.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import directget.get.Ref;
-import directget.run.Failable;
-import directget.run.Fork;
+import directget.get.run.Failable;
+import directget.get.run.Fork;
 
 /**
  * The wrapper for a new thread run.

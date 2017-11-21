@@ -21,10 +21,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
 
 import directget.get.exceptions.GetException;
+import directget.get.run.Named;
+import directget.get.run.Named.Predicate;
 import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
-import directget.run.Named;
-import directget.run.Named.Predicate;
 import lombok.val;
 
 /**

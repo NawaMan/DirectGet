@@ -13,14 +13,14 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
+package directget.get.run.session;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import directget.run.Failable;
-import directget.run.exceptions.FailableException;
+import directget.get.run.Failable;
+import directget.get.run.exceptions.FailableException;
 import lombok.val;
 
 

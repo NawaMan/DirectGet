@@ -36,7 +36,7 @@ import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
-import directget.run.Run;
+import directget.get.run.Run;
 
 public class ProvidingOrderTest {
 

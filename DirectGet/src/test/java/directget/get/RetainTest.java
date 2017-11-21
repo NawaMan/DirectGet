@@ -2,8 +2,8 @@ package directget.get;
 
 import static directget.get.Get.a;
 import static directget.get.Get.the;
-import static directget.run.Run.OnNewThread;
-import static directget.run.Run.With;
+import static directget.get.run.Run.OnNewThread;
+import static directget.get.run.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import directget.run.Fork;
-import directget.run.Run;
+import directget.get.run.Fork;
+import directget.get.run.Run;
 import lombok.val;
 
 public class RetainTest {

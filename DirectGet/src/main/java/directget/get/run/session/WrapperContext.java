@@ -13,16 +13,31 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run;
+package directget.get.run.session;
 
+import static directget.get.run.session.utils._or;
+import static directget.get.run.session.utils._toUnmodifiableNonNullList;
+
+import java.util.List;
 import java.util.function.Function;
 
+import directget.get.run.Failable;
+
 /**
- * Alias type of Function&lt;Runnable, Runnable&gt;.
+ * The contains the wrappers so that we can run something within them.
  * 
  * @author NawaMan
  **/
-@FunctionalInterface
-public interface Wrapper extends Function<Runnable, Runnable> {
+public class WrapperContext {
+    
+    @SuppressWarnings("rawtypes")
+    final Function<Failable.Runnable, Runnable> failHandler;
+    final List<Function<Runnable, Runnable>> wrappers;
+    
+    @SuppressWarnings("rawtypes") 
+    WrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+        this.failHandler = _or(failHandler, ()->runnable->runnable.gracefully());
+        this.wrappers    = _toUnmodifiableNonNullList(functions);
+    }
     
 }

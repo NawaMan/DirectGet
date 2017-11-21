@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run;
+package directget.get.run;
 
 import directget.get.Get;
 import directget.get.Ref;

@@ -13,31 +13,20 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
-
-import static directget.run.session.utils._or;
-import static directget.run.session.utils._toUnmodifiableNonNullList;
-
-import java.util.List;
-import java.util.function.Function;
-
-import directget.run.Failable;
+package directget.get.run.exceptions;
 
 /**
- * The contains the wrappers so that we can run something within them.
+ * This exception wraps an exception from a failable.
  * 
- * @author NawaMan
- **/
-public class WrapperContext {
+ * @author nawaman
+ */
+public class FailableException extends DirectRunRuntimeException {
     
-    @SuppressWarnings("rawtypes")
-    final Function<Failable.Runnable, Runnable> failHandler;
-    final List<Function<Runnable, Runnable>> wrappers;
+    private static final long serialVersionUID = 1L;
     
-    @SuppressWarnings("rawtypes") 
-    WrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
-        this.failHandler = _or(failHandler, ()->runnable->runnable.gracefully());
-        this.wrappers    = _toUnmodifiableNonNullList(functions);
+    /** Constructor */
+    public FailableException(Throwable cause) {
+        super(cause);
     }
     
 }

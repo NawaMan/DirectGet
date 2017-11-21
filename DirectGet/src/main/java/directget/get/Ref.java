@@ -19,9 +19,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import directget.get.exceptions.GetException;
+import directget.get.run.Named;
 import directget.get.supportive.DirectRef;
 import directget.get.supportive.ForClassRef;
-import directget.run.Named;
 import lombok.val;
 
 /***

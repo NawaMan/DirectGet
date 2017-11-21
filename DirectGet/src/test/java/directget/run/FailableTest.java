@@ -1,6 +1,6 @@
 package directget.run;
 
-import static directget.run.exceptions.ProblemHandler.problemHandler;
+import static directget.get.run.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -11,9 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import directget.run.exceptions.FailableException;
-import directget.run.exceptions.ProblemHandledException;
-import directget.run.exceptions.ProblemHandler;
+import directget.get.run.Failable;
+import directget.get.run.Run;
+import directget.get.run.exceptions.FailableException;
+import directget.get.run.exceptions.ProblemHandledException;
+import directget.get.run.exceptions.ProblemHandler;
 import lombok.val;
 
 public class FailableTest {

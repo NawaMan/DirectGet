@@ -15,9 +15,9 @@
 //  ========================================================================
 package directget.run;
 
-import static directget.run.Run.IgnoreHandledProblem;
-import static directget.run.Run.OnNewThread;
-import static directget.run.exceptions.ProblemHandler.problemHandler;
+import static directget.get.run.Run.IgnoreHandledProblem;
+import static directget.get.run.Run.OnNewThread;
+import static directget.get.run.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -31,8 +31,10 @@ import org.junit.Test;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.run.exceptions.ProblemHandledException;
-import directget.run.exceptions.ProblemHandler;
+import directget.get.run.Failable;
+import directget.get.run.Run;
+import directget.get.run.exceptions.ProblemHandledException;
+import directget.get.run.exceptions.ProblemHandler;
 import lombok.val;
 
 public class RunTest {

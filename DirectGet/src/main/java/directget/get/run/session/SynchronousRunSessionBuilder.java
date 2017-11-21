@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================package directget.get.run;
-package directget.run.session;
+package directget.get.run.session;
 
 /**
  * This interface marks that SessionBuilder Synchronous.

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static directget.get.Preferability.Dictate;
-import static directget.run.Run.*;
+import static directget.get.run.Run.*;
 import static java.lang.Thread.*;
 
 import org.junit.Test;
@@ -42,10 +42,10 @@ import directget.get.Get;
 import directget.get.Preferability;
 import directget.get.Providing;
 import directget.get.Ref;
-import directget.run.Fork;
-import directget.run.Named;
-import directget.run.Run;
-import directget.run.Wrapper;
+import directget.get.run.Fork;
+import directget.get.run.Named;
+import directget.get.run.Run;
+import directget.get.run.Wrapper;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {

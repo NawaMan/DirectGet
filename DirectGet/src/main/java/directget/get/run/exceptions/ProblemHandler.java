@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.exceptions;
+package directget.get.run.exceptions;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

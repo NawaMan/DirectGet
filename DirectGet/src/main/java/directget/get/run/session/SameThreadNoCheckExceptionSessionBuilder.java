@@ -13,9 +13,9 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
+package directget.get.run.session;
 
-import directget.run.Failable;
+import directget.get.run.Failable;
 
 /**
  * This class make building a run a bit easier.

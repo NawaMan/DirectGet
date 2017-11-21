@@ -19,9 +19,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import directget.get.run.Named;
+import directget.get.run.Wrapper;
 import directget.get.supportive.Utilities;
-import directget.run.Named;
-import directget.run.Wrapper;
 import lombok.experimental.ExtensionMethod;
 
 /**

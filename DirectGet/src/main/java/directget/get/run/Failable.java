@@ -13,11 +13,11 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run;
+package directget.get.run;
 
 import directget.get.Get;
-import directget.run.exceptions.FailableException;
-import directget.run.exceptions.ProblemHandler;
+import directget.get.run.exceptions.FailableException;
+import directget.get.run.exceptions.ProblemHandler;
 
 /**
  * Failable actions.

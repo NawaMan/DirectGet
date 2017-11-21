@@ -13,13 +13,13 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
+package directget.get.run.session;
 
 import java.util.function.Predicate;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.run.Wrapper;
+import directget.get.run.Wrapper;
 import lombok.val;
 
 /**

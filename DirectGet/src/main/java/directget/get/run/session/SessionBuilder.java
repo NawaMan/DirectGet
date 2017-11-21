@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.run.session;
+package directget.get.run.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,9 +26,9 @@ import directget.get.App;
 import directget.get.GetInstance;
 import directget.get.Providing;
 import directget.get.Scope;
-import directget.run.Failable;
-import directget.run.Wrapper;
-import directget.run.exceptions.ProblemHandledException;
+import directget.get.run.Failable;
+import directget.get.run.Wrapper;
+import directget.get.run.exceptions.ProblemHandledException;
 import lombok.val;
 
 /**

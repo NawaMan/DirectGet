@@ -1,4 +1,4 @@
-package directget.run.session;
+package directget.get.run.session;
 
 import java.util.Collection;
 import java.util.Collections;

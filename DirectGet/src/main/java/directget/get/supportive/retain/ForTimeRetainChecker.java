@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.get.supportive.directget_internal_utilities;
+import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -36,13 +36,13 @@ import lombok.experimental.ExtensionMethod;
  *
  * @param <V> the type that is retained.
  */
-@ExtensionMethod({ directget_internal_utilities.class })
+@ExtensionMethod({ Utilities.class })
 public class ForTimeRetainChecker<V> implements Predicate<V> {
     
     /** Ref for current time in milliseconds. */
     final static Ref<Long> currentTimeMillis
             = Ref.of(Long.class).by(()->Long.valueOf(System.currentTimeMillis()));
-
+    
     final static Supplier<Long> nextExpire(long time, TimeUnit unit) {
         return ()->the(currentTimeMillis) + unit.toMillis(time);
     }
@@ -86,7 +86,7 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
     public long getTime() {
         return time;
     }
-
+    
     /** @return the time unuit. */
     public TimeUnit getTimeUnit() {
         return unit;

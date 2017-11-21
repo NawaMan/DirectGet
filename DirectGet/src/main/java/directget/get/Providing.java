@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import directget.get.supportive.directget_internal_utilities;
+import directget.get.supportive.Utilities;
 import directget.run.Named;
 import directget.run.Wrapper;
 import lombok.experimental.ExtensionMethod;
@@ -29,7 +29,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author nawaman
  **/
-@ExtensionMethod({ directget_internal_utilities.class })
+@ExtensionMethod({ Utilities.class })
 public class Providing<T> implements Supplier<T>, Wrapper {
     
     final Ref<T> ref;

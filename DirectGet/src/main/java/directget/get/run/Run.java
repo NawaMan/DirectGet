@@ -122,7 +122,7 @@ public class Run {
     }
     
     // TODO - change or add "Async"
-    // TODO - new thread must be more generic so it can be implment by RIU
+    // TODO - new thread must be more generic so it can be implement by RIU
     /** Make the run to be run on a new thread. */
     public static NewThreadSessionBuilder OnNewThread() {
         return new SameThreadSessionBuilder().onNewThread();

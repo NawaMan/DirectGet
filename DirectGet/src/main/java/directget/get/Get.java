@@ -44,10 +44,10 @@ public final class Get {
     
     
     /** The reference to the thread factory. */
-    public static final Ref<ThreadFactory> _ThreadFactory_ = Ref.of(ThreadFactory.class, CounterThreadFactory.instance);
+    public static final Ref<ThreadFactory> DefaultThreadFactory = Ref.of(ThreadFactory.class, CounterThreadFactory.instance);
     
     /** The reference to the executor. */
-    public static final Ref<Executor> _Executor_ = Ref.of(Executor.class).by(()->GetThreadFactoryExecutor.instance);
+    public static final Ref<Executor> DefaultExecutor = Ref.of(Executor.class).by(()->GetThreadFactoryExecutor.instance);
     
     
     private Get() {

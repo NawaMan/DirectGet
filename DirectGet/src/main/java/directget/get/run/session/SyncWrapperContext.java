@@ -29,10 +29,10 @@ import lombok.val;
  * 
  * @author NawaMan
  **/
-public class SameThreadWrapperContext extends WrapperContext {
+public class SyncWrapperContext extends WrapperContext {
     
     @SuppressWarnings("rawtypes")
-    SameThreadWrapperContext(
+    SyncWrapperContext(
             Function<Failable.Runnable, Runnable> failHandler,
             List<Function<Runnable, Runnable>> functions) {
         super(failHandler, functions);

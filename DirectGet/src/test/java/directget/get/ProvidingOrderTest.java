@@ -36,7 +36,6 @@ import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
-import directget.get.run.Run;
 
 public class ProvidingOrderTest {
 
@@ -99,7 +98,7 @@ public class ProvidingOrderTest {
             try {
                 @SuppressWarnings("rawtypes")
                 List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
-                theScope.Get().runNewThread(list, () -> {
+                theScope.Get().runAsync(list, () -> {
                     try {
                         theScope.Get().substitute(Stream.of(_stack), () -> {
                             String actual = theScope.Get()._a(ref).orElse(null);

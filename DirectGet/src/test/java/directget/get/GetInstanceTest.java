@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static directget.get.Preferability.Dictate;
-import static directget.get.run.Run.*;
+import static directget.get.Run.*;
 import static java.lang.Thread.*;
 
 import org.junit.Test;
@@ -44,7 +44,6 @@ import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.run.Fork;
 import directget.get.run.Named;
-import directget.get.run.Run;
 import directget.get.run.Wrapper;
 import lombok.val;
 
@@ -103,7 +102,7 @@ public class GetInstanceTest implements Named.User {
                 System.out.println(str);
             }
         };
-        providings.add(new Providing(Preferability._Listener_, Preferability.Dictate, () -> listener));
+        providings.add(new Providing(Preferability.DefaultListener, Preferability.Dictate, () -> listener));
         App.Get().substitute(providings.stream(), runnable);
     });
     
@@ -112,7 +111,7 @@ public class GetInstanceTest implements Named.User {
         val fork = new Fork();
         
         With(_newText)
-        .onNewThread()
+        .synchronously()
         .inheritNone()
         .joinWith(fork)
         .run(()->{
@@ -129,7 +128,7 @@ public class GetInstanceTest implements Named.User {
         Run
         .with(_text_.butProvidedWith(newText))
         .with(_verboseLogger)
-        .onNewThread()
+        .synchronously()
         .inheritAll()
         .joinWith(fork)
         .run(()->{

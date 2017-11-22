@@ -17,8 +17,8 @@ package directget.get;
 
 import static directget.get.Get.a;
 import static directget.get.Get.the;
-import static directget.get.run.Run.OnNewThread;
-import static directget.get.run.Run.With;
+import static directget.get.Run.Asynchronously;
+import static directget.get.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import directget.get.run.Fork;
-import directget.get.run.Run;
 import lombok.val;
 
 public class RetainTest {
@@ -161,7 +160,7 @@ public class RetainTest {
         the(logs).clear();
         
         val fork = new Fork();
-        OnNewThread()
+        Asynchronously()
         .joinWith(fork)
         .run(() -> {
             Thread.sleep(100);
@@ -190,7 +189,7 @@ public class RetainTest {
             the(logs).clear();
             
             val fork = new Fork();
-            OnNewThread()
+            Asynchronously()
             .joinWith(fork)
             .inherit(logs)
             .run(() -> {
@@ -236,7 +235,7 @@ public class RetainTest {
         assertEquals("Value#0", the(ref).toString());
         assertEquals("Value#1", the(ref).toString());
         
-        OnNewThread().run(()->{
+        Asynchronously().run(()->{
             assertEquals("Value#2", the(ref).toString());
         });
         

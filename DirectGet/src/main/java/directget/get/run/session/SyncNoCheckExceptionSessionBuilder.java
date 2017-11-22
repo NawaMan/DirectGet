@@ -22,13 +22,13 @@ import directget.get.run.Failable;
  * 
  * @author NawaMan
  */
-public class SameThreadNoCheckExceptionSessionBuilder
-        extends SessionBuilder<SameThreadSessionBuilder>
+public class SyncNoCheckExceptionSessionBuilder
+        extends SessionBuilder<SyncSessionBuilder>
         implements SynchronousRunSessionBuilder {
     
     /** Build the session for later use. */
-    public SameThreadWrapperContext build() {
-        return new SameThreadWrapperContext(failHandler, wrappers);
+    public SyncWrapperContext build() {
+        return new SyncWrapperContext(failHandler, wrappers);
     }
     
     /** Run the given supplier and return a value. */

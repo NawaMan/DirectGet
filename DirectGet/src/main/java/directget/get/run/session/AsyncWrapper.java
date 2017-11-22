@@ -27,11 +27,11 @@ import lombok.val;
  * 
  * @author NawaMan
  **/
-public class NewThreadWrapper implements Wrapper {
+public class AsyncWrapper implements Wrapper {
     
-    private final NewThreadSessionBuilder builder;
+    private final AsyncSessionBuilder builder;
     
-    NewThreadWrapper(NewThreadSessionBuilder builder) {
+    AsyncWrapper(AsyncSessionBuilder builder) {
         this.builder = builder;
     }
     
@@ -63,11 +63,11 @@ public class NewThreadWrapper implements Wrapper {
         val checker = predicate;
         if (builder.fork != null) {
             return () -> {
-                builder.get().runNewThread(checker, builder.fork.run(runnable));
+                builder.get().runAsync(checker, builder.fork.run(runnable));
             };
         } else {
             return () -> {
-                builder.get().runNewThread(checker, runnable);
+                builder.get().runAsync(checker, runnable);
             };
         }
     }

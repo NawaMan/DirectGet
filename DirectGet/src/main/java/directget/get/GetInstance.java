@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.Get._ThreadFactory_;
+import static directget.get.Get.DefaultExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -274,49 +274,26 @@ public final class GetInstance {
     }
     
     /**
-     * Create a sub thread with a get that inherits the given substitution from
-     * the current Get and run the runnable with it.
-     **/
-    @SuppressWarnings("rawtypes")
-    public <T extends Throwable> Thread newThread(List<Ref> refsToInherit, Runnable runnable) {
-        val thread = newThread(refsToInherit::contains, runnable);
-        return thread;
-    }
-    
-    /**
-     * Run the given runnable on a new thread that inherits the providings of
+     * Run the given runnable asynchronously and inherits the providings of
      * those given refs.
      **/
-    public void runNewThread(
+    public void runAsync(
             @SuppressWarnings("rawtypes") List<Ref> refsToInherit,
             Runnable runnable) {
-        val thread = newThread(refsToInherit, runnable);
-        thread.start();
+        runAsync(refsToInherit::contains, runnable);
     }
     
     /**
-     * Run the given runnable on a new thread that inherits the substitution
+     * Run the given runnable asynchronously and inherits the substitution
      * from the current Get (all Ref that pass the predicate test).
      **/
-    public void runNewThread(
-            @SuppressWarnings("rawtypes") Predicate<Ref> refsToInherit,
-            Runnable runnable) {
-        val thread = newThread(refsToInherit, runnable);
-        thread.start();
-    }
-    
-    /**
-     * Create a sub thread with a get that inherits the substitution from the
-     * current Get (all Ref that pass the predicate test) and run the runnable
-     * with it.
-     **/
     @SuppressWarnings("rawtypes")
-    public Thread newThread(Predicate<Ref> refsToInherit, Runnable runnable) {
+    public void runAsync(Predicate<Ref> refsToInherit, Runnable runnable) {
         val newGet = new GetInstance(scope);
         val providings = prepareProvidings(refsToInherit);
         
-        val newThread = the(_ThreadFactory_);
-        return newThread.newThread(() -> {
+        val newExecutor = the(DefaultExecutor);
+        newExecutor.execute(() -> {
             scope.threadGet.set(newGet);
             val providingsList = providings;
             newGet.substitute(providingsList.stream(), runnable);

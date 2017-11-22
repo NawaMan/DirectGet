@@ -13,15 +13,16 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.run;
+package directget.get;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import directget.get.Scope;
-import directget.get.run.session.NewThreadSessionBuilder;
-import directget.get.run.session.SameThreadNoCheckExceptionSessionBuilder;
-import directget.get.run.session.SameThreadSessionBuilder;
+import directget.get.run.Failable;
+import directget.get.run.Wrapper;
+import directget.get.run.session.AsyncSessionBuilder;
+import directget.get.run.session.SyncNoCheckExceptionSessionBuilder;
+import directget.get.run.session.SyncSessionBuilder;
 import lombok.val;
 
 /**
@@ -32,110 +33,108 @@ import lombok.val;
 public class Run {
     
     /** Specify that the running should be done under the given scope */
-    public static SameThreadSessionBuilder under(Scope scope) {
-        return new SameThreadSessionBuilder().under(scope);
+    public static SyncSessionBuilder under(Scope scope) {
+        return new SyncSessionBuilder().under(scope);
     }
     
     /** Specify that the running should be done under the given scope */
-    public static SameThreadSessionBuilder Under(Scope scope) {
-        return new SameThreadSessionBuilder().under(scope);
+    public static SyncSessionBuilder Under(Scope scope) {
+        return new SyncSessionBuilder().under(scope);
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder with(Wrapper... wrappers) {
+    public static SyncSessionBuilder with(Wrapper... wrappers) {
         return with(Stream.of(wrappers));
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder With(Wrapper... wrappers) {
+    public static SyncSessionBuilder With(Wrapper... wrappers) {
         return with(Stream.of(wrappers));
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder with(Collection<Wrapper> wrappers) {
+    public static SyncSessionBuilder with(Collection<Wrapper> wrappers) {
         return with(wrappers.stream());
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder With(Collection<Wrapper> wrappers) {
+    public static SyncSessionBuilder With(Collection<Wrapper> wrappers) {
         return with(wrappers.stream());
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder With(Stream<Wrapper> providings) {
+    public static SyncSessionBuilder With(Stream<Wrapper> providings) {
         return with(providings);
     }
     
     /** Add the wrapper */
-    public static SameThreadSessionBuilder with(Stream<Wrapper> wrappers) {
-        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
+    public static SyncSessionBuilder with(Stream<Wrapper> wrappers) {
+        SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.with(wrappers);
         return sessionBuilder;
     }
     
     /** Mark that this run should handle the exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder HandleProblem() {
+    public static SyncNoCheckExceptionSessionBuilder HandleProblem() {
         return handleProblem();
     }
     
     /** Mark that this run should handle the exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder handleProblem() {
-        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder handleProblem() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleProblem();
         return sessionBuilder;
     }
     
     /** Mark that this run should handle the exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder HandleThenIgnoreProblem() {
+    public static SyncNoCheckExceptionSessionBuilder HandleThenIgnoreProblem() {
         return handleThenIgnoreProblem();
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
-        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleThenIgnoreProblem();
         return sessionBuilder;
     }
     
     /** Mark that this run should ignore all the handled problem. */
-    public static SameThreadSessionBuilder IgnoreHandledProblem() {
+    public static SyncSessionBuilder IgnoreHandledProblem() {
         return ignoreHandledProblem();
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder IgnoreException() {
+    public static SyncNoCheckExceptionSessionBuilder IgnoreException() {
         return ignoreException();
     }
     
         /** Mark that this run should ignore all the handled problem. */
-    public static SameThreadSessionBuilder ignoreHandledProblem() {
-        val sessionBuilder = new SameThreadSessionBuilder();
+    public static SyncSessionBuilder ignoreHandledProblem() {
+        val sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.ignoreHandledProblem();
         return sessionBuilder;
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public static SameThreadNoCheckExceptionSessionBuilder ignoreException() {
-        val sessionBuilder = new SameThreadNoCheckExceptionSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder ignoreException() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.ignoreException();
         return sessionBuilder;
     }
     
-    // TODO - change or add "Async"
-    // TODO - new thread must be more generic so it can be implement by RIU
     /** Make the run to be run on a new thread. */
-    public static NewThreadSessionBuilder OnNewThread() {
-        return new SameThreadSessionBuilder().onNewThread();
+    public static AsyncSessionBuilder Asynchronously() {
+        return new SyncSessionBuilder().synchronously();
     }
     
     /** Make the run to be run on a new thread. */
-    public static NewThreadSessionBuilder onNewThread() {
-        return new SameThreadSessionBuilder().onNewThread();
+    public static AsyncSessionBuilder asynchronously() {
+        return new SyncSessionBuilder().synchronously();
     }
     
     /** Run the session now. */
     public static <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
-        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
+        SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.run(runnable);
     }
     
@@ -145,7 +144,7 @@ public class Run {
      * @throws T
      */
     public static <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
-        SameThreadSessionBuilder sessionBuilder = new SameThreadSessionBuilder();
+        SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         return sessionBuilder.run(supplier);
     }
     

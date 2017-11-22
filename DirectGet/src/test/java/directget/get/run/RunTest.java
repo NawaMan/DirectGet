@@ -15,8 +15,8 @@
 //  ========================================================================
 package directget.get.run;
 
-import static directget.get.run.Run.IgnoreHandledProblem;
-import static directget.get.run.Run.OnNewThread;
+import static directget.get.Run.Asynchronously;
+import static directget.get.Run.IgnoreHandledProblem;
 import static directget.get.run.exceptions.ProblemHandler.problemHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,8 +31,7 @@ import org.junit.Test;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.get.run.Failable;
-import directget.get.run.Run;
+import directget.get.Run;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;
 import lombok.val;
@@ -75,7 +74,7 @@ public class RunTest {
     public void testDiffThreadSupplier() throws InterruptedException {
         val iAmHereFirst = new AtomicBoolean(false);
         val latch = new CountDownLatch(1);
-        OnNewThread()
+        Asynchronously()
         .with(num.butProvidedWith(10))
         .run(()->{
             Thread.sleep(200);
@@ -100,7 +99,7 @@ public class RunTest {
     @Test
     public void testDiffThreadSupplier_withException() throws InterruptedException {
         val latch = new CountDownLatch(1);
-        OnNewThread()
+        Asynchronously()
         .run(()->{
             Thread.sleep(200);
             throw new IOException();

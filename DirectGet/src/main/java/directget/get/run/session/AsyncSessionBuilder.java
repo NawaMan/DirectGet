@@ -29,7 +29,7 @@ import directget.get.run.Fork;
  * 
  * @author NawaMan
  **/
-public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuilder> {
+public class AsyncSessionBuilder extends SessionBuilder<AsyncSessionBuilder> {
     
     @SuppressWarnings("rawtypes")
     final List<Ref> includedRefs = new ArrayList<>();
@@ -40,25 +40,25 @@ public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuil
     
     Fork fork = null;
     
-    NewThreadWrapper newThreadwrapper = new NewThreadWrapper(this);
+    AsyncWrapper asyncWrapper = new AsyncWrapper(this);
     
     /** Default constructor. */
-    public NewThreadSessionBuilder() {
+    public AsyncSessionBuilder() {
     }
     
     /** Constructor with a fork. */
-    public NewThreadSessionBuilder(Fork fork) {
+    public AsyncSessionBuilder(Fork fork) {
         this.fork = fork;
     }
     
     /** Join the runnable with using the given fork. */
-    public NewThreadSessionBuilder joinWith(Fork fork) {
+    public AsyncSessionBuilder joinWith(Fork fork) {
         this.fork = fork;
         return this;
     }
     
     /** Set this run to inherit all refs from the parent thread. */
-    public NewThreadSessionBuilder inheritAll() {
+    public AsyncSessionBuilder inheritAll() {
         inheritMass = true;
         includedRefs.clear();
         excludedRefs.clear();
@@ -66,7 +66,7 @@ public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuil
     }
     
     /** Set this run to inherit no refs from the parent thread. */
-    public NewThreadSessionBuilder inheritNone() {
+    public AsyncSessionBuilder inheritNone() {
         inheritMass = false;
         includedRefs.clear();
         excludedRefs.clear();
@@ -75,7 +75,7 @@ public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuil
     
     /** Specify what refs to be inherited - in case of inherit none. */
     @SuppressWarnings({ "rawtypes" })
-    public NewThreadSessionBuilder inherit(Ref... refs) {
+    public AsyncSessionBuilder inherit(Ref... refs) {
         List<Ref> list = Arrays.asList(refs);
         includedRefs.addAll(list);
         excludedRefs.removeAll(list);
@@ -84,7 +84,7 @@ public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuil
     
     /** Specify what refs NOT to be inherited - in case of inherit all. */
     @SuppressWarnings({ "rawtypes" })
-    public NewThreadSessionBuilder notInherit(Ref... refs) {
+    public AsyncSessionBuilder notInherit(Ref... refs) {
         List<Ref> list = Arrays.asList(refs);
         includedRefs.removeAll(list);
         excludedRefs.addAll(list);
@@ -92,8 +92,8 @@ public class NewThreadSessionBuilder extends SessionBuilder<NewThreadSessionBuil
     }
     
     /** Build the session for later use. */
-    public NewThreadWrapperContext build() {
-        return new NewThreadWrapperContext(failHandler, wrappers);
+    public AsyncWrapperContext build() {
+        return new AsyncWrapperContext(failHandler, wrappers);
     }
     
     /** Run the given supplier and return a value. */

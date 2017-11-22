@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
+import directget.get.Run;
 import directget.get.run.Failable;
-import directget.get.run.Run;
 import directget.get.run.exceptions.FailableException;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;

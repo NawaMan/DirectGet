@@ -32,7 +32,7 @@ public class GetThreadFactoryExecutor implements Executor {
 
     @Override
     public void execute(Runnable runnable) {
-        val newThread = Get.a(Get._ThreadFactory_).newThread(runnable);
+        val newThread = Get.a(Get.DefaultThreadFactory).newThread(runnable);
         newThread.start();
     }
     

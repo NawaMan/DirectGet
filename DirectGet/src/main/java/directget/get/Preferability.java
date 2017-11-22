@@ -30,7 +30,7 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 // OK - I feel like am going to regret this but this closed design (of using Enums) makes things
-//        much simpler and it might worth the thread off.
+//        much simpler and it might worth the trade offs.
 /**
  * This enum is used to specify the preferability of a providing.
  * 
@@ -71,7 +71,7 @@ public enum Preferability {
     }
     
     /** */
-    public static final Ref<DetermineProvidingListener> _Listener_ = Ref.of(DetermineProvidingListener.class, null);
+    public static final Ref<DetermineProvidingListener> DefaultListener = Ref.of(DetermineProvidingListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     
@@ -99,7 +99,7 @@ public enum Preferability {
     public static <T> Providing<T> determineProviding(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProvidingStackMap stacks) {
         Optional<BiConsumer<String, Providing<T>>> alarm = Optional
-                .ofNullable((!_ListenerEnabled_.get() || (ref == _Listener_)) ? null : Get.a(_Listener_))
+                .ofNullable((!_ListenerEnabled_.get() || (ref == DefaultListener)) ? null : Get.a(DefaultListener))
                 .map(listener -> (foundSource, foundProviding) -> {
                     listener.onDetermine(ref, foundSource, foundProviding, Preferability::callStackToString,
                             getXRayString(ref, parentScope, currentScope, stacks));
@@ -171,7 +171,8 @@ public enum Preferability {
     }
     
     private static String callStackToString() {
-        val toString = Arrays.stream(Thread.currentThread().getStackTrace()).map(Objects::toString)
+        val toString = Arrays.stream(Thread.currentThread().getStackTrace())
+                .map(Objects::toString)
                 .collect(Collectors.joining("\n\t"));
         return "\t" + toString;
     }

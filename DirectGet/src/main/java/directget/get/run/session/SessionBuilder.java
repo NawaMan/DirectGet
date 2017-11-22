@@ -24,11 +24,11 @@ import java.util.stream.Stream;
 
 import directget.get.App;
 import directget.get.GetInstance;
-import directget.get.Providing;
 import directget.get.Scope;
 import directget.get.run.Failable;
 import directget.get.run.Wrapper;
 import directget.get.run.exceptions.ProblemHandledException;
+import directget.get.supportive.Providing;
 import lombok.val;
 
 /**

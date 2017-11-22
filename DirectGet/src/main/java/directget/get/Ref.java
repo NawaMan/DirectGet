@@ -22,6 +22,7 @@ import directget.get.exceptions.GetException;
 import directget.get.run.Named;
 import directget.get.supportive.DirectRef;
 import directget.get.supportive.ForClassRef;
+import directget.get.supportive.Providing;
 import lombok.val;
 
 /***

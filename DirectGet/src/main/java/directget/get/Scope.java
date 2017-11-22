@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
+import directget.get.supportive.Providing;
 import lombok.val;
 
 /***

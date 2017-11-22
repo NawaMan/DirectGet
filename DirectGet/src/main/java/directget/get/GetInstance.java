@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
+import directget.get.supportive.Providing;
 import directget.get.supportive.ProvidingStackMap;
 import directget.get.supportive.Utilities;
 import lombok.val;

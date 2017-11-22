@@ -13,34 +13,36 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
 import java.util.function.Supplier;
 
-import directget.get.supportive.DirectRef;
+import directget.get.Preferability;
+import directget.get.Ref;
 import directget.get.supportive.retain.Retainer;
 import directget.get.supportive.retain.RetainerBuilder;
 import directget.get.supportive.retain.WithRetainer;
 import lombok.val;
 
 /**
- * A direct ref with retainer.
+ * Providing with a retainer.
  * 
- * @author Nawa Man
+ * @author NawaMan
  *
- * @param <T> the type of data this will be reference to.
+ * @param <T>
  */
-public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetainer<T, DirectRefWithRetainer<T>> {
-    
+public class ProvidingWithRetainer<T> extends Providing<T> implements WithRetainer<T, ProvidingWithRetainer<T>> {
+
     /** Constructor. */
-    public DirectRefWithRetainer(String name, Class<T> targetClass, Preferability preferability,
-            Supplier<? extends T> factory) {
-        super(name, targetClass, preferability, factory);
+    public ProvidingWithRetainer(
+            Ref<T>                ref, 
+            Preferability         preferability, 
+            Supplier<? extends T> supplier) {
+        super(ref, preferability, supplier);
     }
-    
-    /** Returns the retainer. */
+
     public Retainer<T> getRetainer() {
-        val supplier = getProviding().supplier;
+        val supplier = getSupplier();
         val retainer
             = ((supplier instanceof Retainer)
             ? ((Retainer<T>)supplier)
@@ -48,13 +50,18 @@ public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetain
         return retainer;
     }
 
-    /** Change the supplier. */
-    public DirectRefWithRetainer<T> __but(Supplier<T> newSupplier) {
-        val supplier = getProviding().supplier;
+    public ProvidingWithRetainer<T> __but(Supplier<T> newSupplier) {
+        val supplier = getSupplier();
         if (newSupplier == supplier) {
             return this;
         }
-        return new DirectRefWithRetainer<>(this.getName(), this.getTargetClass(), this.getPreferability(), newSupplier);
+        val ref           = getRef();
+        val preferability = getPreferability();
+        return new ProvidingWithRetainer<T>(ref, preferability, newSupplier);
+    }
+    
+    static <T> Supplier<? extends T> getSupplierOf(Providing<T> provider) {
+        return provider.getSupplier();
     }
     
 }

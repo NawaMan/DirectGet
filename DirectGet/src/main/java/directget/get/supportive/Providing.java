@@ -13,15 +13,17 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.supportive;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import directget.get.App;
+import directget.get.Preferability;
+import directget.get.Ref;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
-import directget.get.supportive.Utilities;
 import lombok.experimental.ExtensionMethod;
 
 /**
@@ -32,11 +34,11 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Utilities.class })
 public class Providing<T> implements Supplier<T>, Wrapper {
     
-    final Ref<T> ref;
+    private final Ref<T> ref;
     
-    final Preferability preferability;
+    private final Preferability preferability;
     
-    final Supplier<T> supplier;
+    private final Supplier<T> supplier;
     
     /**
      * Constructor.

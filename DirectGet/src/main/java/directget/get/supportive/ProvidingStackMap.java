@@ -19,7 +19,6 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-import directget.get.Providing;
 import directget.get.Ref;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;

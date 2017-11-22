@@ -40,11 +40,11 @@ import org.junit.Test;
 import directget.get.App;
 import directget.get.Get;
 import directget.get.Preferability;
-import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.run.Fork;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
+import directget.get.supportive.Providing;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {

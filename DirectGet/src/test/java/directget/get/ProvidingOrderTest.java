@@ -32,10 +32,10 @@ import org.junit.Test;
 import directget.get.App;
 import directget.get.Configuration;
 import directget.get.Preferability;
-import directget.get.Providing;
 import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
+import directget.get.supportive.Providing;
 
 public class ProvidingOrderTest {
 

@@ -19,9 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import directget.get.DirectRefWithRetainer;
 import directget.get.Preferability;
-import directget.get.Providing;
 import directget.get.Ref;
 import lombok.val;
 

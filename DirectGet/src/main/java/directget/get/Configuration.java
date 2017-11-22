@@ -16,10 +16,13 @@
 //  ========================================================================
 package directget.get;
 
+import static java.util.Arrays.stream;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import directget.get.supportive.HasProvider;
@@ -40,8 +43,6 @@ import lombok.experimental.ExtensionMethod;
                                                // just as bad if not worse.
 @ExtensionMethod({ Utilities.class })
 public final class Configuration {
-    
-    private static final Function<Provider, Ref> byProviderRef = Provider::getRef;
     
     private final Map<Ref, Provider> providers;
     
@@ -69,8 +70,24 @@ public final class Configuration {
     
     /** Constructor. */
     public Configuration(Stream<Provider> providers) {
-        this(providers._toNonNullMap(byProviderRef));
+        this(toMap(providers));
     }
+    
+    private static Map<Ref, Provider> toMap(Stream<Provider> providers) {
+        val theMap = new TreeMap<Ref, Provider>();
+        providers
+        .filter(Objects::nonNull)
+        .forEach(provider->{
+            val ref = provider.getRef();
+            if (theMap.containsKey(ref))
+                return;
+            
+            theMap.put(ref, provider);
+        });
+        return theMap;
+    }
+    
+    // TODO - Merge and cascade configurations.
     
     private Configuration(Map<Ref, Provider> providers) {
         this.providers = providers._toUnmodifiableSortedMap();
@@ -115,6 +132,18 @@ public final class Configuration {
         String pairs = providers._toPairStrings()._toIndentLines();
         String xRay = String.format("{\n\t%s\n}", pairs);
         return xRay;
+    }
+    
+    /**
+     * Combine the configurations.
+     * 
+     * If there are duplicate Ref, the one in the earlier configuration get precedence.
+     * 
+     * @param configurations the configurations.
+     * @return the configuration.
+     */
+    public static Configuration combineOf(Configuration ... configurations) {
+        return new Configuration(stream(configurations).flatMap(Configuration::getProviders));
     }
     
 }

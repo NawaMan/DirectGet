@@ -151,6 +151,8 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     //== For default ==================================================================================================
     
+    // TODO consider the with, withA and by
+    
     /** Set the default value for this ref. */
     default public DirectRef<T> with(T defaultValue) {
         val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;

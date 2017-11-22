@@ -17,7 +17,6 @@ package directget.get.supportive;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.toMap;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -83,11 +82,6 @@ public class Utilities {
         if (theGivenObject != null)
             theAction.accept(theGivenObject);
         return theGivenObject;
-    }
-    
-    /** Convert non-null elements in the given stream to map using the keyMapper to create the key. **/
-    public static <K, V> Map<K, V> _toNonNullMap(Stream<V> theGivenStream, Function<V, K> theKeyMapper) {
-        return theGivenStream.filter(Objects::nonNull).collect(toMap(theKeyMapper, p -> p));
     }
     
     /** Returns the unmodifiedable sorted map from the given map. **/

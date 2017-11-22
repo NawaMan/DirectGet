@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import directget.get.App;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
+import lombok.val;
 
 // VERY IMPORTANT NOTE!!!
 // These test cases are designed to be run alone.
@@ -71,6 +72,25 @@ public class AppTest {
         assertTrue(App.isInitialized());
         // ... but the second time will throws an exception.
         App.initializeIfAbsent(null);
+    }
+    
+    @Test
+    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
+    public void testInitialize_withConfiguration() throws AppScopeAlreadyInitializedException {
+        val ref1 = Ref.of(String.class).with("Ref1");
+        val ref2 = Ref.of(String.class).with("Ref2");
+
+        assertEquals("Ref1", Get.the(ref1));
+        assertEquals("Ref2", Get.the(ref2));
+        
+        val configuration = new Configuration(
+                ref1.getProviding().butWith("Str1"),
+                ref2.getProviding().butWith("Str2")
+        );
+        App.initializeIfAbsent(configuration);
+        
+        assertEquals("Str1", Get.the(ref1));
+        assertEquals("Str2", Get.the(ref2));
     }
     
 }

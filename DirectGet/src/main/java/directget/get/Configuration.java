@@ -22,13 +22,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import directget.get.supportive.Providing;
+import directget.get.supportive.HasProvider;
+import directget.get.supportive.Provider;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
- * This class contains the providings for a scope.
+ * This class contains the providers for a scope.
  * 
  * @author NawaMan
  **/
@@ -40,71 +41,78 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Utilities.class })
 public final class Configuration {
     
-    private static final Function<Providing, Ref> byProvidingRef = Providing::getRef;
+    private static final Function<Provider, Ref> byProviderRef = Provider::getRef;
     
-    private final Map<Ref, Providing> providings;
+    private final Map<Ref, Provider> providers;
     
     /** Default constructor. */
     public Configuration() {
-        this((Map<Ref, Providing>) null);
+        this((Map<Ref, Provider>) null);
+    }
+    
+    
+
+    /** Constructor. */
+    public Configuration(HasProvider ... hasProviders) {
+        this(Arrays.asList(hasProviders).stream().map(HasProvider::getProvider));
     }
     
     /** Constructor. */
-    public Configuration(Providing... providings) {
-        this(Arrays.asList(providings));
+    public Configuration(Provider... providers) {
+        this(Arrays.asList(providers));
     }
     
     /** Constructor. */
-    public Configuration(Collection<Providing> providings) {
-        this(providings.stream());
+    public Configuration(Collection<Provider> providers) {
+        this(providers.stream());
     }
     
     /** Constructor. */
-    public Configuration(Stream<Providing> providings) {
-        this(providings._toNonNullMap(byProvidingRef));
+    public Configuration(Stream<Provider> providers) {
+        this(providers._toNonNullMap(byProviderRef));
     }
     
-    private Configuration(Map<Ref, Providing> providings) {
-        this.providings = providings._toUnmodifiableSortedMap();
+    private Configuration(Map<Ref, Provider> providers) {
+        this.providers = providers._toUnmodifiableSortedMap();
     }
     
     /** @return all the refs specified by this configuration. */
     public Stream<Ref> getRefs() {
-        return providings.keySet().stream();
+        return providers.keySet().stream();
     }
     
-    /** @return all the providings specified by this configuration. */
-    public Stream<Providing> getProvidings() {
-        return providings.values().stream();
+    /** @return all the providers specified by this configuration. */
+    public Stream<Provider> getProviders() {
+        return providers.values().stream();
     }
     
-    /** @return the providing for the given ref. */
-    public <T> Providing<T> getProviding(Ref<T> ref) {
-        val providing = providings.get(ref);
-        return providing;
+    /** @return the provider for the given ref. */
+    public <T> Provider<T> getProvider(Ref<T> ref) {
+        val provider = providers.get(ref);
+        return provider;
     }
     
-    /** @return {@code} if this configuration specified the providing for the given ref. */
-    public <T> boolean hasProviding(Ref<T> ref) {
-        val hasProviding = providings.containsKey(ref);
-        return hasProviding;
+    /** @return {@code} if this configuration specified the provider for the given ref. */
+    public <T> boolean hasProvider(Ref<T> ref) {
+        val hasProvider = providers.containsKey(ref);
+        return hasProvider;
     }
     
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        val toString = String.format("Configuration(%s)", providings.size());
+        val toString = String.format("Configuration(%s)", providers.size());
         return toString;
     }
     
     /** Return the detail string representation of this object. */
     public String toXRayString() {
-        val isEmpty = providings.isEmpty();
+        val isEmpty = providers.isEmpty();
         if (isEmpty) {
             return "{\n}";
         }
         
-        String pairs = providings._toPairStrings()._toIndentLines();
+        String pairs = providers._toPairStrings()._toIndentLines();
         String xRay = String.format("{\n\t%s\n}", pairs);
         return xRay;
     }

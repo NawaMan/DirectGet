@@ -27,7 +27,7 @@ import lombok.val;
  */
 public final class ForClassRef<T> extends AbstractRef<T> implements Ref<T> {
     
-    private final Providing<T> providing;
+    private final Provider<T> provider;
     
     /**
      * Constructor.
@@ -37,7 +37,7 @@ public final class ForClassRef<T> extends AbstractRef<T> implements Ref<T> {
      */
     public ForClassRef(Class<T> targetClass) {
         super(targetClass);
-        this.providing = new Providing<>(this, Preferability.Default, () -> get());
+        this.provider = new Provider<>(this, Preferability.Default, () -> get());
     }
     
     /**
@@ -56,8 +56,8 @@ public final class ForClassRef<T> extends AbstractRef<T> implements Ref<T> {
     }
     
     @Override
-    public Providing<T> getProviding() {
-        return providing;
+    public Provider<T> getProvider() {
+        return provider;
     }
     
 }

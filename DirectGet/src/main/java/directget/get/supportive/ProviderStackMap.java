@@ -24,26 +24,26 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
- * StackMap for Providing.
+ * StackMap for Provider.
  * 
  * @author NawaMan
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 @ExtensionMethod({ Utilities.class })
-public class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
+public class ProviderStackMap extends TreeMap<Ref, Stack<Provider>> {
     
     private static final long serialVersionUID = -8113998773064688984L;
     
-    private Supplier<Stack<Providing>> ensureValue(Ref ref) {
-        return (Supplier<Stack<Providing>>) () -> {
-            this.put((Ref) ref, new Stack<Providing>());
+    private Supplier<Stack<Provider>> ensureValue(Ref ref) {
+        return (Supplier<Stack<Provider>>) () -> {
+            this.put((Ref) ref, new Stack<Provider>());
             return super.get(ref);
         };
     }
     
     @Override
-    public Stack<Providing> get(Object ref) {
-        Stack<Providing> stack = super.get(ref)._or(ensureValue((Ref) ref));
+    public Stack<Provider> get(Object ref) {
+        Stack<Provider> stack = super.get(ref)._or(ensureValue((Ref) ref));
         return stack;
     }
     
@@ -52,13 +52,13 @@ public class ProvidingStackMap extends TreeMap<Ref, Stack<Providing>> {
      * 
      * @param ref
      *          the ref.
-     * @return the providing.
+     * @return the provider.
      */
-    public <T> Providing<T> peek(Ref<T> ref) {
+    public <T> Provider<T> peek(Ref<T> ref) {
         if (!containsKey(ref)) {
             return null;
         }
-        Stack<Providing> stack = get(ref);
+        Stack<Provider> stack = get(ref);
         if (stack.isEmpty()) {
             return null;
         }

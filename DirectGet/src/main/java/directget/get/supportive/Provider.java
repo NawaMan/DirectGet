@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import directget.get.App;
+import directget.get.HasRef;
 import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
@@ -27,12 +28,12 @@ import directget.get.run.Wrapper;
 import lombok.experimental.ExtensionMethod;
 
 /**
- * Instance of this class holds data for providing.
+ * Instance of this class can provide data.
  * 
  * @author NawaMan
  **/
 @ExtensionMethod({ Utilities.class })
-public class Providing<T> implements Supplier<T>, Wrapper {
+public class Provider<T> implements HasProvider<T>, HasRef<T>, Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
     
@@ -51,14 +52,19 @@ public class Providing<T> implements Supplier<T>, Wrapper {
      *            the supplier to get the value.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public Providing(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
+	public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
         this.ref = Objects.requireNonNull(ref);
         this.preferability = preferability._or(Preferability.Default);
         this.supplier = supplier._or((Supplier)()->null);
     }
+
+    @Override
+    public Provider<T> getProvider() {
+        return this;
+    }
     
     /**
-     * Returns the supplier underlining this providing.
+     * Returns the supplier underlining this provider.
      * 
      * @return the supplier.
      */
@@ -66,7 +72,7 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         return this.supplier;
     }
     
-    /** @return the reference for this providing. */
+    /** @return the reference for this provider. */
     public final Ref<T> getRef() {
         return ref;
     }
@@ -76,69 +82,69 @@ public class Providing<T> implements Supplier<T>, Wrapper {
         return supplier.get();
     }
     
-    /** @return the preferability for this providing. */
+    /** @return the preferability for this provider. */
     public final Preferability getPreferability() {
         return preferability;
     }
     
     public String toString() {
-        return "Providing (" + preferability + ":" + ref + "): " + supplier;
+        return "Provider (" + preferability + ":" + ref + "): " + supplier;
     }
 
     @Override
     public Runnable apply(Runnable runnable) {
         return ()->{
             @SuppressWarnings("rawtypes")
-            Stream<Providing> stream = Stream.of(this);
+            Stream<Provider> stream = Stream.of(this);
             App.Get().substitute(stream, runnable);
         };
     }
     
     /** @return the retainer. */
-    public final ProvidingWithRetainer<T> retained() {
-        return new ProvidingWithRetainer<T>(ref, preferability, supplier);
+    public final ProviderWithRetainer<T> retained() {
+        return new ProviderWithRetainer<T>(ref, preferability, supplier);
     }
     
     //== Wither =======================================================================================================
     
     /**
-     * @return the new providing similar to this one except the preferability of dictate.
+     * @return the new provider similar to this one except the preferability of dictate.
      **/
-    public Providing<T> butDictate() {
-        return new Providing<>(ref, Preferability.Dictate, supplier);
+    public Provider<T> butDictate() {
+        return new Provider<>(ref, Preferability.Dictate, supplier);
     }
     
     /**
-     * @return the new providing similar to this one except the preferability of normal.
+     * @return the new provider similar to this one except the preferability of normal.
      **/
-    public Providing<T> butNormal() {
-        return new Providing<>(ref, Preferability.Normal, supplier);
+    public Provider<T> butNormal() {
+        return new Provider<>(ref, Preferability.Normal, supplier);
     }
     
     /**
-     * @return the new providing similar to this one except the preferability of default.
+     * @return the new provider similar to this one except the preferability of default.
      **/
-    public Providing<T> butDefault() {
-        return new Providing<>(ref, Preferability.Default, supplier);
+    public Provider<T> butDefault() {
+        return new Provider<>(ref, Preferability.Default, supplier);
     }
     
     /**
-     * @return the new providing similar to this one except with the value.
+     * @return the new provider similar to this one except with the value.
      **/
-    public Providing<T> butWith(T value) {
-        return new Providing<>(ref, preferability, new Named.ValueSupplier<T>(value));
+    public Provider<T> butWith(T value) {
+        return new Provider<>(ref, preferability, new Named.ValueSupplier<T>(value));
     }
     
     /**
-     * @return the new providing similar to this one except with the value.
+     * @return the new provider similar to this one except with the value.
      **/
-    public Providing<T> butWithA(Ref<T> ref) {
-        return new Providing<>(ref, preferability, new Named.RefSupplier<T>(ref));
+    public Provider<T> butWithA(Ref<T> ref) {
+        return new Provider<>(ref, preferability, new Named.RefSupplier<T>(ref));
     }
     
-    /** @return the new providing similar to this one except the supplied by the given supplier. **/
-    public Providing<T> butBy(Supplier<T> supplier) {
-        return new Providing<>(ref, preferability, supplier);
+    /** @return the new provider similar to this one except the supplied by the given supplier. **/
+    public Provider<T> butBy(Supplier<T> supplier) {
+        return new Provider<>(ref, preferability, supplier);
     }
     
 }

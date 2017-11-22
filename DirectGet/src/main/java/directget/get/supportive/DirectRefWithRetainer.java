@@ -40,7 +40,7 @@ public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetain
     
     /** Returns the retainer. */
     public Retainer<T> getRetainer() {
-        val supplier = getProviding().getSupplier();
+        val supplier = getProvider().getSupplier();
         val retainer
             = ((supplier instanceof Retainer)
             ? ((Retainer<T>)supplier)
@@ -50,7 +50,7 @@ public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetain
 
     /** Change the supplier. */
     public DirectRefWithRetainer<T> __but(Supplier<T> newSupplier) {
-        val supplier = getProviding().getSupplier();
+        val supplier = getProvider().getSupplier();
         if (newSupplier == supplier) {
             return this;
         }

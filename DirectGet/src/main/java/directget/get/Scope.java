@@ -22,11 +22,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
-import directget.get.supportive.Providing;
+import directget.get.supportive.Provider;
 import lombok.val;
 
 /***
- * Scope holds a configuration which specify providings.
+ * Scope holds a configuration which specify providers.
  * 
  * @author NawaMan
  */
@@ -123,12 +123,12 @@ public class Scope {
         return config;
     }
     
-    protected final <T> Providing<T> getProviding(Ref<T> ref) {
+    protected final <T> Provider<T> getProvider(Ref<T> ref) {
         if (ref == null) {
             return null;
         }
         
-        return config.getProviding(ref);
+        return config.getProvider(ref);
     }
     
     /**
@@ -141,9 +141,9 @@ public class Scope {
     
     <T> Optional<T> doGet(Ref<T> ref) {
         val currentGet = this.Get();
-        val providing = currentGet.getProviding(ref);
-        if (providing != null) {
-            return Optional.ofNullable(providing.get());
+        val provider = currentGet.getProvider(ref);
+        if (provider != null) {
+            return Optional.ofNullable(provider.get());
         }
         
         Optional<T> optValue = ref._get();

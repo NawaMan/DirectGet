@@ -25,16 +25,16 @@ import directget.get.supportive.retain.WithRetainer;
 import lombok.val;
 
 /**
- * Providing with a retainer.
+ * Provider with a retainer.
  * 
  * @author NawaMan
  *
  * @param <T>
  */
-public class ProvidingWithRetainer<T> extends Providing<T> implements WithRetainer<T, ProvidingWithRetainer<T>> {
+public class ProviderWithRetainer<T> extends Provider<T> implements WithRetainer<T, ProviderWithRetainer<T>> {
 
     /** Constructor. */
-    public ProvidingWithRetainer(
+    public ProviderWithRetainer(
             Ref<T>                ref, 
             Preferability         preferability, 
             Supplier<? extends T> supplier) {
@@ -50,17 +50,17 @@ public class ProvidingWithRetainer<T> extends Providing<T> implements WithRetain
         return retainer;
     }
 
-    public ProvidingWithRetainer<T> __but(Supplier<T> newSupplier) {
+    public ProviderWithRetainer<T> __but(Supplier<T> newSupplier) {
         val supplier = getSupplier();
         if (newSupplier == supplier) {
             return this;
         }
         val ref           = getRef();
         val preferability = getPreferability();
-        return new ProvidingWithRetainer<T>(ref, preferability, newSupplier);
+        return new ProviderWithRetainer<T>(ref, preferability, newSupplier);
     }
     
-    static <T> Supplier<? extends T> getSupplierOf(Providing<T> provider) {
+    static <T> Supplier<? extends T> getSupplierOf(Provider<T> provider) {
         return provider.getSupplier();
     }
     

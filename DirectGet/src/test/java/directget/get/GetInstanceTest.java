@@ -44,7 +44,7 @@ import directget.get.Ref;
 import directget.get.run.Fork;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
-import directget.get.supportive.Providing;
+import directget.get.supportive.Provider;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {
@@ -56,8 +56,8 @@ public class GetInstanceTest implements Named.User {
     
     private Ref<String> _text_ = Ref.of("TheText", String.class).with(orgText);
     
-    private Stream<Providing> provideNewText = Stream
-            .of(new Providing<>(_text_, Dictate, supplier("NewText", () -> newText)));
+    private Stream<Provider> provideNewText = Stream
+            .of(new Provider<>(_text_, Dictate, supplier("NewText", () -> newText)));
     
     @Test
     public void testBasic() {
@@ -92,18 +92,18 @@ public class GetInstanceTest implements Named.User {
     };
     
     private final Wrapper _verboseLogger = runnable -> Named.runnable("VERBOSE", () -> {
-        List providings = new ArrayList();
-        Preferability.DetermineProvidingListener listener = new Preferability.DetermineProvidingListener() {
+        List providers = new ArrayList();
+        Preferability.DetermineProviderListener listener = new Preferability.DetermineProviderListener() {
             @Override
-            public <T> void onDetermine(Ref<T> ref, String from, Providing<T> result,
+            public <T> void onDetermine(Ref<T> ref, String from, Provider<T> result,
                     Supplier<String> stackTraceSupplier, Supplier<String> xraySupplier) {
                 String str = "Get(" + ref + ") = " + result + "\nXRay " + xraySupplier.get() + " on => "
                         + Thread.currentThread().toString() + " {\n" + stackTraceSupplier.get() + "\n}";
                 System.out.println(str);
             }
         };
-        providings.add(new Providing(Preferability.DefaultListener, Preferability.Dictate, () -> listener));
-        App.Get().substitute(providings.stream(), runnable);
+        providers.add(new Provider(Preferability.DefaultListener, Preferability.Dictate, () -> listener));
+        App.Get().substitute(providers.stream(), runnable);
     });
     
     @Test
@@ -111,7 +111,7 @@ public class GetInstanceTest implements Named.User {
         val fork = new Fork();
         
         With(_newText)
-        .synchronously()
+        .asynchronously()
         .inheritNone()
         .joinWith(fork)
         .run(()->{
@@ -128,7 +128,7 @@ public class GetInstanceTest implements Named.User {
         Run
         .with(_text_.butProvidedWith(newText))
         .with(_verboseLogger)
-        .synchronously()
+        .asynchronously()
         .inheritAll()
         .joinWith(fork)
         .run(()->{

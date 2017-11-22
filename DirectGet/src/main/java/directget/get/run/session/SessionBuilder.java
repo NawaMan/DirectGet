@@ -28,7 +28,7 @@ import directget.get.Scope;
 import directget.get.run.Failable;
 import directget.get.run.Wrapper;
 import directget.get.run.exceptions.ProblemHandledException;
-import directget.get.supportive.Providing;
+import directget.get.supportive.Provider;
 import lombok.val;
 
 /**
@@ -83,17 +83,17 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
     /** Add the wrapper */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public SB with(Stream<Wrapper> wrappers) {
-        val providings = new ArrayList<Providing>();
+        val providers = new ArrayList<Provider>();
         wrappers.forEach(wrapper->{
-            if (wrapper instanceof Providing) {
-                providings.add((Providing)wrapper);
+            if (wrapper instanceof Provider) {
+                providers.add((Provider)wrapper);
             } else {
                 this.wrappers.add(wrapper);
             }
         });
-        if (!providings.isEmpty()) {
+        if (!providers.isEmpty()) {
             this.wrappers.add(runnable->()->{
-                scope.Get().substitute(providings.stream(), runnable);
+                scope.Get().substitute(providers.stream(), runnable);
             });
         }
         return (SB) this;
@@ -155,7 +155,7 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
     }
     
     /** Make the run to be run on a new thread. */
-    public AsyncSessionBuilder synchronously() {
+    public AsyncSessionBuilder asynchronously() {
         val asyncSessionBuilder = new AsyncSessionBuilder();
         asyncSessionBuilder.wrappers.addAll(this.wrappers);
         asyncSessionBuilder.wrappers.add(asyncSessionBuilder.asyncWrapper);

@@ -35,9 +35,9 @@ import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
-import directget.get.supportive.Providing;
+import directget.get.supportive.Provider;
 
-public class ProvidingOrderTest {
+public class ProviderOrderTest {
 
     public static final String NOT_IMPLEMENT_YET = "NOT_IMPLEMENT_YET";
     
@@ -60,34 +60,34 @@ public class ProvidingOrderTest {
     private final Ref<String> ref = Ref.of("RefDefault");
     private final Ref<String> refNoDefault = Ref.of(String.class);
     
-    private final Providing<String> getParentDictate = new Providing<>(ref, Preferability.Dictate,
+    private final Provider<String> getParentDictate = new Provider<>(ref, Preferability.Dictate,
             () -> "GetParentDictate");
-    private final Providing<String> scopeParentDictate = new Providing<>(ref, Preferability.Dictate,
+    private final Provider<String> scopeParentDictate = new Provider<>(ref, Preferability.Dictate,
             () -> "ScopeParentDictate");
-    private final Providing<String> scopeDictate = new Providing<>(ref, Preferability.Dictate, () -> "ScopeDictate");
-    private final Providing<String> stackDictate = new Providing<>(ref, Preferability.Dictate, () -> "StackDictate");
+    private final Provider<String> scopeDictate = new Provider<>(ref, Preferability.Dictate, () -> "ScopeDictate");
+    private final Provider<String> stackDictate = new Provider<>(ref, Preferability.Dictate, () -> "StackDictate");
     
-    private final Providing<String> getParentNormal = new Providing<>(ref, Preferability.Normal,
+    private final Provider<String> getParentNormal = new Provider<>(ref, Preferability.Normal,
             () -> "GetParentNormal");
-    private final Providing<String> scopeParentNormal = new Providing<>(ref, Preferability.Normal,
+    private final Provider<String> scopeParentNormal = new Provider<>(ref, Preferability.Normal,
             () -> "ScopeParentNormal");
-    private final Providing<String> scopeNormal = new Providing<>(ref, Preferability.Normal, () -> "ScopeNormal");
-    private final Providing<String> stackNormal = new Providing<>(ref, Preferability.Normal, () -> "StackNormal");
+    private final Provider<String> scopeNormal = new Provider<>(ref, Preferability.Normal, () -> "ScopeNormal");
+    private final Provider<String> stackNormal = new Provider<>(ref, Preferability.Normal, () -> "StackNormal");
     
-    private final Providing<String> getParentDefault = new Providing<>(ref, Preferability.Default,
+    private final Provider<String> getParentDefault = new Provider<>(ref, Preferability.Default,
             () -> "GetParentDefault");
-    private final Providing<String> scopeParentDefault = new Providing<>(ref, Preferability.Default,
+    private final Provider<String> scopeParentDefault = new Provider<>(ref, Preferability.Default,
             () -> "ScopeParentDefault");
-    private final Providing<String> scopeDefault = new Providing<>(ref, Preferability.Default, () -> "ScopeDefault");
-    private final Providing<String> stackDefault = new Providing<>(ref, Preferability.Default, () -> "StackDefault");
+    private final Provider<String> scopeDefault = new Provider<>(ref, Preferability.Default, () -> "ScopeDefault");
+    private final Provider<String> stackDefault = new Provider<>(ref, Preferability.Default, () -> "StackDefault");
     
-    private void doTest(Providing<String> _getParent, Providing<String> _scopeParent, Providing<String> _scope,
-            Providing<String> _stack, String expected) {
+    private void doTest(Provider<String> _getParent, Provider<String> _scopeParent, Provider<String> _scope,
+            Provider<String> _stack, String expected) {
         doTest(_getParent, _scopeParent, _scope, _stack, false, expected);
     }
     
-    private void doTest(Providing<String> _getParent, Providing<String> _scopeParent, Providing<String> _scope,
-            Providing<String> _stack, boolean isToInherit, String expected) {
+    private void doTest(Provider<String> _getParent, Provider<String> _scopeParent, Provider<String> _scope,
+            Provider<String> _stack, boolean isToInherit, String expected) {
         Scope appScope = App.scope;
         Scope parentScope = appScope.newSubScope(new Configuration(_scopeParent));
         Scope theScope = parentScope.newSubScope(new Configuration(_scope));
@@ -137,64 +137,64 @@ public class ProvidingOrderTest {
     
     @Test
     public void test_forDictate_superHasPriority() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
     }
     
     @Test
     public void test_forNormal_subHasPriority() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void test_forDefault_subHasPriority() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
     }
     
     @Test
     public void test_forDefault_hasPriority_thenNull() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDefault");
     }
     
     @Test
     public void test_forNormal_hasPriority_thenDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void test_forDictate_hasPriority_thenNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
     }
     
     @Test
     public void test_ifNonSpecified_refDefaultIsReturned() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
     }
     
@@ -216,10 +216,10 @@ public class ProvidingOrderTest {
     
     @Test
     public void test_byDefault_parentHasNoEffect_so_refDefault() {
-        Providing<String> _getParent = scopeDictate;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = scopeDictate;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
     }
     
@@ -229,91 +229,91 @@ public class ProvidingOrderTest {
     
     @Test
     public void testRefDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
     }
     
     @Test
     public void testRefDefaultStackDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
     }
     
     @Test
     public void testScopeDefaultStackDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
     }
     
     @Test
     public void testScopeParentDefaultScopeDefaultStackDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
     }
     
     @Test
     public void testGetParentDefaultScopeParentDefaultScopeDefaultStackDefault() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDefault");
     }
     
     @Test
     public void testGetParentDefaultScopeParentDefaultScopeDefault() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDefault");
     }
     
     @Test
     public void testGetParentDefaultScopeParentDefault() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDefault");
     }
     
     @Test
     public void testGetParentDefault() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
     }
     
     @Test
     public void testGetParentDefault_borrowSpecifyRefs_includeChecked_fromParent() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, true, "GetParentDefault");
     }
     
     @Test
     public void testGetParentDefault_borrowSpecifyRefs_excludeChecked_fromParent() {
-        Providing<String> _getParent = getParentDefault;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = null;
+        Provider<String> _getParent = getParentDefault;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = null;
         doTest(_getParent, _scopeParent, _scope, _stack, false, "RefDefault");
     }
     
@@ -321,118 +321,118 @@ public class ProvidingOrderTest {
     
     @Test
     public void testRefDefaultStackNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormalScopeParentNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormalScopeParentDefault() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeDefaultScopeParentNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentNormal");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeDefaultScopeParentNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeNormalScopeParentNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormalScopeParentormalGetParentNormal() {
-        Providing<String> _getParent = getParentNormal;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = getParentNormal;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormalScopeParentDefaultGetParentNormal() {
-        Providing<String> _getParent = getParentNormal;
-        Providing<String> _scopeParent = scopeParentDefault;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = getParentNormal;
+        Provider<String> _scopeParent = scopeParentDefault;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeNormal");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeDefaultScopeParentNormalGetParentNormal() {
-        Providing<String> _getParent = getParentNormal;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = getParentNormal;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentNormal");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeDefaultScopeParentNormalGetParentNormal() {
-        Providing<String> _getParent = getParentNormal;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeDefault;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = getParentNormal;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeDefault;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeNormalScopeParentNormalGetParentNormal() {
-        Providing<String> _getParent = getParentNormal;
-        Providing<String> _scopeParent = scopeParentNormal;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = getParentNormal;
+        Provider<String> _scopeParent = scopeParentNormal;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackNormal");
     }
     
@@ -440,91 +440,91 @@ public class ProvidingOrderTest {
     
     @Test
     public void testRefDefaultStackDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = null;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = null;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
     }
     
     @Test
     public void testRefDefaultStackNormalScopeDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackNormal;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackNormal;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeDictate");
     }
     
     @Test
     public void testRefDefaultStackDictateScopeNormal() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
     }
     
     @Test
     public void testRefDefaultStackDictateScopeDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = null;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = null;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, "StackDictate");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeNormalScopeParentDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentDictate;
-        Providing<String> _scope = scopeNormal;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentDictate;
+        Provider<String> _scope = scopeNormal;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
     }
     
     @Test
     public void testRefDefaultStackDefaultScopeDictateScopeParentDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentDictate;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDefault;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentDictate;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDefault;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
     }
     
     @Test
     public void testRefDefaultStackDictateScopeDictateScopeParentDictate() {
-        Providing<String> _getParent = null;
-        Providing<String> _scopeParent = scopeParentDictate;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = null;
+        Provider<String> _scopeParent = scopeParentDictate;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, "ScopeParentDictate");
     }
     
     @Test
     public void testRefDefaultStackDictateScopeDictateScopeParentDictateGetParentDictate_includeParent() {
-        Providing<String> _getParent = getParentDictate;
-        Providing<String> _scopeParent = scopeParentDictate;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = getParentDictate;
+        Provider<String> _scopeParent = scopeParentDictate;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, true, "ScopeParentDictate");
     }
     
     @Test
     public void testRefDefaultStackDictateScopeDictateScopeParentDictateGetParentDictate_excludeParent() {
-        Providing<String> _getParent = getParentDictate;
-        Providing<String> _scopeParent = scopeParentDictate;
-        Providing<String> _scope = scopeDictate;
-        Providing<String> _stack = stackDictate;
+        Provider<String> _getParent = getParentDictate;
+        Provider<String> _scopeParent = scopeParentDictate;
+        Provider<String> _scope = scopeDictate;
+        Provider<String> _stack = stackDictate;
         doTest(_getParent, _scopeParent, _scope, _stack, false, "ScopeParentDictate");
     }
     

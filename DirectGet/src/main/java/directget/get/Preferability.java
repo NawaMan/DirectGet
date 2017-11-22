@@ -24,8 +24,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import directget.get.supportive.Providing;
-import directget.get.supportive.ProvidingStackMap;
+import directget.get.supportive.Provider;
+import directget.get.supportive.ProviderStackMap;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -33,7 +33,7 @@ import lombok.experimental.ExtensionMethod;
 // OK - I feel like am going to regret this but this closed design (of using Enums) makes things
 //        much simpler and it might worth the trade offs.
 /**
- * This enum is used to specify the preferability of a providing.
+ * This enum is used to specify the preferability of a provider
  * 
  * @author NawaMan
  */
@@ -48,7 +48,7 @@ public enum Preferability {
     Dictate;
     
     private static Function<Scope, String> scopeToXRay = Scope::toXRayString;
-    private static Function<ProvidingStackMap, String> stackToXRay = ProvidingStackMap::toXRayString;
+    private static Function<ProviderStackMap, String> stackToXRay = ProviderStackMap::toXRayString;
     
     private static Function<String, String> addingTabIndentation = str -> str.replaceAll("\n", "\n\t");
     
@@ -61,111 +61,111 @@ public enum Preferability {
     }
     
     /**
-     * @return {@code true} if the given providing has the same preferability as
+     * @return {@code true} if the given provider has the same preferability as
      *         this preferability.
      */
-    public <T> boolean is(Providing<T> providing) {
-        if (providing == null) {
+    public <T> boolean is(Provider<T> provider) {
+        if (provider == null) {
             return false;
         }
-        return is(providing.getPreferability());
+        return is(provider.getPreferability());
     }
     
     /** */
-    public static final Ref<DetermineProvidingListener> DefaultListener = Ref.of(DetermineProvidingListener.class, null);
+    public static final Ref<DetermineProviderListener> DefaultListener = Ref.of(DetermineProviderListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     
     // TODO - Clean this up.
     /**  */
     @FunctionalInterface
-    public static interface DetermineProvidingListener {
+    public static interface DetermineProviderListener {
         
         /**  */
-        public <T> void onDetermine(Ref<T> ref, String from, Providing<T> result, Supplier<String> stackTraceSupplier,
+        public <T> void onDetermine(Ref<T> ref, String from, Provider<T> result, Supplier<String> stackTraceSupplier,
                 Supplier<String> xraySupplier);
         
     }
     
     // The code in the following method is heavily duplicated.
-    // That is intentional, if we are wondering where a providing came from,
+    // That is intentional, if we are wondering where a provider came from,
     // debugging these method will give you that answer very quickly.
     // Ok, I am going to regret typing this too .... but
     // This logic is not intended or supposed to be changed often.
     /**
-     * Determine the providing for Get.
+     * Determine the provider for Get.
      * 
-     * @return the providing.
+     * @return the provider.
      */
-    public static <T> Providing<T> determineProviding(Ref<T> ref, Scope parentScope, Scope currentScope,
-            ProvidingStackMap stacks) {
-        Optional<BiConsumer<String, Providing<T>>> alarm = Optional
+    public static <T> Provider<T> determineProvider(Ref<T> ref, Scope parentScope, Scope currentScope,
+            ProviderStackMap stacks) {
+        Optional<BiConsumer<String, Provider<T>>> alarm = Optional
                 .ofNullable((!_ListenerEnabled_.get() || (ref == DefaultListener)) ? null : Get.a(DefaultListener))
-                .map(listener -> (foundSource, foundProviding) -> {
-                    listener.onDetermine(ref, foundSource, foundProviding, Preferability::callStackToString,
+                .map(listener -> (foundSource, foundProvider) -> {
+                    listener.onDetermine(ref, foundSource, foundProvider, Preferability::callStackToString,
                             getXRayString(ref, parentScope, currentScope, stacks));
                 });
         
-        val refProviding = ref.getProviding();
-        if (Dictate.is(refProviding)) {
-            alarm.ifPresent(it -> it.accept("Ref", refProviding));
-            return refProviding;
+        val refProvider = ref.getProvider();
+        if (Dictate.is(refProvider)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProvider));
+            return refProvider;
         }
         
-        val parentProviding = (parentScope != null) ? parentScope.getProviding(ref) : null;
-        if (Dictate.is(parentProviding)) {
-            alarm.ifPresent(it -> it.accept("Parent", parentProviding));
-            return parentProviding;
+        val parentProvider = (parentScope != null) ? parentScope.getProvider(ref) : null;
+        if (Dictate.is(parentProvider)) {
+            alarm.ifPresent(it -> it.accept("Parent", parentProvider));
+            return parentProvider;
         }
         
-        val configProviding = currentScope.getProviding(ref);
-        if (Dictate.is(configProviding)) {
-            alarm.ifPresent(it -> it.accept("Config", configProviding));
-            return configProviding;
+        val configProvider = currentScope.getProvider(ref);
+        if (Dictate.is(configProvider)) {
+            alarm.ifPresent(it -> it.accept("Config", configProvider));
+            return configProvider;
         }
         
-        val stackProviding = stacks.peek(ref);
-        if (Dictate.is(stackProviding)) {
-            alarm.ifPresent(it -> it.accept("Stack", stackProviding));
-            return stackProviding;
+        val stackProvider = stacks.peek(ref);
+        if (Dictate.is(stackProvider)) {
+            alarm.ifPresent(it -> it.accept("Stack", stackProvider));
+            return stackProvider;
         }
         
         // At this point, non is dictate.
         
-        if (Normal.is(stackProviding)) {
-            alarm.ifPresent(it -> it.accept("Stack", stackProviding));
-            return stackProviding;
+        if (Normal.is(stackProvider)) {
+            alarm.ifPresent(it -> it.accept("Stack", stackProvider));
+            return stackProvider;
         }
-        if (Normal.is(configProviding)) {
-            alarm.ifPresent(it -> it.accept("Config", configProviding));
-            return configProviding;
+        if (Normal.is(configProvider)) {
+            alarm.ifPresent(it -> it.accept("Config", configProvider));
+            return configProvider;
         }
-        if (Normal.is(parentProviding)) {
-            alarm.ifPresent(it -> it.accept("Parent", parentProviding));
-            return parentProviding;
+        if (Normal.is(parentProvider)) {
+            alarm.ifPresent(it -> it.accept("Parent", parentProvider));
+            return parentProvider;
         }
-        if (Normal.is(refProviding)) {
-            alarm.ifPresent(it -> it.accept("Ref", refProviding));
-            return refProviding;
+        if (Normal.is(refProvider)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProvider));
+            return refProvider;
         }
         
         // At this point, non is normal.
         
-        if (Default.is(stackProviding)) {
-            alarm.ifPresent(it -> it.accept("Stack", stackProviding));
-            return stackProviding;
+        if (Default.is(stackProvider)) {
+            alarm.ifPresent(it -> it.accept("Stack", stackProvider));
+            return stackProvider;
         }
-        if (Default.is(configProviding)) {
-            alarm.ifPresent(it -> it.accept("Config", configProviding));
-            return configProviding;
+        if (Default.is(configProvider)) {
+            alarm.ifPresent(it -> it.accept("Config", configProvider));
+            return configProvider;
         }
-        if (Default.is(parentProviding)) {
-            alarm.ifPresent(it -> it.accept("Parent", parentProviding));
-            return parentProviding;
+        if (Default.is(parentProvider)) {
+            alarm.ifPresent(it -> it.accept("Parent", parentProvider));
+            return parentProvider;
         }
-        if (Default.is(refProviding)) {
-            alarm.ifPresent(it -> it.accept("Ref", refProviding));
-            return refProviding;
+        if (Default.is(refProvider)) {
+            alarm.ifPresent(it -> it.accept("Ref", refProvider));
+            return refProvider;
         }
         
         return null;
@@ -179,7 +179,7 @@ public enum Preferability {
     }
     
     private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope,
-            ProvidingStackMap stacks) {
+            ProviderStackMap stacks) {
         String parentXRayString  = parentScope ._changeFrom(scopeToXRay);
         String currentXRayString = currentScope._changeFrom(scopeToXRay);
         String stackXRayString   = stacks      ._changeFrom(stackToXRay);

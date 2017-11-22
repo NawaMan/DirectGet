@@ -84,13 +84,13 @@ public class AppTest {
         assertEquals("Ref2", Get.the(ref2));
         
         val configuration = new Configuration(
-                ref1.getProviding().butWith("Str1"),
-                ref2.getProviding().butWith("Str2")
+                ref1.getProvider().butWith("Str1"),
+                ref2
         );
         App.initializeIfAbsent(configuration);
         
         assertEquals("Str1", Get.the(ref1));
-        assertEquals("Str2", Get.the(ref2));
+        assertEquals("Ref2", Get.the(ref2));
     }
     
 }

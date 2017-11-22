@@ -93,8 +93,8 @@ public class Utilities {
     /** Returns the unmodifiedable sorted map from the given map. **/
     public static <K, V> Map<K, V> _toUnmodifiableSortedMap(Map<K, V> theGivenMap) {
         @SuppressWarnings("unchecked")
-        Map<K, V> newProvidingMap = _or(_changeBy(theGivenMap, newTreeMap), emptyMap());
-        return unmodifiableMap(newProvidingMap);
+        Map<K, V> newProviderMap = _or(_changeBy(theGivenMap, newTreeMap), emptyMap());
+        return unmodifiableMap(newProviderMap);
     }
     
     private static Function<Map.Entry<?, ?>, String> pairToString = each -> {

@@ -63,8 +63,8 @@ public class Run {
     }
     
     /** Add the wrapper */
-    public static SyncSessionBuilder With(Stream<Wrapper> providings) {
-        return with(providings);
+    public static SyncSessionBuilder With(Stream<Wrapper> providers) {
+        return with(providers);
     }
     
     /** Add the wrapper */
@@ -124,12 +124,12 @@ public class Run {
     
     /** Make the run to be run on a new thread. */
     public static AsyncSessionBuilder Asynchronously() {
-        return new SyncSessionBuilder().synchronously();
+        return new SyncSessionBuilder().asynchronously();
     }
     
     /** Make the run to be run on a new thread. */
     public static AsyncSessionBuilder asynchronously() {
-        return new SyncSessionBuilder().synchronously();
+        return new SyncSessionBuilder().asynchronously();
     }
     
     /** Run the session now. */

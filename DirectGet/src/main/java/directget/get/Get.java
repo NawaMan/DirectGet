@@ -25,7 +25,7 @@ import directget.get.run.Named;
 import directget.get.run.Named.Predicate;
 import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
-import directget.get.supportive.Providing;
+import directget.get.supportive.Provider;
 import lombok.val;
 
 /**
@@ -55,8 +55,8 @@ public final class Get {
         
     }
     
-    static <T> Providing<T> getProvider(Ref<T> ref) {
-        return App.Get().getProviding(ref);
+    static <T> Provider<T> getProvider(Ref<T> ref) {
+        return App.Get().getProvider(ref);
     }
     
     /** @return the optional value associated with the given ref. */

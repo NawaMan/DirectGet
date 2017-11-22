@@ -89,7 +89,7 @@ public abstract class Retainer<V> implements Supplier<V> {
         return newRetainer;
     }
 
-    /** @return the new providing similar to this one except that it retains its value with in current thread. **/
+    /** @return the new provider similar to this one except that it retains its value with in current thread. **/
     public Retainer<V> forCurrentThread() {
         boolean                 isLocal          = (this instanceof LocalRetainer);
         Predicate<Predicate<V>> sameShouldRetain = shouldRetain -> isLocal && (shouldRetain == RetainerBuilder.ALWAYS);

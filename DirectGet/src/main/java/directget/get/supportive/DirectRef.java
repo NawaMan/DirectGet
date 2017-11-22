@@ -44,7 +44,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     
     private final String name;
     
-    private final Providing<T> providing;
+    private final Provider<T> provider;
     
     /**
      * Constructor.
@@ -63,9 +63,9 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
         val prefer = (preferability != null) ? preferability : Preferability.Default;
         
         this.name = Optional.ofNullable(name).orElse(targetClass.getName() + "#" + id.getAndIncrement());
-        this.providing = (factory == null) 
+        this.provider = (factory == null) 
                 ? null 
-                : new Providing<>(this, prefer, factory);
+                : new Provider<>(this, prefer, factory);
     }
     
     /** @return the name of the reference */
@@ -76,10 +76,10 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     /** @return the default object. */
     @Override
     public final T get() {
-        if (providing == null) {
+        if (provider == null) {
             return super.get();
         } else {
-            return providing.get();
+            return provider.get();
         }
     }
     
@@ -90,8 +90,8 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     }
     
     @Override
-    public Providing<T> getProviding() {
-        return this.providing;
+    public Provider<T> getProvider() {
+        return this.provider;
     }
     
     /**
@@ -100,7 +100,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
      * @return preferability
      */
     public Preferability getPreferability() {
-        return (this.providing != null) ? this.providing.getPreferability() : Preferability.Default;
+        return (this.provider != null) ? this.provider.getPreferability() : Preferability.Default;
     }
     
     /**
@@ -119,7 +119,7 @@ public class DirectRef<T> extends AbstractRef<T> implements Ref<T> {
     
     /** Returns the retainer. */
     public DirectRefWithRetainer<T> retained() {
-        return new DirectRefWithRetainer<>(name, getTargetClass(), getPreferability(), providing.getSupplier());
+        return new DirectRefWithRetainer<>(name, getTargetClass(), getPreferability(), provider.getSupplier());
     }
 
 }

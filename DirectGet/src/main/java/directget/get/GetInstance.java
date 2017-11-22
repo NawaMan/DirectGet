@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
-import directget.get.supportive.Providing;
-import directget.get.supportive.ProvidingStackMap;
+import directget.get.supportive.Provider;
+import directget.get.supportive.ProviderStackMap;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -44,7 +44,7 @@ public final class GetInstance {
     
     private final Scope scope;
     
-    private final ProvidingStackMap providingStacks = new ProvidingStackMap();
+    private final ProviderStackMap providerStacks = new ProviderStackMap();
     
     
     GetInstance(Scope scope) {
@@ -58,16 +58,16 @@ public final class GetInstance {
     
     @SuppressWarnings("rawtypes")
     Stream<Ref> getStackRefs() {
-        return providingStacks.keySet().stream();
+        return providerStacks.keySet().stream();
     }
     
-    <T> Providing<T> getProviding(Ref<T> ref) {
+    <T> Provider<T> getProvider(Ref<T> ref) {
         if (ref == null) {
             return null;
         }
         
-        val providing = Preferability.determineProviding(ref, scope.getParentScope(), scope, providingStacks);
-        return providing;
+        val provider = Preferability.determineProvider(ref, scope.getParentScope(), scope, providerStacks);
+        return provider;
     }
     
     /** @return the optional value associated with the given ref. */
@@ -213,13 +213,13 @@ public final class GetInstance {
     }
     
     /**
-     * Substitute the given providings and run the runnable.
+     * Substitute the given providers and run the runnable.
      */
     @SuppressWarnings({ "rawtypes" })
-    public void substitute(Stream<Providing> providings, Runnable runnable) {
+    public void substitute(Stream<Provider> providers, Runnable runnable) {
         val problemHolder = new AtomicReference<RuntimeException>(null);
         try {
-            substitute(providings, runnable._toSupplier(problemHolder));
+            substitute(providers, runnable._toSupplier(problemHolder));
         } catch (Throwable t) {
             throw new RunWithSubstitutionException(t);
         }
@@ -231,13 +231,13 @@ public final class GetInstance {
     }
     
     /**
-     * Substitute the given providings and run the action.
+     * Substitute the given providers and run the action.
      */
     @SuppressWarnings("rawtypes")
-    synchronized public <V> V substitute(Stream<Providing> providings, Supplier<V> supplier) {
+    synchronized public <V> V substitute(Stream<Provider> providers, Supplier<V> supplier) {
         List<Ref> substitutedRefs = null;
         try {
-            substitutedRefs = substituteProvidings(providings, substitutedRefs);
+            substitutedRefs = substituteProviders(providers, substitutedRefs);
             val result = supplier.get();
             return result;
         } finally {
@@ -246,16 +246,16 @@ public final class GetInstance {
     }
 
     @SuppressWarnings("rawtypes")
-    private List<Ref> substituteProvidings(Stream<Providing> providings, List<Ref> addedRefs) {
-        Iterable<Providing> iterable = () -> providings.iterator();
-        for (Providing providing : iterable) {
-            if (providing == null) {
+    private List<Ref> substituteProviders(Stream<Provider> providers, List<Ref> addedRefs) {
+        Iterable<Provider> iterable = () -> providers.iterator();
+        for (Provider provider : iterable) {
+            if (provider == null) {
                 continue;
             }
             
-            val ref = providing.getRef();
-            val stack = providingStacks.get(ref);
-            stack.push(providing);
+            val ref = provider.getRef();
+            val stack = providerStacks.get(ref);
+            stack.push(provider);
             if (addedRefs == null) {
                 addedRefs = new ArrayList<>();
             }
@@ -268,14 +268,14 @@ public final class GetInstance {
     private void resetSubstitution(List<Ref> addedRefs) {
         if (addedRefs != null) {
             addedRefs.forEach(ref -> {
-                val stack = providingStacks.get(ref);
+                val stack = providerStacks.get(ref);
                 stack.pop();
             });
         }
     }
     
     /**
-     * Run the given runnable asynchronously and inherits the providings of
+     * Run the given runnable asynchronously and inherits the providers of
      * those given refs.
      **/
     public void runAsync(
@@ -291,13 +291,13 @@ public final class GetInstance {
     @SuppressWarnings("rawtypes")
     public void runAsync(Predicate<Ref> refsToInherit, Runnable runnable) {
         val newGet = new GetInstance(scope);
-        val providings = prepareProvidings(refsToInherit);
+        val providers = prepareProviders(refsToInherit);
         
         val newExecutor = the(DefaultExecutor);
         newExecutor.execute(() -> {
             scope.threadGet.set(newGet);
-            val providingsList = providings;
-            newGet.substitute(providingsList.stream(), runnable);
+            val providersList = providers;
+            newGet.substitute(providersList.stream(), runnable);
         });
     }
     
@@ -305,24 +305,24 @@ public final class GetInstance {
     private static final Predicate<Predicate<Ref>> notInteritNone = test -> test != Get.INHERIT_NONE;
     
     @SuppressWarnings("rawtypes")
-    private static final Supplier<List<Providing>> emptyProvidingList = ()->new ArrayList<Providing>();
+    private static final Supplier<List<Provider>> emptyProviderList = ()->new ArrayList<Provider>();
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private List<Providing> prepareProvidings(Predicate<Ref> refsToInherit) {
+    private List<Provider> prepareProviders(Predicate<Ref> refsToInherit) {
         Preferability._ListenerEnabled_.set(false);
         try {
             Function<Predicate<Ref>, List> filterRefs = test -> {
                 return (List) getStackRefs()
                         .filter(test)
-                        .map(this::getProviding)
+                        .map(this::getProvider)
                         ._toList();
             };
-            List<Providing> list
+            List<Provider> list
                 = refsToInherit._toNullable()
                     .filter(notInteritNone)
                     .map(filterRefs)
-                    .orElse(emptyProvidingList.get());
-            return (List<Providing>) list;
+                    .orElse(emptyProviderList.get());
+            return (List<Provider>) list;
         } finally {
             Preferability._ListenerEnabled_.set(true);
         }

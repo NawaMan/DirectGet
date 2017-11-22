@@ -34,7 +34,7 @@ public class Scope {
     
     private static final String APP_SCOPE_NAME = "AppScope";
     
-    private static final Configuration DEF_CONFIG = new Configuration();
+    private static final Configuration DEFAULT_CONFIG = new Configuration();
     
     private static final Object lock = new Object();
     
@@ -58,7 +58,7 @@ public class Scope {
     Scope() {
         this.name = APP_SCOPE_NAME;
         this.parentScope = null;
-        this.config = DEF_CONFIG;
+        this.config = DEFAULT_CONFIG;
         this.threadGet = ThreadLocal.withInitial(() -> new GetInstance(this));
     }
     
@@ -72,7 +72,7 @@ public class Scope {
     
     // -- For AppScope only ---------------------------------------------------
     void init(Configuration newConfig) throws AppScopeAlreadyInitializedException {
-        if (config == DEF_CONFIG) {
+        if (config == DEFAULT_CONFIG) {
             initIfAbsent(newConfig);
             return;
         }
@@ -84,9 +84,9 @@ public class Scope {
     }
     
     boolean initIfAbsent(Configuration newConfig) {
-        if (config == DEF_CONFIG) {
+        if (config == DEFAULT_CONFIG) {
             synchronized (lock) {
-                if (config == DEF_CONFIG) {
+                if (config == DEFAULT_CONFIG) {
                     config = (newConfig == null) ? new Configuration() : newConfig;
                     stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
                     return true;
@@ -97,7 +97,7 @@ public class Scope {
     }
     
     boolean hasBeenInitialized() {
-        return config != DEF_CONFIG;
+        return config != DEFAULT_CONFIG;
     }
     
     /** @return the stacktrace when this scope is initialized. */

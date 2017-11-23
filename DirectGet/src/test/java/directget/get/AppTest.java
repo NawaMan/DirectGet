@@ -77,8 +77,8 @@ public class AppTest {
     @Test
     @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testInitialize_withConfiguration() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).with("Ref1");
-        val ref2 = Ref.of(String.class).with("Ref2");
+        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
+        val ref2 = Ref.of(String.class).defaultedTo("Ref2");
 
         assertEquals("Ref1", Get.the(ref1));
         assertEquals("Ref2", Get.the(ref2));

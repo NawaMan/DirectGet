@@ -50,6 +50,11 @@ public class RefTest {
         assertTrue(ref._get().isPresent());
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
+    @Test
+    public void testRef_directWithGenericDefault() {
+        Ref<List<String>> ref = Ref.of((List<String>)null).defaultedToBy(()->new ArrayList<String>());
+        assertTrue(ref.get().isEmpty());
+    }
     
     
     static class Car {

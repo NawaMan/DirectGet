@@ -54,7 +54,7 @@ public class GetInstanceTest implements Named.User {
     private String orgText = "The Text";
     private String newText = "New Text!!!";
     
-    private Ref<String> _text_ = Ref.of("TheText", String.class).with(orgText);
+    private Ref<String> _text_ = Ref.of("TheText", String.class).defaultedTo(orgText);
     
     private Stream<Provider> provideNewText = Stream
             .of(new Provider<>(_text_, Dictate, supplier("NewText", () -> newText)));

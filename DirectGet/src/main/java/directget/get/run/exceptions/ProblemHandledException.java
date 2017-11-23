@@ -26,7 +26,7 @@ import directget.get.Ref;
 public class ProblemHandledException extends DirectRunRuntimeException {
     
     /** The ref to get current time. */
-    public static Ref<Long> currentTime = Ref.of(Long.class).by(System::currentTimeMillis);
+    public static Ref<Long> currentTime = Ref.of(Long.class).defaultedToBy(System::currentTimeMillis);
     
     private static final long serialVersionUID = -5350585488754817001L;
     

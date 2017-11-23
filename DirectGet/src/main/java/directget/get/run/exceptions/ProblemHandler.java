@@ -30,15 +30,15 @@ public class ProblemHandler {
     
     /** This handler print a stacktrace. */
     public static final Ref<ProblemHandler> printStackTrace
-            = Ref.of(ProblemHandler.class).by(()->new ProblemHandler(problem->problem.printStackTrace()));
+            = Ref.of(ProblemHandler.class).defaultedToBy(()->new ProblemHandler(problem->problem.printStackTrace()));
     
     /** This handler ignore the problem. */
     public static final Ref<ProblemHandler> ignoreProblem
-            = Ref.of(ProblemHandler.class).by(()->new ProblemHandler(problem->{}));
+            = Ref.of(ProblemHandler.class).defaultedToBy(()->new ProblemHandler(problem->{}));
     
     /** Default problem handler. */
     public static final Ref<ProblemHandler> problemHandler
-            = Ref.of(ProblemHandler.class).by(()->Get.a(printStackTrace));
+            = Ref.of(ProblemHandler.class).defaultedToBy(()->Get.a(printStackTrace));
     
     private final String name;
     

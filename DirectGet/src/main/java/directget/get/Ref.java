@@ -106,7 +106,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** Create and return a reference to a target class. **/
     public static <T> Ref<T> of(Class<T> targetClass) {
-        return of(null, targetClass, Preferability.Default, null).by(null);
+        return of(null, targetClass, Preferability.Default, null);
     }
     
     /**
@@ -121,7 +121,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * class.
      **/
     public static <T> Ref<T> of(String name, Class<T> targetClass) {
-        return of(name, targetClass, Preferability.Default, null).by(null);
+        return of(name, targetClass, Preferability.Default, null);
     }
     
     /**
@@ -150,32 +150,6 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     }
     
     //== For default ==================================================================================================
-    
-    // TODO consider the with, withA and by
-    
-    /** Set the default value for this ref. */
-    default public DirectRef<T> with(T defaultValue) {
-        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
-        return providedWith(preferability, defaultValue);
-    }
-    
-    /** Set the default value to the value of the given ref.. */
-    default public DirectRef<T> withA(Ref<T> ref) {
-        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
-        return providedWithA(preferability, ref);
-    }
-    
-    /**
-     * Create another ref of the same type and preferibility but with the given default supplier.
-     * 
-     * @param defaultSupplier the default supplier
-     * @return a new ref with the default value.
-     */
-    @SuppressWarnings("unchecked")
-    default public DirectRef<T> by(Supplier<? extends T> defaultSupplier) {
-        val preferability = (this instanceof DirectRef) ? ((DirectRef<T>)this).getPreferability() : Preferability.Default;
-        return providedBy(preferability, (Supplier<T>) defaultSupplier);
-    }
     
     /** Create a provider that dictate the given value. */
     default public DirectRef<T> dictatedTo(T value) {

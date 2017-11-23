@@ -46,11 +46,11 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class).by(StringList::new).retained().forCurrentThread();
+    static final Ref<StringList> logs = Ref.of(StringList.class).defaultedToBy(StringList::new).retained().forCurrentThread();
     
     static final Ref<String> username = Ref.of(orgName);
     
-    static final Ref<Integer> usernameLength = Ref.of(Integer.class).by(()->{
+    static final Ref<Integer> usernameLength = Ref.of(Integer.class).defaultedToBy(()->{
         a(logs).add("Calculate username length.");
         return a(username).length();
     }).retained().forSame(username);
@@ -230,8 +230,8 @@ public class RetainTest {
     
     @Test
     public void testRetain_but() {
-        val counter = Ref.of(AtomicInteger.class).by(()->new AtomicInteger()).retained().globally().forAlways();
-        val ref     = Ref.of(String.class).by(()->"Value#" + the(counter).getAndIncrement());
+        val counter = Ref.of(AtomicInteger.class).defaultedToBy(()->new AtomicInteger()).retained().globally().forAlways();
+        val ref     = Ref.of(String.class).defaultedToBy(()->"Value#" + the(counter).getAndIncrement());
         assertEquals("Value#0", the(ref).toString());
         assertEquals("Value#1", the(ref).toString());
         

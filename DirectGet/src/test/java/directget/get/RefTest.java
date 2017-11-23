@@ -51,4 +51,19 @@ public class RefTest {
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
     
+    
+    static class Car {
+        
+        public String zoom() {
+            return "FLASH!";
+        }
+        
+    }
+    
+    @Test
+    public void testDefaultValue() {
+        Ref<Car> carRef = Ref.of(Car.class);
+        assertEquals("FLASH!", Get.a(carRef).zoom());
+    }
+    
 }

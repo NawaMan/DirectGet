@@ -100,7 +100,7 @@ public enum Preferability {
     public static <T> Provider<T> determineProvider(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProviderStackMap stacks) {
         Optional<BiConsumer<String, Provider<T>>> alarm = Optional
-                .ofNullable((!_ListenerEnabled_.get() || (ref == DefaultListener)) ? null : Get.a(DefaultListener))
+                .ofNullable((!_ListenerEnabled_.get() || (ref == DefaultListener) || currentScope.isInitializing.get()) ? null : Get.a(DefaultListener))
                 .map(listener -> (foundSource, foundProvider) -> {
                     listener.onDetermine(ref, foundSource, foundProvider, Preferability::callStackToString,
                             getXRayString(ref, parentScope, currentScope, stacks));

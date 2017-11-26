@@ -31,6 +31,8 @@ import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
+// TODO - Convenient method to create configuration from different sources.
+
 /**
  * This class contains the providers for a scope.
  * 
@@ -79,8 +81,14 @@ public final class Configuration {
         .filter(Objects::nonNull)
         .forEach(provider->{
             val ref = provider.getRef();
-            if (theMap.containsKey(ref))
-                return;
+            if (theMap.containsKey(ref)) {
+                val thisPreferability = theMap.get(ref).getPreferability();
+                val thatPreferability = provider.getPreferability();
+                if (thisPreferability.compareTo(thatPreferability) >= 0)
+                    return;
+                
+                theMap.put(ref, provider);
+            }
             
             theMap.put(ref, provider);
         });

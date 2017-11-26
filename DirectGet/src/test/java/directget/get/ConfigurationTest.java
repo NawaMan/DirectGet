@@ -89,4 +89,34 @@ public class ConfigurationTest {
         assertEquals("Ref3", configuration.getProvider(ref3).get());
     }
     
+    @Test
+    public void testConfiguration_combine_preferenceSame() throws AppScopeAlreadyInitializedException {
+        val ref = Ref.of(String.class).defaultedTo("Ref");
+        
+        val configuration1 = new Configuration(
+                ref.getProvider().butWith("Str1")
+        );
+        val configuration2 = new Configuration(
+                ref.getProvider().butWith("Str2")
+        );
+        
+        assertEquals("Str1", Configuration.combineOf(configuration1, configuration2).getProvider(ref).get());
+        assertEquals("Str2", Configuration.combineOf(configuration2, configuration1).getProvider(ref).get());
+    }
+    
+    @Test
+    public void testConfiguration_combine_preferenceDiffer() throws AppScopeAlreadyInitializedException {
+        val ref = Ref.of(String.class).defaultedTo("Ref");
+        
+        val configuration1 = new Configuration(
+                ref.getProvider().butWith("Str1")
+        );
+        val configuration2 = new Configuration(
+                ref.getProvider().butDictate().butWith("Str2")
+        );
+        
+        assertEquals("Str2", Configuration.combineOf(configuration1, configuration2).getProvider(ref).get());
+        assertEquals("Str2", Configuration.combineOf(configuration2, configuration1).getProvider(ref).get());
+    }
+    
 }

@@ -18,9 +18,9 @@ package directget.get;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import directget.get.exceptions.GetException;
 import directget.get.run.Named;
 import directget.get.supportive.DirectRef;
+import directget.get.supportive.RefFactory;
 import directget.get.supportive.ForClassRef;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
@@ -35,6 +35,11 @@ import lombok.val;
  * @author NawaMan
  */
 public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
+    
+    /** The default factory. */
+    public static final Ref<RefFactory> factory = Ref.ofValue(new RefFactory());
+    
+    
     
     /** Returns this reference **/
     public default Ref<T> getRef() {
@@ -54,13 +59,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** @return the default object. */
     default public T get() {
-        try {
-            val clzz = getTargetClass();
-            val instance = clzz.newInstance();
-            return instance;
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new GetException(this, e);
-        }
+        return Get.the(factory).make(this);
     }
     
     /** @return the optional default object. */

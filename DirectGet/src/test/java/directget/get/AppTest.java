@@ -79,18 +79,28 @@ public class AppTest {
     public void testInitialize_withConfiguration() throws AppScopeAlreadyInitializedException {
         val ref1 = Ref.of(String.class).defaultedTo("Ref1");
         val ref2 = Ref.of(String.class).defaultedTo("Ref2");
-
-        assertEquals("Ref1", Get.the(ref1));
-        assertEquals("Ref2", Get.the(ref2));
         
         val configuration = new Configuration(
-                ref1.getProvider().butWith("Str1"),
+                ref1.getProvider().butNormal().butWith("Str1"),
                 ref2
         );
         App.initializeIfAbsent(configuration);
         
         assertEquals("Str1", Get.the(ref1));
         assertEquals("Ref2", Get.the(ref2));
+    }
+    
+    @Test
+    public void testInitializeGet() {
+        val ref = Ref.of(String.class).defaultedTo("Ref1");
+        assertEquals("Ref1", Get.the(ref));
+        
+        assertTrue(App.isInitialized());
+        assertTrue(App.scope
+                .getConfiguration()
+                .getProvider(Ref.factory)
+                .getPreferability()
+                .is(Preferability.Dictate));
     }
     
 }

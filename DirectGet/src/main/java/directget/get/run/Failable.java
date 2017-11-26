@@ -189,4 +189,58 @@ public class Failable {
         }
     }
     
+    /** Failable function. **/
+    @FunctionalInterface
+    public static interface Function<V, R, T extends Throwable> {
+
+        /** Convenient factory method to allow lambda */
+        public static <V, R, T extends Throwable> Function<V, R, T> of(Function<V, R, T> function) {
+            return function;
+        }
+        
+        /** Run this function. */
+        public R apply(V value) throws T;
+        
+        /** Convert to a regular function and throw FailableException if there is an exception. */
+        public default java.util.function.Function<V, R> toFunction() {
+            return gracefully();
+        }
+        
+        /** Convert to a regular function and throw FailableException if there is an exception. */        
+        public default java.util.function.Function<V, R> gracefully() {
+            return v -> {
+                try {
+                    return apply(v);
+                } catch (RuntimeException t) {
+                    throw t;
+                } catch (Throwable t) {
+                    throw new FailableException(t);
+                }
+            };
+        }
+        
+        /** Convert to a regular function that completely ignore the exception throw from it. */
+        public default java.util.function.Function<V, R> carelessly() {
+            return v -> {
+                try {
+                    return apply(v);
+                } catch (Throwable t) {
+                    return null;
+                }
+            };
+        }
+        
+        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        public default java.util.function.Function<V, R> handledly() {
+            return value -> {
+                try {
+                    return apply(value);
+                } catch (Throwable t) {
+                    Get.a(ProblemHandler.problemHandler).handle(t);
+                    return null;
+                }
+            };
+        }
+    }
+    
 }

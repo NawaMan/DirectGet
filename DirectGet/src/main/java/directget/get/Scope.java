@@ -15,10 +15,12 @@
 //  ========================================================================
 package directget.get;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
@@ -37,6 +39,8 @@ public class Scope {
     private static final Configuration DEFAULT_CONFIG = new Configuration();
     
     private static final Object lock = new Object();
+    
+    final AtomicBoolean isInitializing = new AtomicBoolean(false);
     
     /**
      * The name of the scope.
@@ -87,16 +91,21 @@ public class Scope {
         if (config == DEFAULT_CONFIG) {
             synchronized (lock) {
                 if (config == DEFAULT_CONFIG) {
-                    config = (newConfig == null) ? new Configuration() : newConfig;
-                    stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
-                    return true;
+                    isInitializing.set(true);
+                    try {
+                        config = forceDictate((newConfig == null) ? new Configuration() : newConfig);
+                        stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
+                        return true;
+                    } finally {
+                        isInitializing.set(false);
+                    }
                 }
             }
         }
         return false;
     }
     
-    boolean hasBeenInitialized() {
+    boolean isInitialized() {
         return config != DEFAULT_CONFIG;
     }
     
@@ -140,6 +149,8 @@ public class Scope {
     }
     
     <T> Optional<T> doGet(Ref<T> ref) {
+        initIfAbsent(null);
+        
         val currentGet = this.Get();
         val provider = currentGet.getProvider(ref);
         if (provider != null) {
@@ -173,6 +184,26 @@ public class Scope {
     public Scope newSubScope(String name, Configuration config) {
         val subScope = new Scope(name, this, config);
         return subScope;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static Configuration forceDictate(final Configuration config) {
+        List<Provider> providers = new ArrayList<>();
+        App.PROTECTED_REFS.forEach(ref->{
+            createDictates(config, ref, providers);
+        });
+        return Configuration.combineOf(config, new Configuration(providers));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void createDictates(Configuration config, Ref ref, List<Provider> providers) {
+        if (config.getProvider(ref) == null) {
+            providers.add(ref.butDictate());
+        } else {
+            val provider = config.getProvider(ref);
+            if (!provider.getPreferability().is(Preferability.Dictate))
+                providers.add(provider.butDictate());
+        }
     }
     
 }

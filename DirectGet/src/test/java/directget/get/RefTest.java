@@ -70,7 +70,7 @@ public class RefTest {
     }
     
     
-    static class Car {
+    public static class Car {
         
         public String zoom() {
             return "FLASH!";

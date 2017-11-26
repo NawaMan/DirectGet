@@ -278,9 +278,8 @@ public final class GetInstance {
      * Run the given runnable asynchronously and inherits the providers of
      * those given refs.
      **/
-    public void runAsync(
-            @SuppressWarnings("rawtypes") List<Ref> refsToInherit,
-            Runnable runnable) {
+    @SuppressWarnings("rawtypes")
+    public void runAsync(List<Ref> refsToInherit, Runnable runnable) {
         runAsync(refsToInherit::contains, runnable);
     }
     

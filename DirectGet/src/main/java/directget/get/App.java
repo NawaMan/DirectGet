@@ -15,6 +15,11 @@
 //  ========================================================================
 package directget.get;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
+import java.util.List;
+
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import lombok.val;
 
@@ -27,6 +32,11 @@ import lombok.val;
  */
 public final class App {
     
+    /** List of Refs that will be protected (force 'Dictate' at initialize time) */
+    public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
+            Ref.factory
+    ));
+    
     /** The only instance of the Application scope. */
     public static final Scope scope = new Scope();
     
@@ -35,6 +45,15 @@ public final class App {
      */
     public static GetInstance Get() {
         return scope.Get();
+    }
+    
+    /**
+     * Initialize the application scope if it has yet to be initialized.
+     * @return {@code true} if the initialization actually happen with this call.
+     */
+    public static boolean initialize() {
+        val isAbsent = initializeIfAbsent(null);
+        return isAbsent;
     }
     
     /**
@@ -56,7 +75,7 @@ public final class App {
     
     /** @return {@code true} if the application scope has been initialized */
     public static boolean isInitialized() {
-        val isInitialized = scope.hasBeenInitialized();
+        val isInitialized = scope.isInitialized();
         return isInitialized;
     }
     

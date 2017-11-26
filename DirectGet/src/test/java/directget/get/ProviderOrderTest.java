@@ -532,7 +532,7 @@ public class ProviderOrderTest {
 
     
     private static final String REF_DICTATE = "RefDictate";
-    private static final Ref<String> dictatedRef = Ref.of(String.class, Preferability.Dictate, REF_DICTATE);
+    private static final Ref<String> dictatedRef = Ref.ofValue(String.class, Preferability.Dictate, REF_DICTATE);
     
     @Test
     public void testRefDictate() {
@@ -544,7 +544,7 @@ public class ProviderOrderTest {
     }
     
     private static final String REF_NORMAL = "RefNormal";
-    private static final Ref<String> normalRef = Ref.of(String.class, Preferability.Normal, REF_NORMAL);
+    private static final Ref<String> normalRef = Ref.ofValue(String.class, Preferability.Normal, REF_NORMAL);
     
     @Test
     public void testRefNormal() {

@@ -97,60 +97,91 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     // -- Direct -------------------------------------------------------------
     
-    /** Create and return a reference to the default value's class. **/
+    /** Create and return a reference to the default value's class default to the default factory. **/
     public static <T> Ref<T> ofValue(T defaultValue) {
         @SuppressWarnings("unchecked")
         val targetClass = (Class<T>)defaultValue.getClass();
-        return of(null, targetClass, Preferability.Default, defaultValue);
+        return ofValue(null, targetClass, Preferability.Default, defaultValue);
     }
     
-    /** Create and return a reference to a target class. **/
+    /** Create and return a reference to a target class with default factory. **/
     public static <T> Ref<T> of(Class<T> targetClass) {
-        return of(null, targetClass, Preferability.Default, null).defaultedToBy(null);
+        return ofValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
     }
     
     /**
      * Create and return a reference to a target class with the default value.
-     * 
-     * This method allows to do this...
-     *   Ref<List<String>> ref = Ref.of(List.class, (List<String>)null).defaultedToBy(()->new ArrayList<String>());
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> of(Class<T> targetClass, V defaultValue) {
-        return (Ref<V>)of(null, targetClass, Preferability.Default, defaultValue);
+    public static <T, V extends T> Ref<V> ofValue(Class<T> targetClass, V defaultValue) {
+        return (Ref<V>)ofValue(null, targetClass, Preferability.Default, defaultValue);
+    }
+    
+    /**
+     * Create and return a reference to a target class with the default supplier.
+     **/
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> Ref<V> ofSupplier(Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (Ref<V>)ofValue(null, (Class<V>)targetClass, Preferability.Default, (V)null).defaultedToBy(valueSupplier);
     }
     
     /**
      * Create and return a reference with a human readable name to a target
-     * class.
+     * class with default factory.
      **/
     public static <T> Ref<T> of(String name, Class<T> targetClass) {
-        return of(name, targetClass, Preferability.Default, null);
+        return ofValue(name, targetClass, Preferability.Default, null);
     }
     
     /**
      * Create and return a reference with a human readable name to a target
-     * class with the default factory.
+     * class with the default value.
      **/
-    public static <T, V extends T> Ref<T> of(String name, Class<T> targetClass, V defaultValue) {
-        return of(name, targetClass, Preferability.Default, defaultValue);
-    }
-    
-    /**
-     * Create and return a reference to a target class with the default factory.
-     **/
-    public static <T, V extends T> Ref<T> of(Class<T> targetClass, Preferability preferability, V defaultValue) {
-        return of(null, targetClass, preferability, defaultValue);
+    public static <T, V extends T> Ref<T> ofValue(String name, Class<T> targetClass, V defaultValue) {
+        return ofValue(name, targetClass, Preferability.Default, defaultValue);
     }
     
     /**
      * Create and return a reference with a human readable name to a target
-     * class with the default factory.
+     * class with the given supplier.
      **/
-    public static <T, V extends T> Ref<T> of(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> Ref<V> ofSupplier(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (Ref<V>)ofValue(name, (Class<V>)targetClass, Preferability.Default, (V)null).defaultedToBy(valueSupplier);
+    }
+    
+    /**
+     * Create and return a reference to a target class with the default value.
+     **/
+    public static <T, V extends T> Ref<T> ofValue(Class<T> targetClass, Preferability preferability, V defaultValue) {
+        return ofValue(null, targetClass, preferability, defaultValue);
+    }
+    
+    /**
+     * Create and return a reference to a target class with the given supplier.
+     **/
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> Ref<V> ofSupplier(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+        return ofValue(null, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
+    }
+    
+    /**
+     * Create and return a reference with a human readable name to a target
+     * class with the default vaule.
+     **/
+    public static <T, V extends T> Ref<T> ofValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
         val theName    = (name != null) ? name : ("#" + DirectRef.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
         return new DirectRef<>(theName, targetClass, preferability, theFactory);
+    }
+    
+    /**
+     * Create and return a reference with a human readable name to a target
+     * class with the default supplier.
+     **/
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> Ref<V> ofSupplier(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+        return ofValue(name, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
     }
     
     //== For default ==================================================================================================

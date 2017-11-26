@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import org.junit.Test;
 
 import directget.get.Ref;
+import lombok.val;
 
 public class RefTest {
     
@@ -47,16 +48,24 @@ public class RefTest {
     @SuppressWarnings("rawtypes")
     public void testRef_directWithDefault() {
         List theList = new ArrayList();
-        Ref<List> ref = Ref.of(List.class, theList);
+        Ref<List> ref = Ref.ofValue(List.class, theList);
         assertTrue(ref._get().isPresent());
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
     
     public void testRef_directWithGenericDefault() {
-        Ref<List<String>> ref = Ref.of(List.class, (List<String>)null).defaultedToBy(()->new ArrayList<String>());
+        Ref<List<String>> ref = Ref.ofSupplier(List.class, ()->new ArrayList<String>());
+        
         assertTrue(ref.get().isEmpty());
         
-        Ref<Supplier<String>> strRef = Ref.of(Supplier.class, (Supplier<String>)null).defaultedTo(()->"Hello");
+        val list = ref.get();
+        list.add("Hey");
+        assertFalse(ref.get().isEmpty());
+        
+        assertTrue(ref.get().isEmpty());
+        
+        // Bad for supplier of supplier
+        Ref<Supplier<String>> strRef = Ref.ofSupplier(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
         assertEquals("Hello", Get.a(strRef).get());
     }
     

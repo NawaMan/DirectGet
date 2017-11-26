@@ -72,7 +72,7 @@ public enum Preferability {
     }
     
     /** */
-    public static final Ref<DetermineProviderListener> DefaultListener = Ref.of(DetermineProviderListener.class, null);
+    public static final Ref<DetermineProviderListener> DefaultListener = Ref.ofValue(DetermineProviderListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     

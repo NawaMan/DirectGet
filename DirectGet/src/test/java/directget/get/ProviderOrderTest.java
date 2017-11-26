@@ -57,7 +57,7 @@ public class ProviderOrderTest {
     // Get parent default - when included
     // Ref default
     
-    private final Ref<String> ref = Ref.of("RefDefault");
+    private final Ref<String> ref = Ref.ofValue("RefDefault");
     private final Ref<String> refNoDefault = Ref.of(String.class);
     
     private final Provider<String> getParentDictate = new Provider<>(ref, Preferability.Dictate,

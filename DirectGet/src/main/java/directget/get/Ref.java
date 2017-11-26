@@ -98,7 +98,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     // -- Direct -------------------------------------------------------------
     
     /** Create and return a reference to the default value's class. **/
-    public static <T> Ref<T> of(T defaultValue) {
+    public static <T> Ref<T> ofValue(T defaultValue) {
         @SuppressWarnings("unchecked")
         val targetClass = (Class<T>)defaultValue.getClass();
         return of(null, targetClass, Preferability.Default, defaultValue);
@@ -106,14 +106,18 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** Create and return a reference to a target class. **/
     public static <T> Ref<T> of(Class<T> targetClass) {
-        return of(null, targetClass, Preferability.Default, null);
+        return of(null, targetClass, Preferability.Default, null).defaultedToBy(null);
     }
     
     /**
      * Create and return a reference to a target class with the default value.
+     * 
+     * This method allows to do this...
+     *   Ref<List<String>> ref = Ref.of(List.class, (List<String>)null).defaultedToBy(()->new ArrayList<String>());
      **/
-    public static <T, V extends T> Ref<T> of(Class<T> targetClass, V defaultValue) {
-        return of(null, targetClass, Preferability.Default, defaultValue);
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> Ref<V> of(Class<T> targetClass, V defaultValue) {
+        return (Ref<V>)of(null, targetClass, Preferability.Default, defaultValue);
     }
     
     /**

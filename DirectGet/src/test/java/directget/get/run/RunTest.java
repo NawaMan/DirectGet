@@ -38,7 +38,7 @@ import lombok.val;
 
 public class RunTest {
     
-    private static Ref<Integer> num = Ref.of(1);
+    private static Ref<Integer> num = Ref.ofValue(1);
     
     @Test
     public void testSameThreadSupplier() {

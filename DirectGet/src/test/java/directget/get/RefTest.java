@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.Test;
 
@@ -50,10 +51,13 @@ public class RefTest {
         assertTrue(ref._get().isPresent());
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
-    @Test
+    
     public void testRef_directWithGenericDefault() {
-        Ref<List<String>> ref = Ref.of((List<String>)null).defaultedToBy(()->new ArrayList<String>());
+        Ref<List<String>> ref = Ref.of(List.class, (List<String>)null).defaultedToBy(()->new ArrayList<String>());
         assertTrue(ref.get().isEmpty());
+        
+        Ref<Supplier<String>> strRef = Ref.of(Supplier.class, (Supplier<String>)null).defaultedTo(()->"Hello");
+        assertEquals("Hello", Get.a(strRef).get());
     }
     
     
@@ -67,8 +71,9 @@ public class RefTest {
     
     @Test
     public void testDefaultValue() {
-        Ref<Car> carRef = Ref.of(Car.class);
+        Ref<Car> carRef = Ref.forClass(Car.class);
         assertEquals("FLASH!", Get.a(carRef).zoom());
+        assertEquals("FLASH!", Get.a(Car.class).zoom());
     }
     
 }

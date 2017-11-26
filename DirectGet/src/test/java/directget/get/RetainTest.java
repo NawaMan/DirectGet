@@ -48,7 +48,7 @@ public class RetainTest {
     
     static final Ref<StringList> logs = Ref.of(StringList.class).defaultedToBy(StringList::new).retained().forCurrentThread();
     
-    static final Ref<String> username = Ref.of(orgName);
+    static final Ref<String> username = Ref.ofValue(orgName);
     
     static final Ref<Integer> usernameLength = Ref.of(Integer.class).defaultedToBy(()->{
         a(logs).add("Calculate username length.");

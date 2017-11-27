@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import javax.inject.Inject;
+
 import org.junit.Test;
 
 import directget.get.Ref;
@@ -71,11 +73,9 @@ public class RefTest {
     
     
     public static class Car {
-        
         public String zoom() {
             return "FLASH!";
         }
-        
     }
     
     @Test
@@ -83,6 +83,85 @@ public class RefTest {
         Ref<Car> carRef = Ref.forClass(Car.class);
         assertEquals("FLASH!", Get.a(carRef).zoom());
         assertEquals("FLASH!", Get.a(Car.class).zoom());
+    }
+
+    public static class Driver {
+        private Car car;
+        public Driver(Car car) {
+            this.car = car;
+        }
+        public String zoom() {
+            return car.zoom();
+        }
+    }
+    
+    @Test
+    public void testOnlyConstructor() {
+        Ref<Driver> driverRef = Ref.forClass(Driver.class);
+        assertEquals("FLASH!", Get.a(driverRef).zoom());
+        assertEquals("FLASH!", Get.a(Driver.class).zoom());
+    }
+
+    public static class Person {
+        private Car car;
+        public Person() {
+            this(null);
+        }
+        public Person(Car car) {
+            this.car = car;
+        }
+        public String zoom() {
+            return (car != null) ? car.zoom() : "Meh";
+        }
+    }
+    
+    @Test
+    public void testDefaultConstructor() {
+        Ref<Person> personRef = Ref.forClass(Person.class);
+        assertEquals("Meh", Get.a(personRef).zoom());
+        assertEquals("Meh", Get.a(Person.class).zoom());
+    }
+
+    public static class AnotherPerson {
+        private Car car;
+        public AnotherPerson() {
+            this(null);
+        }
+        @Inject
+        public AnotherPerson(Car car) {
+            this.car = car;
+        }
+        public String zoom() {
+            return (car != null) ? car.zoom() : "Meh";
+        }
+    }
+    
+    @Test
+    public void testInjectConstructor() {
+        Ref<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
+        assertEquals("FLASH!", Get.a(personRef).zoom());
+        assertEquals("FLASH!", Get.a(AnotherPerson.class).zoom());
+    }
+
+    public static class OneAnotherPerson {
+        private Car car;
+        public OneAnotherPerson() {
+            this(null);
+        }
+        @InjectedConstructor
+        public OneAnotherPerson(Car car) {
+            this.car = car;
+        }
+        public String zoom() {
+            return (car != null) ? car.zoom() : "Meh";
+        }
+    }
+    
+    @Test
+    public void testInjectConstructorConstructor() {
+        Ref<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
+        assertEquals("FLASH!", Get.a(personRef).zoom());
+        assertEquals("FLASH!", Get.a(OneAnotherPerson.class).zoom());
     }
     
 }

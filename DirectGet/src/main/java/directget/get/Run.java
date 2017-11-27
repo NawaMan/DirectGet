@@ -25,6 +25,8 @@ import directget.get.run.session.SyncNoCheckExceptionSessionBuilder;
 import directget.get.run.session.SyncSessionBuilder;
 import lombok.val;
 
+// TODO - Record the stack when new thread.
+
 /**
  * This class offer a natural way to run something.
  * 

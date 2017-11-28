@@ -15,10 +15,11 @@
 //  ========================================================================
 package directget.get.supportive.retain;
 
+import static directget.get.Get.the;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import directget.get.Get;
 import directget.get.Ref;
 import lombok.val;
 
@@ -44,7 +45,7 @@ public class ForSameRetainChecker<T, V> implements Predicate<V> {
      */
     public ForSameRetainChecker(Ref<T> ref) {
         this.ref = ref;
-        refValue = new AtomicReference<T>(Get.a(ref));
+        refValue = new AtomicReference<T>(the(ref));
     }
 
     /** @return the reference ref.  **/
@@ -54,7 +55,7 @@ public class ForSameRetainChecker<T, V> implements Predicate<V> {
 
     @Override
     public boolean test(V value) {
-        val newValue = Get.a(ref);
+        val newValue = the(ref);
         val isSame = newValue == refValue.get();
         if (!isSame) {
             refValue.set(newValue);

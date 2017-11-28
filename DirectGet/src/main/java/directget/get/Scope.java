@@ -144,21 +144,27 @@ public class Scope {
      * @return the get for the current thread that is associated with this
      *         scope. NOTE: capital 'G' is intentional.
      */
-    public GetInstance Get() {
+    public GetInstance get() {
         return threadGet.get();
     }
     
-    <T> Optional<T> doGet(Ref<T> ref) {
+    <T> Optional<T> doGetThe(Ref<T> ref) {
         initIfAbsent(null);
         
-        val currentGet = this.Get();
+        val currentGet = this.get();
         val provider = currentGet.getProvider(ref);
         if (provider != null) {
             return Optional.ofNullable(provider.get());
         }
         
-        Optional<T> optValue = ref._get();
-        return optValue;
+        return Optional.empty();
+    }
+    
+    <T> Optional<T> doGetA(Ref<T> ref) {
+        val optValue = doGetThe(ref);
+        if (optValue.isPresent())
+             return optValue;
+        else return ref._get();
     }
     
     /** {@inheritDoc} */

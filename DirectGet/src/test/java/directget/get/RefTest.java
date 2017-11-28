@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Run.With;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import org.junit.Test;
 
 import directget.get.Ref;
+import directget.get.supportive.RefFor;
 import lombok.val;
 
 public class RefTest {
@@ -33,8 +35,8 @@ public class RefTest {
     @Test
     @SuppressWarnings("rawtypes")
     public void testRef_forClass() {
-        Ref<List> ref1 = Ref.forClass(List.class);
-        Ref<List> ref2 = Ref.forClass(List.class);
+        RefFor<List> ref1 = Ref.forClass(List.class);
+        RefFor<List> ref2 = Ref.forClass(List.class);
         assertEquals(ref1, ref2);
     }
     
@@ -68,7 +70,7 @@ public class RefTest {
         
         // Bad for supplier of supplier
         Ref<Supplier<String>> strRef = Ref.ofSupplier(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
-        assertEquals("Hello", Get.a(strRef).get());
+        assertEquals("Hello", Get.the(strRef).get());
     }
     
     
@@ -81,7 +83,7 @@ public class RefTest {
     @Test
     public void testDefaultValue() {
         Ref<Car> carRef = Ref.forClass(Car.class);
-        assertEquals("FLASH!", Get.a(carRef).zoom());
+        assertEquals("FLASH!", Get.the(carRef).zoom());
         assertEquals("FLASH!", Get.a(Car.class).zoom());
     }
 
@@ -98,8 +100,26 @@ public class RefTest {
     @Test
     public void testOnlyConstructor() {
         Ref<Driver> driverRef = Ref.forClass(Driver.class);
-        assertEquals("FLASH!", Get.a(driverRef).zoom());
+        assertEquals("FLASH!", Get.the(driverRef).zoom());
         assertEquals("FLASH!", Get.a(Driver.class).zoom());
+    }
+    
+    public static class SuperCar extends Car {
+        public String zoom() {
+            return "SUPER FLASH!!!!";
+        }
+    }
+    
+    @Test
+    public void test_substitute() {
+        RefFor<Driver>   driverRef   = Ref.forClass(Driver.class);
+        RefFor<Car>      carRef      = Ref.forClass(Car.class);
+        assertEquals("SUPER FLASH!!!!", 
+                With(carRef.butProvidedWithA(SuperCar.class))
+                .run(()->
+                    Get.a(Driver.class).zoom()
+                )
+        );
     }
 
     public static class Person {
@@ -118,7 +138,7 @@ public class RefTest {
     @Test
     public void testDefaultConstructor() {
         Ref<Person> personRef = Ref.forClass(Person.class);
-        assertEquals("Meh", Get.a(personRef).zoom());
+        assertEquals("Meh", Get.the(personRef).zoom());
         assertEquals("Meh", Get.a(Person.class).zoom());
     }
 
@@ -139,7 +159,7 @@ public class RefTest {
     @Test
     public void testInjectConstructor() {
         Ref<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
-        assertEquals("FLASH!", Get.a(personRef).zoom());
+        assertEquals("FLASH!", Get.the(personRef).zoom());
         assertEquals("FLASH!", Get.a(AnotherPerson.class).zoom());
     }
 
@@ -160,8 +180,33 @@ public class RefTest {
     @Test
     public void testInjectConstructorConstructor() {
         Ref<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
-        assertEquals("FLASH!", Get.a(personRef).zoom());
+        assertEquals("FLASH!", Get.the(personRef).zoom());
         assertEquals("FLASH!", Get.a(OneAnotherPerson.class).zoom());
+    }
+    
+    @Test
+    public void testThe_forClass_useRefFactory() {
+        RefFor<Person> personClassRef = Ref.forClass(Person.class);
+        assertNotNull(Get.the(personClassRef));
+    }
+    
+    @Test
+    public void testThe_nonForClass_returnNull() {
+        Ref<Person> personRef = Ref.of(Person.class);
+        assertNull(Get.the(personRef));
+    }
+    
+    @Test
+    public void testA_forClass_useRefFactory() {
+        RefFor<Person> personClassRef = Ref.forClass(Person.class);
+        assertNotNull(Get.a(personClassRef));
+        assertNotNull(Get.a(Person.class));
+    }
+    
+    @Test
+    public void testA_forFactory() {
+        Ref<Factory<Car>> newCar = Ref.ofValue(Factory.class, ()->new Car());
+        assertTrue(Get.a(newCar) instanceof Car);
     }
     
 }

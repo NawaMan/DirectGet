@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static directget.get.Get._the;
 import static directget.get.Preferability.Dictate;
 import static directget.get.Run.*;
 import static java.lang.Thread.*;
@@ -69,7 +70,7 @@ public class GetInstanceTest implements Named.User {
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
         Ref<StringBuffer> aBuffer = Ref.ofValue("aList", StringBuffer.class, theBuffer);
-        assertTrue(App.Get()._a(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
+        assertTrue(App.Get()._the(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
     }
     
     private void join() {
@@ -83,7 +84,7 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRunSubstitution() {
         Run.with(_newText).run(() -> {
-            assertEquals(newText, Get.a(_text_));
+            assertEquals(newText, Get.the(_text_));
         });
     }
     
@@ -115,7 +116,7 @@ public class GetInstanceTest implements Named.User {
         .inheritNone()
         .joinWith(fork)
         .run(()->{
-            assertEquals(orgText, Get.a(_text_));
+            assertEquals(orgText, Get.the(_text_));
         });
         
         fork.join();
@@ -132,7 +133,7 @@ public class GetInstanceTest implements Named.User {
         .inheritAll()
         .joinWith(fork)
         .run(()->{
-            assertEquals(newText, Get.a(_text_));
+            assertEquals(newText, Get.the(_text_));
         });
         
         fork.join();

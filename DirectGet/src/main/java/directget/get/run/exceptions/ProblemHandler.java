@@ -18,7 +18,6 @@ package directget.get.run.exceptions;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import directget.get.Get;
 import directget.get.Ref;
 
 /**
@@ -38,7 +37,7 @@ public class ProblemHandler {
     
     /** Default problem handler. */
     public static final Ref<ProblemHandler> problemHandler
-            = Ref.of(ProblemHandler.class).defaultedToBy(()->Get.a(printStackTrace));
+            = Ref.of(ProblemHandler.class).defaultedToA(printStackTrace);
     
     private final String name;
     

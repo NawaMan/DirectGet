@@ -30,7 +30,7 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
- * Factory for a ref.
+ * Factory for a ref. It create an instance of a Ref.
  * 
  * @param <T> the data type of the ref.
  * 

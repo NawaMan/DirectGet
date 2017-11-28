@@ -30,10 +30,10 @@ import lombok.val;
  *
  * @param <T> the type of data this will be reference to.
  */
-public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetainer<T, DirectRefWithRetainer<T>> {
+public class RefOfWithRetainer<T> extends RefOf<T> implements WithRetainer<T, RefOfWithRetainer<T>> {
     
     /** Constructor. */
-    public DirectRefWithRetainer(String name, Class<T> targetClass, Preferability preferability,
+    public RefOfWithRetainer(String name, Class<T> targetClass, Preferability preferability,
             Supplier<? extends T> factory) {
         super(name, targetClass, preferability, factory);
     }
@@ -49,12 +49,12 @@ public class DirectRefWithRetainer<T> extends DirectRef<T> implements WithRetain
     }
 
     /** Change the supplier. */
-    public DirectRefWithRetainer<T> __but(Supplier<T> newSupplier) {
+    public RefOfWithRetainer<T> __but(Supplier<T> newSupplier) {
         val supplier = getProvider().getSupplier();
         if (newSupplier == supplier) {
             return this;
         }
-        return new DirectRefWithRetainer<>(this.getName(), this.getTargetClass(), this.getPreferability(), newSupplier);
+        return new RefOfWithRetainer<>(this.getName(), this.getTargetClass(), this.getPreferability(), newSupplier);
     }
     
 }

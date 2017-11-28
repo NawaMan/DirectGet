@@ -13,29 +13,20 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive;
+package directget.get;
 
-import static directget.get.Get.DefaultThreadFactory;
-import static directget.get.Get.the;
-
-import java.util.concurrent.Executor;
-
-import lombok.val;
+import directget.get.exceptions.FactoryException;
 
 /**
- * This executor create thread using the Get._ThreadFactory_.
+ * Factory can make something.
  * 
  * @author NawaMan
+ *
+ * @param <T> the data type.
  */
-public class GetThreadFactoryExecutor implements Executor {
+public interface Factory<T> {
     
-    /** The default instance. */
-    public static final GetThreadFactoryExecutor instance = new GetThreadFactoryExecutor();
-
-    @Override
-    public void execute(Runnable runnable) {
-        val newThread = the(DefaultThreadFactory).newThread(runnable);
-        newThread.start();
-    }
+    /** @return the newly created data. */
+    public T make() throws FactoryException;
     
 }

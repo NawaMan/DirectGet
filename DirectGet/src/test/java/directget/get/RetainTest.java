@@ -51,38 +51,38 @@ public class RetainTest {
     static final Ref<String> username = Ref.ofValue(orgName);
     
     static final Ref<Integer> usernameLength = Ref.of(Integer.class).defaultedToBy(()->{
-        a(logs).add("Calculate username length.");
-        return a(username).length();
+        the(logs).add("Calculate username length.");
+        return the(username).length();
     }).retained().forSame(username);
     
     @Test
     public void testRetainRef_same() {
         the(logs).clear();
-        assertTrue(orgName.length() == a(usernameLength));
+        assertTrue(orgName.length() == the(usernameLength));
         assertEquals("[Calculate username length.]", the(logs).toString());
         
-        assertTrue(orgName.length() == a(usernameLength));
+        assertTrue(orgName.length() == the(usernameLength));
         assertEquals("[Calculate username length.]", the(logs).toString());
         
         Run.with(username.butProvidedWith(anotherName)).run(() -> {
-            assertTrue(anotherName.length() == a(usernameLength));
+            assertTrue(anotherName.length() == the(usernameLength));
             assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
             
-            assertTrue(anotherName.length() == a(usernameLength));
+            assertTrue(anotherName.length() == the(usernameLength));
             assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
         });
         
         Run.with(username.butProvidedWith(newName)).run(() -> {
-            assertTrue(newName.length() == a(usernameLength));
+            assertTrue(newName.length() == the(usernameLength));
             assertEquals("[Calculate username length., Calculate username length., Calculate username length.]",
                     the(logs).toString());
             
-            assertTrue(newName.length() == a(usernameLength));
+            assertTrue(newName.length() == the(usernameLength));
             assertEquals("[Calculate username length., Calculate username length., Calculate username length.]",
                     the(logs).toString());
         });
         
-        assertTrue(orgName.length() == Get.a(usernameLength));
+        assertTrue(orgName.length() == Get.the(usernameLength));
         assertEquals(
                 "[Calculate username length., Calculate username length., Calculate username length., Calculate username length.]",
                 the(logs).toString());
@@ -92,36 +92,36 @@ public class RetainTest {
     public void testRetainRef_equal() {
         With(usernameLength
             .butProvidedBy(()->{
-                a(logs).add("Calculate username length.");
-                return a(username).length();
+                the(logs).add("Calculate username length.");
+                return the(username).length();
             })
             .retained().forEquivalent(username)
         )
         .run(() -> {
             the(logs).clear();
-            assertTrue(orgName.length() == a(usernameLength));
+            assertTrue(orgName.length() == the(usernameLength));
             assertEquals("[Calculate username length.]", the(logs).toString());
             
-            assertTrue(orgName.length() == a(usernameLength));
+            assertTrue(orgName.length() == the(usernameLength));
             assertEquals("[Calculate username length.]", the(logs).toString());
             
             Run.with(username.butProvidedWith(anotherName)).run(() -> {
-                assertTrue(anotherName.length() == a(usernameLength));
+                assertTrue(anotherName.length() == the(usernameLength));
                 assertEquals("[Calculate username length.]", the(logs).toString());
                 
-                assertTrue(anotherName.length() == a(usernameLength));
+                assertTrue(anotherName.length() == the(usernameLength));
                 assertEquals("[Calculate username length.]", the(logs).toString());
             });
             
             Run.with(username.butProvidedWith(newName)).run(() -> {
-                assertTrue(newName.length() == a(usernameLength));
+                assertTrue(newName.length() == the(usernameLength));
                 assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
                 
-                assertTrue(newName.length() == a(usernameLength));
+                assertTrue(newName.length() == the(usernameLength));
                 assertEquals("[Calculate username length., Calculate username length.]", the(logs).toString());
             });
             
-            assertTrue(orgName.length() == Get.a(usernameLength));
+            assertTrue(orgName.length() == the(usernameLength));
             assertEquals("[Calculate username length., Calculate username length., Calculate username length.]",
                     the(logs).toString());
         });

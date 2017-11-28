@@ -34,7 +34,7 @@ public final class App {
     
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */
     public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
-            Ref.factory
+            Ref.refFactory
     ));
     
     /** The only instance of the Application scope. */
@@ -44,7 +44,7 @@ public final class App {
      * @return the get for the current thread that is associated with this scope. NOTE: capital 'G' is intentional.
      */
     public static GetInstance Get() {
-        return scope.Get();
+        return scope.get();
     }
     
     /**

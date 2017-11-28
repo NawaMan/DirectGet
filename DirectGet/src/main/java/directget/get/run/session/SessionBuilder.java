@@ -56,7 +56,7 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
     
     /** @return the get instance of the current scope. */
     public GetInstance get() {
-        return scope.Get();
+        return scope.get();
     }
     
     /** Specify that the running should be done under the given scope */
@@ -93,7 +93,7 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
         });
         if (!providers.isEmpty()) {
             this.wrappers.add(runnable->()->{
-                scope.Get().substitute(providers.stream(), runnable);
+                scope.get().substitute(providers.stream(), runnable);
             });
         }
         return (SB) this;

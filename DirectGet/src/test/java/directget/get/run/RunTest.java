@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get.run;
 
+import static directget.get.Get.the;
 import static directget.get.Run.Asynchronously;
 import static directget.get.Run.IgnoreHandledProblem;
 import static directget.get.run.exceptions.ProblemHandler.problemHandler;
@@ -93,7 +94,7 @@ public class RunTest {
     }
     
     private int numPlusSix() {
-        return Get.a(num) + 6;
+        return the(num) + 6;
     }
     
     @Test

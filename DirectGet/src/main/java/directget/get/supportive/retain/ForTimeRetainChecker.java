@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import directget.get.Get;
 import directget.get.Ref;
 import directget.get.supportive.Utilities;
 import lombok.val;
@@ -40,10 +39,10 @@ import lombok.experimental.ExtensionMethod;
 public class ForTimeRetainChecker<V> implements Predicate<V> {
     
     /** Ref for current time in milliseconds. */
-    final static Ref<Long> currentTimeMillis
-            = Ref.of(Long.class).defaultedToBy(()->Long.valueOf(System.currentTimeMillis()));
+    static final Ref<Long> currentTimeMillis
+            = Ref.ofSupplier(Long.class, ()->Long.valueOf(System.currentTimeMillis()));
     
-    final static Supplier<Long> nextExpire(long time, TimeUnit unit) {
+    static final Supplier<Long> nextExpire(long time, TimeUnit unit) {
         return ()->the(currentTimeMillis) + unit.toMillis(time);
     }
     
@@ -94,7 +93,7 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
     
     @Override
     public boolean test(V value) {
-        val currentTime = Get.a(currentTimeMillis);
+        val currentTime = the(currentTimeMillis);
         val hasExpires = currentTime >= expiredValue.get();
         if (hasExpires) {
             expiredValue.set(nextExpire(time, unit).get());

@@ -26,10 +26,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import directget.get.exceptions.GetException;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
+import directget.get.supportive.RefFor;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -70,147 +70,65 @@ public final class GetInstance {
         return provider;
     }
     
+    //-- a --
+    
     /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _a(Ref<T> ref) {
-        val optValue = scope.doGet(ref);
+    public <T> Optional<T> _a(RefFor<T> ref) {
+        val optValue = scope.doGetA(ref);
         return optValue;
     }
     
     /** @return the optional value associated with the given class. */
     public <T> Optional<T> _a(Class<T> clzz) {
-        val ref = Ref.forClass(clzz);
-        val optValue = _a(ref);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given ref. */
-    public <T> T a(Class<T> clzz) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref);
-        return value;
-    }
-    
-    /** @return the value associated with the given class. */
-    public <T> T a(Ref<T> ref) {
-        val optValue = _a(ref);
-        val value = optValue.orElse(null);
-        return value;
-    }
-    
-    /**
-     * @return the value associated with the given class or return the elseValue
-     *         if no value associated with the class.
-     */
-    public <T> T a(Class<T> clzz, T elseValue) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref, elseValue);
-        return value;
-    }
-    
-    /**
-     * @return the value associated with the given ref or return the elseValue
-     *         if no value associated with the ref.
-     */
-    public <T> T a(Ref<T> ref, T elseValue) {
-        try {
-            val optValue = _a(ref);
-            val value = optValue.orElse(elseValue);
-            return value;
-        } catch (GetException e) {
-            return elseValue;
-        }
-    }
-    
-    /**
-     * @return the value associated with the given class or return the from
-     *         elseSupplier if no value associated with the class.
-     */
-    public <T> T a(Class<T> clzz, Supplier<T> elseSupplier) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref, elseSupplier);
-        return value;
-    }
-    
-    /**
-     * @return the value associated with the given ref or return the from
-     *         elseSupplier if no value associated with the ref.
-     */
-    public <T> T a(Ref<T> ref, Supplier<T> elseSupplier) {
-        val optValue = _a(ref);
-        val value = optValue.orElseGet(elseSupplier);
-        return value;
-    }
-
-    /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _the(Ref<T> ref) {
-        val optValue = scope.doGet(ref);
+        val ref      = Ref.forClass(clzz);
+        val optValue = scope.doGetA(ref);
         return optValue;
     }
     
     /** @return the optional value associated with the given class. */
-    public <T> Optional<T> _the(Class<T> clzz) {
-        val ref = Ref.forClass(clzz);
-        val optValue = _the(ref);
-        return optValue;
+    public <T, F extends Factory<T>> Optional<T> _a(Ref<F> factoryRef) {
+        val optValue = scope.doGetA(factoryRef);
+        return optValue.map(Factory::make);
     }
     
     /** @return the value associated with the given ref. */
-    public <T> T the(Class<T> clzz) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref);
+    public <T> T a(Class<T> clzz) {
+        val ref      = Ref.forClass(clzz);
+        val optValue = scope.doGetA(ref);
+        val value    = optValue.orElse(null);  // TODO - Should we use RefFactory?
         return value;
     }
     
     /** @return the value associated with the given class. */
+    public <T> T a(RefFor<T> ref) {
+        val optValue = scope.doGetA(ref);
+        val value    = optValue.orElse(null);  // TODO - Should we use RefFactory?
+        return value;
+    }
+    
+    /** @return the optional value associated with the given class. */
+    public <T, F extends Factory<T>> T a(Ref<F> factoryRef) {
+        val optValue = scope.doGetA(factoryRef);
+        val value    = optValue.map(Factory::make).orElse(null);  // TODO - Should we use RefFactory?
+        return value;
+    }
+    
+    //-- the --
+
+    /** @return the optional value associated with the given ref. */
+    public <T> Optional<T> _the(Ref<T> ref) {
+        val optValue = scope.doGetThe(ref);
+        return optValue;
+    }
+    
+    /** @return the value associated with the given class. */
     public <T> T the(Ref<T> ref) {
-        val optValue = _a(ref);
-        val value = optValue.orElse(null);
+        val optValue = scope.doGetThe(ref);
+        val value    = optValue.orElse(null);
         return value;
     }
     
-    /**
-     * @return the value associated with the given class or return the elseValue
-     *         if no value associated with the class.
-     */
-    public <T> T the(Class<T> clzz, T elseValue) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref, elseValue);
-        return value;
-    }
-    
-    /**
-     * @return the value associated with the given ref or return the elseValue
-     *         if no value associated with the ref.
-     */
-    public <T> T the(Ref<T> ref, T elseValue) {
-        try {
-            val optValue = _a(ref);
-            val value = optValue.orElse(elseValue);
-            return value;
-        } catch (GetException e) {
-            return elseValue;
-        }
-    }
-    
-    /**
-     * @return the value associated with the given class or return the from
-     *         elseSupplier if no value associated with the class.
-     */
-    public <T> T the(Class<T> clzz, Supplier<T> elseSupplier) {
-        val ref = Ref.forClass(clzz);
-        val value = a(ref, elseSupplier);
-        return value;
-    }
-    
-    /**
-     * @return the value associated with the given ref or return the from
-     *         elseSupplier if no value associated with the ref.
-     */
-    public <T> T the(Ref<T> ref, Supplier<T> elseSupplier) {
-        val optValue = _a(ref);
-        val value = optValue.orElseGet(elseSupplier);
-        return value;
-    }
+    //-- Substitute --
     
     /**
      * Substitute the given providers and run the runnable.

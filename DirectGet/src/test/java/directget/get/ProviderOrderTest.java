@@ -94,14 +94,14 @@ public class ProviderOrderTest {
         
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<AssertionError> assertErr = new AtomicReference<>();
-        theScope.Get().substitute(Stream.of(_getParent), () -> {
+        theScope.get().substitute(Stream.of(_getParent), () -> {
             try {
                 @SuppressWarnings("rawtypes")
                 List<Ref> list = isToInherit ? Arrays.asList(ref) : Collections.emptyList();
-                theScope.Get().runAsync(list, () -> {
+                theScope.get().runAsync(list, () -> {
                     try {
-                        theScope.Get().substitute(Stream.of(_stack), () -> {
-                            String actual = theScope.Get()._a(ref).orElse(null);
+                        theScope.get().substitute(Stream.of(_stack), () -> {
+                            String actual = theScope.get()._the(ref).orElse(null);
                             try {
                                 assertEquals(expected, actual);
                             } catch (AssertionError e) {
@@ -198,20 +198,9 @@ public class ProviderOrderTest {
         doTest(_getParent, _scopeParent, _scope, _stack, "RefDefault");
     }
     
-    @Test
-    public void test_refDefault_defaultConstructionIsCalledIsUsed() {
-        Assert.assertEquals("", App.scope.Get().a(refNoDefault));
-    }
-    
     @Test(expected = GetException.class)
     public void test_refDefault_withNoDefaultConstruction_exceptionIsThrown() {
-        App.scope.Get().a(Ref.of(List.class));
-    }
-    
-    @Test
-    public void test_refDefault_withNoDefaultConstruction_returnTheGivenResult() {
-        List<String> theList = new ArrayList<>();
-        Assert.assertEquals(theList, App.scope.Get().a(Ref.of(List.class), theList));
+        App.scope.get().a(Ref.forClass(List.class));
     }
     
     @Test

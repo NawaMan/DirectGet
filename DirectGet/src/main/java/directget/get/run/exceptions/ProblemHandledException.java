@@ -38,7 +38,7 @@ public class ProblemHandledException extends DirectRunRuntimeException {
     protected ProblemHandledException(Throwable problem, ProblemHandler handler) {
         super(problem);
         this.handler = handler;
-        this.timeMillis = Get.a(currentTime);
+        this.timeMillis = Get.the(currentTime);
     }
     
     /** @return the problem. */

@@ -15,6 +15,8 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.the;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -99,8 +101,12 @@ public enum Preferability {
      */
     public static <T> Provider<T> determineProvider(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProviderStackMap stacks) {
+        // TODO - This code is terrible.
         Optional<BiConsumer<String, Provider<T>>> alarm = Optional
-                .ofNullable((!_ListenerEnabled_.get() || (ref == DefaultListener) || currentScope.isInitializing.get()) ? null : Get.a(DefaultListener))
+                .ofNullable(
+                        (!_ListenerEnabled_.get() || (ref == DefaultListener) || currentScope.isInitializing.get())
+                        ? null
+                        : the(DefaultListener))
                 .map(listener -> (foundSource, foundProvider) -> {
                     listener.onDetermine(ref, foundSource, foundProvider, Preferability::callStackToString,
                             getXRayString(ref, parentScope, currentScope, stacks));

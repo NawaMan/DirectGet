@@ -15,15 +15,17 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.supportive.Utilities.whenNotNull;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import directget.get.run.Named;
-import directget.get.supportive.DirectRef;
-import directget.get.supportive.RefFactory;
-import directget.get.supportive.ForClassRef;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
+import directget.get.supportive.RefFactory;
+import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 /***
@@ -37,11 +39,11 @@ import lombok.val;
 public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
-    public static final Ref<RefFactory> factory = Ref.ofValue(new RefFactory());
+    public static final Ref<RefFactory> refFactory = Ref.ofValue(new RefFactory());
     
     
     
-    /** Returns this reference **/
+    /** @return this reference **/
     public default Ref<T> getRef() {
         return this;
     }
@@ -59,7 +61,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** @return the default object. */
     default public T get() {
-        return Get.the(factory).make(this);
+        return Get.the(refFactory).make(this);
     }
     
     /** @return the optional default object. */
@@ -90,21 +92,21 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     // -- ForClass -------------------------------------------------------------
     
     /** @return the reference that represent the target class directly. */
-    public static <T> Ref<T> forClass(Class<T> targetClass) {
-        return new ForClassRef<>(targetClass);
+    public static <T> RefFor<T> forClass(Class<T> targetClass) {
+        return new RefFor<>(targetClass);
     }
     
     // -- Direct -------------------------------------------------------------
     
     /** Create and return a reference to the default value's class default to the default factory. **/
-    public static <T> Ref<T> ofValue(T defaultValue) {
+    public static <T> RefOf<T> ofValue(T defaultValue) {
         @SuppressWarnings("unchecked")
         val targetClass = (Class<T>)defaultValue.getClass();
         return ofValue(null, targetClass, Preferability.Default, defaultValue);
     }
     
     /** Create and return a reference to a target class with default factory. **/
-    public static <T> Ref<T> of(Class<T> targetClass) {
+    public static <T> RefOf<T> of(Class<T> targetClass) {
         return ofValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
     }
     
@@ -112,23 +114,24 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * Create and return a reference to a target class with the default value.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> ofValue(Class<T> targetClass, V defaultValue) {
-        return (Ref<V>)ofValue(null, targetClass, Preferability.Default, defaultValue);
+    public static <T, V extends T> RefOf<V> ofValue(Class<T> targetClass, V defaultValue) {
+        return (RefOf<V>)ofValue(null, targetClass, Preferability.Default, defaultValue);
     }
     
     /**
      * Create and return a reference to a target class with the default supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> ofSupplier(Class<T> targetClass, Supplier<V> valueSupplier) {
-        return (Ref<V>)ofValue(null, (Class<V>)targetClass, Preferability.Default, (V)null).defaultedToBy(valueSupplier);
+    public static <T, V extends T> RefOf<V> ofSupplier(Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (RefOf<V>)ofValue(null, (Class<V>)targetClass, Preferability.Default, (V)null)
+                .defaultedToBy(valueSupplier);
     }
     
     /**
      * Create and return a reference with a human readable name to a target
      * class with default factory.
      **/
-    public static <T> Ref<T> of(String name, Class<T> targetClass) {
+    public static <T> RefOf<T> of(String name, Class<T> targetClass) {
         return ofValue(name, targetClass, Preferability.Default, null);
     }
     
@@ -136,7 +139,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * Create and return a reference with a human readable name to a target
      * class with the default value.
      **/
-    public static <T, V extends T> Ref<T> ofValue(String name, Class<T> targetClass, V defaultValue) {
+    public static <T, V extends T> RefOf<T> ofValue(String name, Class<T> targetClass, V defaultValue) {
         return ofValue(name, targetClass, Preferability.Default, defaultValue);
     }
     
@@ -145,14 +148,15 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * class with the given supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> ofSupplier(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
-        return (Ref<V>)ofValue(name, (Class<V>)targetClass, Preferability.Default, (V)null).defaultedToBy(valueSupplier);
+    public static <T, V extends T> RefOf<V> ofSupplier(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (RefOf<V>)ofValue(name, (Class<V>)targetClass, Preferability.Default, (V)null)
+                .defaultedToBy(valueSupplier);
     }
     
     /**
      * Create and return a reference to a target class with the default value.
      **/
-    public static <T, V extends T> Ref<T> ofValue(Class<T> targetClass, Preferability preferability, V defaultValue) {
+    public static <T, V extends T> RefOf<T> ofValue(Class<T> targetClass, Preferability preferability, V defaultValue) {
         return ofValue(null, targetClass, preferability, defaultValue);
     }
     
@@ -160,7 +164,7 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * Create and return a reference to a target class with the given supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> ofSupplier(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+    public static <T, V extends T> RefOf<V> ofSupplier(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
         return ofValue(null, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
     }
     
@@ -168,10 +172,10 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * Create and return a reference with a human readable name to a target
      * class with the default vaule.
      **/
-    public static <T, V extends T> Ref<T> ofValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        val theName    = (name != null) ? name : ("#" + DirectRef.getNewId());
+    public static <T, V extends T> RefOf<T> ofValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
+        val theName    = whenNotNull(name).orElseGet(()->"#" + RefOf.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
-        return new DirectRef<>(theName, targetClass, preferability, theFactory);
+        return new RefOf<>(theName, targetClass, preferability, theFactory);
     }
     
     /**
@@ -179,90 +183,13 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * class with the default supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> Ref<V> ofSupplier(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+    public static <T, V extends T> RefOf<V> ofSupplier(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
         return ofValue(name, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
     }
     
-    //== For default ==================================================================================================
-    
-    /** Create a provider that dictate the given value. */
-    default public DirectRef<T> dictatedTo(T value) {
-        return providedBy(Preferability.Dictate, new Named.ValueSupplier<T>(value));
-    }
-    
-    /** Create the provider that dictate the value of the given ref. */
-    default public DirectRef<T> dictatedToA(Ref<T> ref) {
-        return providedBy(Preferability.Dictate, new Named.RefSupplier<T>(ref));
-    }
-    
-    /** Create the provider that dictate the result of the given supplier. */
-    default public DirectRef<T> dictatedBy(Supplier<T> supplier) {
-        return providedBy(Preferability.Dictate, (Supplier<T>)supplier);
-    }
-    
-    /** Create the provider (normal preferability) the given value. */
-    default public DirectRef<T> providedWith(T value) {
-        return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
-    }
-    
-    /**
-     * Create the provider (normal preferability) the value of the given ref.
-     */
-    default public DirectRef<T> providedWithA(Ref<T> ref) {
-        return providedBy(Preferability.Normal, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the provider (normal preferability) the result of the given
-     * supplier.
-     */
-    default public DirectRef<T> providedBy(Supplier<T> supplier) {
-        return providedBy(Preferability.Normal, supplier);
-    }
-    
-    /** Create the provider (using the given preferability) the given value. */
-    default public DirectRef<T> providedWith(Preferability preferability, T value) {
-        return providedBy(preferability, new Named.ValueSupplier<T>(value));
-    }
-    
-    /**
-     * Create the provider (using the given preferability) the value of the
-     * given ref.
-     */
-    default public DirectRef<T> providedWithA(Preferability preferability, Ref<T> ref) {
-        return providedBy(preferability, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the provider (using the given preferability) the result of the
-     * given supplier.
-     */
-    default public DirectRef<T> providedBy(Preferability preferability, Supplier<T> supplier) {
-        return new DirectRef<>(
-                this.getName(),
-                this.getTargetClass(),
-                preferability,
-                supplier);
-    }
-    
-    /** Create the provider that default to the given value. */
-    default public DirectRef<T> defaultedTo(T value) {
-        return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
-    }
-    
-    /** Create the provider that default to the value of the given ref. */
-    default public DirectRef<T> defaultedToA(Ref<T> ref) {
-        return providedBy(Preferability.Normal, new Named.RefSupplier<T>(ref));
-    }
-    
-    /**
-     * Create the provider that default to the result of the given supplier.
-     */
-    default public DirectRef<T> defaultedToBy(Supplier<T> supplier) {
-        return providedBy(Preferability.Normal, supplier);
-    }
-    
     //== For substitution =============================================================================================
+    
+    //-- Preference only --
     
     /** Create a provider that dictate the current. */
     default public Provider<T> butDictate() {
@@ -282,43 +209,57 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
         return new Provider<>(this, Preferability.Default, currentProvider.getSupplier());
     }
     
+    //-- but Preference + Value --
+    
     /** Create a provider that dictate the given value. */
-    default public Provider<T> butDictatedTo(T value) {
+    default public <V extends T> Provider<T> butDictatedTo(V value) {
         return new Provider<>(this, Preferability.Dictate, new Named.ValueSupplier<T>(value));
     }
     
     /** Create the provider that dictate the value of the given ref. */
-    default public Provider<T> butDictatedToA(Ref<T> ref) {
-        return new Provider<>(this, Preferability.Dictate, new Named.RefSupplier<T>(ref));
+    default public <V extends T> Provider<T> butDictatedToA(Ref<V> ref) {
+        return new Provider<>(this, Preferability.Dictate, new Named.RefSupplier<V>(ref));
+    }
+    
+    /** Create the provider that dictate the value of the given target class. */
+    default public <V extends T> Provider<T> butDictatedToA(Class<V> targetClass) {
+        return new Provider<>(this, Preferability.Dictate, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
     }
     
     /** Create the provider that dictate the result of the given supplier. */
-    default public Provider<T> butDictatedBy(Supplier<T> supplier) {
+    default public <V extends T> Provider<T> butDictatedBy(Supplier<V> supplier) {
         return new Provider<>(this, Preferability.Dictate, supplier);
     }
     
     /** Create the provider (normal preferability) the given value. */
-    default public Provider<T> butProvidedWith(T value) {
+    default public <V extends T> Provider<T> butProvidedWith(V value) {
         return new Provider<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
     
     /**
      * Create the provider (normal preferability) the value of the given ref.
      */
-    default public Provider<T> butProvidedWithA(Ref<T> ref) {
-        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    default public <V extends T> Provider<T> butProvidedWithA(Ref<V> ref) {
+        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<V>(ref));
+    }
+    
+    /**
+     * Create the provider (normal preferability) the value of the given target class.
+     */
+    default public <V extends T> Provider<T> butProvidedWithA(Class<V> targetClass) {
+        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
     }
     
     /**
      * Create the provider (normal preferability) the result of the given
      * supplier.
      */
-    default public Provider<T> butProvidedBy(Supplier<T> supplier) {
+    default public <V extends T> Provider<T> butProvidedBy(Supplier<V> supplier) {
         return new Provider<>(this, Preferability.Normal, supplier);
     }
     
     /** Create the provider (using the given preferability) the given value. */
-    default public Provider<T> butProvidedWith(Preferability preferability, T value) {
+    default public <V extends T> Provider<T> butProvidedWith(Preferability preferability, V value) {
         return new Provider<>(this, preferability, new Named.ValueSupplier<T>(value));
     }
     
@@ -326,32 +267,45 @@ public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
      * Create the provider (using the given preferability) the value of the
      * given ref.
      */
-    default public Provider<T> butProvidedWithA(Preferability preferability, Ref<T> ref) {
-        return new Provider<>(this, preferability, new Named.RefSupplier<T>(ref));
+    default public <V extends T> Provider<T> butProvidedWithA(Preferability preferability, Ref<V> ref) {
+        return new Provider<>(this, preferability, new Named.RefSupplier<V>(ref));
+    }
+    
+    /**
+     * Create the provider (using the given preferability) the value of the
+     * given target class.
+     */
+    default public <V extends T> Provider<T> butProvidedWithA(Preferability preferability, Class<V> targetClass) {
+        return new Provider<>(this, preferability, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
     }
     
     /**
      * Create the provider (using the given preferability) the result of the
      * given supplier.
      */
-    default public Provider<T> butProvidedBy(Preferability preferability, Supplier<T> supplier) {
+    default public <V extends T> Provider<T> butProvidedBy(Preferability preferability, Supplier<V> supplier) {
         return new Provider<>(this, preferability, supplier);
     }
     
     /** Create the provider that default to the given value. */
-    default public Provider<T> butDefaultedTo(T value) {
+    default public <V extends T> Provider<T> butDefaultedTo(V value) {
         return new Provider<>(this, Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
     
     /** Create the provider that default to the value of the given ref. */
-    default public Provider<T> butDefaultedToA(Ref<T> ref) {
-        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<T>(ref));
+    default public <V extends T> Provider<T> butDefaultedToA(Ref<V> ref) {
+        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<V>(ref));
+    }
+    
+    /** Create the provider that default to the value of the given target class. */
+    default public <V extends T> Provider<T> butDefaultedToA(Class<V> targetClass) {
+        return new Provider<>(this, Preferability.Normal, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
     }
     
     /**
      * Create the provider that default to the result of the given supplier.
      */
-    default public Provider<T> butDefaultedToBy(Supplier<T> supplier) {
+    default public <V extends T> Provider<T> butDefaultedToBy(Supplier<V> supplier) {
         return new Provider<>(this, Preferability.Normal, supplier);
     }
     

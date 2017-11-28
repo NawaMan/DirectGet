@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import org.junit.Test;
 
 import directget.get.Ref;
+import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefFor;
 import directget.get.supportive.RefOf;
 import lombok.val;
@@ -53,13 +54,13 @@ public class RefTest {
     @SuppressWarnings("rawtypes")
     public void testRef_directWithDefault() {
         List theList = new ArrayList();
-        Ref<List> ref = Ref.ofValue(List.class, theList);
+        RefOf<List> ref = Ref.of(List.class).defaultedTo(theList);
         assertTrue(ref._get().isPresent());
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
     
     public void testRef_directWithGenericDefault() {
-        Ref<List<String>> ref = Ref.ofSupplier(List.class, ()->new ArrayList<String>());
+        Ref<List<String>> ref = Ref.of(List.class, ()->new ArrayList<String>());
         
         assertTrue(ref.get().isEmpty());
         
@@ -70,7 +71,7 @@ public class RefTest {
         assertTrue(ref.get().isEmpty());
         
         // Bad for supplier of supplier
-        RefOf<Supplier<String>> strRef = Ref.ofSupplier(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
+        RefOf<Supplier<String>> strRef = Ref.of(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
         assertEquals("Hello", Get.the(strRef).get());
     }
     
@@ -206,8 +207,26 @@ public class RefTest {
     
     @Test
     public void testA_forFactory() {
-        Ref<Factory<Car>> newCar = Ref.ofValue(Factory.class, ()->new Car());
-        assertTrue(Get.a(newCar) instanceof Car);
+        RefOf<Factory<Car>> carFactory = Ref.ofFactory(()->new Car());
+        assertTrue(Get.from(carFactory) instanceof Car);
+    }
+    
+    public static class CarFactory implements Factory<Car> {
+        @Override
+        public Car make() throws FactoryException {
+            return new Car();
+        }
+    }
+    
+    @Test
+    public void testA_forFactoryClass() {
+        Ref<CarFactory> carFactory = Ref.forClass(CarFactory.class);
+        assertTrue(Get.from(carFactory) instanceof Car);
+    }
+    
+    @Test
+    public void testFrom_forFactoryClass() {
+        assertTrue(Get.from(CarFactory.class) instanceof Car);
     }
     
 }

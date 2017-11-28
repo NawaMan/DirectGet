@@ -46,7 +46,7 @@ public final class Get {
     
     
     /** The reference to the thread factory. */
-    public static final RefOf<ThreadFactory> DefaultThreadFactory = Ref.ofValue(ThreadFactory.class, CounterThreadFactory.instance);
+    public static final RefOf<ThreadFactory> DefaultThreadFactory = Ref.of(ThreadFactory.class).defaultedTo(CounterThreadFactory.instance);
     
     /** The reference to the executor. */
     public static final RefOf<Executor> DefaultExecutor = Ref.of(Executor.class).defaultedToBy(()->GetThreadFactoryExecutor.instance);
@@ -105,12 +105,6 @@ public final class Get {
         return optValue;
     }
     
-    /** @return the optional value associated with the given class. */
-    public static <T, F extends Factory<T>> Optional<T> _a(Ref<F> factoryRef) {
-        val optValue = App.scope.get()._a(factoryRef);
-        return optValue;
-    }
-    
     /** @return the value associated with the given ref. */
     public static <T> T a(Class<T> clzz) {
         val optValue = App.scope.get().a(clzz);
@@ -120,12 +114,6 @@ public final class Get {
     /** @return the value associated with the given class. */
     public static <T> T a(RefFor<T> ref) {
         val optValue = App.scope.get().a(ref);
-        return optValue;
-    }
-    
-    /** @return the optional value associated with the given class. */
-    public static <T, F extends Factory<T>> T a(Ref<F> factoryRef) {
-        val optValue = App.scope.get().a(factoryRef);
         return optValue;
     }
     
@@ -157,6 +145,32 @@ public final class Get {
         val optValue = App.scope.get()._any(ref);
         val value = optValue.orElse(null);
         return value;
+    }
+    
+    //-- From --
+
+    /** @return the optional value of object create from the factory. */
+    public static <T, F extends Factory<T>> Optional<T> _from(Class<F> factoryRef) {
+        val optValue = App.scope.get()._a(factoryRef);
+        return optValue.map(Factory::make);
+    }
+
+    /** @return the optional value of object create from the factory. */
+    public static <T, F extends Factory<T>> T from(Class<F> factoryRef) {
+        val optValue = App.scope.get()._a(factoryRef);
+        return optValue.map(Factory::make).orElse(null);
+    }
+
+    /** @return the optional value of object create from the factory. */
+    public static <T, F extends Factory<T>> Optional<T> _from(Ref<F> factoryRef) {
+        val optValue = App.scope.get()._any(factoryRef);
+        return optValue.map(Factory::make);
+    }
+
+    /** @return the optional value of object create from the factory. */
+    public static <T, F extends Factory<T>> T from(Ref<F> factoryRef) {
+        val optValue = App.scope.get()._any(factoryRef);
+        return optValue.map(Factory::make).orElse(null);
     }
     
 }

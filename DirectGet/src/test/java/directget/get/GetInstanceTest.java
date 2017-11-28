@@ -46,6 +46,7 @@ import directget.get.run.Fork;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
 import directget.get.supportive.Provider;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 public class GetInstanceTest implements Named.User {
@@ -55,7 +56,7 @@ public class GetInstanceTest implements Named.User {
     private String orgText = "The Text";
     private String newText = "New Text!!!";
     
-    private Ref<String> _text_ = Ref.of("TheText", String.class).defaultedTo(orgText);
+    private RefOf<String> _text_ = Ref.of("TheText", String.class).defaultedTo(orgText);
     
     private Stream<Provider> provideNewText = Stream
             .of(new Provider<>(_text_, Dictate, supplier("NewText", () -> newText)));
@@ -69,7 +70,7 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
-        Ref<StringBuffer> aBuffer = Ref.ofValue("aList", StringBuffer.class, theBuffer);
+    	RefOf<StringBuffer> aBuffer = Ref.ofValue("aList", StringBuffer.class, theBuffer);
         assertTrue(App.Get()._the(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
     }
     

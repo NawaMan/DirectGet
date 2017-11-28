@@ -36,6 +36,7 @@ import directget.get.Ref;
 import directget.get.Scope;
 import directget.get.exceptions.GetException;
 import directget.get.supportive.Provider;
+import directget.get.supportive.RefOf;
 
 public class ProviderOrderTest {
 
@@ -57,8 +58,8 @@ public class ProviderOrderTest {
     // Get parent default - when included
     // Ref default
     
-    private final Ref<String> ref = Ref.ofValue("RefDefault");
-    private final Ref<String> refNoDefault = Ref.of(String.class);
+    private final RefOf<String> ref = Ref.ofValue("RefDefault");
+    private final RefOf<String> refNoDefault = Ref.of(String.class);
     
     private final Provider<String> getParentDictate = new Provider<>(ref, Preferability.Dictate,
             () -> "GetParentDictate");
@@ -521,7 +522,7 @@ public class ProviderOrderTest {
 
     
     private static final String REF_DICTATE = "RefDictate";
-    private static final Ref<String> dictatedRef = Ref.ofValue(String.class, Preferability.Dictate, REF_DICTATE);
+    private static final RefOf<String> dictatedRef = Ref.ofValue(String.class, Preferability.Dictate, REF_DICTATE);
     
     @Test
     public void testRefDictate() {
@@ -533,7 +534,7 @@ public class ProviderOrderTest {
     }
     
     private static final String REF_NORMAL = "RefNormal";
-    private static final Ref<String> normalRef = Ref.ofValue(String.class, Preferability.Normal, REF_NORMAL);
+    private static final RefOf<String> normalRef = Ref.ofValue(String.class, Preferability.Normal, REF_NORMAL);
     
     @Test
     public void testRefNormal() {

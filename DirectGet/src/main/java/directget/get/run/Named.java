@@ -171,7 +171,7 @@ public interface Named {
         
         /** Constructor */
         public RefSupplier(Ref<T> ref) {
-            super(String.format(NAME_TEMPLATE, ref.toString()), () -> Get.the(ref));
+            super(String.format(NAME_TEMPLATE, ref.toString()), () -> Get.any(ref));
         }
         
     }

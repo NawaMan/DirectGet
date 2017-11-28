@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
+import directget.get.supportive.RefOf;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -74,7 +75,7 @@ public enum Preferability {
     }
     
     /** */
-    public static final Ref<DetermineProviderListener> DefaultListener = Ref.ofValue(DetermineProviderListener.class, null);
+    public static final RefOf<DetermineProviderListener> DefaultListener = Ref.ofValue(DetermineProviderListener.class, null);
     
     static final AtomicBoolean _ListenerEnabled_ = new AtomicBoolean(true);
     

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import directget.get.Ref;
+import directget.get.supportive.RefOf;
 
 /** The retainer builder. */
 public class RetainerBuilder<V> {
@@ -74,7 +74,7 @@ public class RetainerBuilder<V> {
      * Create and return a supplier that cache its value until the value of the given ref is not the same
      *   the last call.
      **/
-    public <T> Supplier<V> forSame(Ref<T> ref) {
+    public <T> Supplier<V> forSame(RefOf<T> ref) {
         Predicate<V> shouldRetain = new ForSameRetainChecker<T, V>(ref);
         return isGlobal
                 ? new GlobalRetainer<V>(supplier, shouldRetain)
@@ -86,7 +86,7 @@ public class RetainerBuilder<V> {
      * Create and return a supplier that cache its value until the value of the given ref does not equal
      *   the last call.
      **/
-    public <T> Supplier<V> forEquivalent(Ref<T> ref) {
+    public <T> Supplier<V> forEquivalent(RefOf<T> ref) {
         Predicate<V> shouldRetain = new ForEquivalentRetainChecker<T, V>(ref);
         return isGlobal
                 ? new GlobalRetainer<V>(supplier, shouldRetain)

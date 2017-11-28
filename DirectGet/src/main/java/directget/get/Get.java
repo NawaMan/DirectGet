@@ -26,6 +26,7 @@ import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 /**
@@ -45,10 +46,10 @@ public final class Get {
     
     
     /** The reference to the thread factory. */
-    public static final Ref<ThreadFactory> DefaultThreadFactory = Ref.ofValue(ThreadFactory.class, CounterThreadFactory.instance);
+    public static final RefOf<ThreadFactory> DefaultThreadFactory = Ref.ofValue(ThreadFactory.class, CounterThreadFactory.instance);
     
     /** The reference to the executor. */
-    public static final Ref<Executor> DefaultExecutor = Ref.of(Executor.class).defaultedToBy(()->GetThreadFactoryExecutor.instance);
+    public static final RefOf<Executor> DefaultExecutor = Ref.of(Executor.class).defaultedToBy(()->GetThreadFactoryExecutor.instance);
     
     
     private Get() {
@@ -131,14 +132,29 @@ public final class Get {
     //-- the --
     
     /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _the(Ref<T> ref) {
+    public static <T> Optional<T> _the(RefOf<T> ref) {
         val optValue = App.scope.get()._the(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
-    public static <T> T the(Ref<T> ref) {
+    public static <T> T the(RefOf<T> ref) {
         val optValue = App.scope.get()._the(ref);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
+    //-- any --
+    
+    /** @return the optional value associated with the given ref. */
+    public static <T> Optional<T> _any(Ref<T> ref) {
+        val optValue = App.scope.get()._any(ref);
+        return optValue;
+    }
+    
+    /** @return the value associated with the given ref. */
+    public static <T> T any(Ref<T> ref) {
+        val optValue = App.scope.get()._any(ref);
         val value = optValue.orElse(null);
         return value;
     }

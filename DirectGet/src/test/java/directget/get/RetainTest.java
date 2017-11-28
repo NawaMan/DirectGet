@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import directget.get.run.Fork;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 public class RetainTest {
@@ -46,11 +47,11 @@ public class RetainTest {
     
     public static final String newName = "nwman";
     
-    static final Ref<StringList> logs = Ref.of(StringList.class).defaultedToBy(StringList::new).retained().forCurrentThread();
+    static final RefOf<StringList> logs = Ref.of(StringList.class).defaultedToBy(StringList::new).retained().forCurrentThread();
     
-    static final Ref<String> username = Ref.ofValue(orgName);
+    static final RefOf<String> username = Ref.ofValue(orgName);
     
-    static final Ref<Integer> usernameLength = Ref.of(Integer.class).defaultedToBy(()->{
+    static final RefOf<Integer> usernameLength = Ref.of(Integer.class).defaultedToBy(()->{
         the(logs).add("Calculate username length.");
         return the(username).length();
     }).retained().forSame(username);

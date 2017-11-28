@@ -110,7 +110,7 @@ public class RefFactory {
         for (int i = 0; i < paramsArray.length; i++) {
             val param = paramsArray[i];
             val paramRef = Ref.forClass(param.getType());
-            val paramValue = Get.the(paramRef);
+            val paramValue = Get.a(paramRef);
             params[i] = paramValue;
         }
         return params;

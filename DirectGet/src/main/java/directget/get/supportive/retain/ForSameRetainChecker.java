@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import directget.get.Ref;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 
@@ -34,7 +35,7 @@ import lombok.val;
  */
 public class ForSameRetainChecker<T, V> implements Predicate<V> {
     
-    private final Ref<T> ref;
+    private final RefOf<T> ref;
     
     private final AtomicReference<T> refValue;
     
@@ -43,7 +44,7 @@ public class ForSameRetainChecker<T, V> implements Predicate<V> {
      * 
      * @param ref the reference ref.
      */
-    public ForSameRetainChecker(Ref<T> ref) {
+    public ForSameRetainChecker(RefOf<T> ref) {
         this.ref = ref;
         refValue = new AtomicReference<T>(the(ref));
     }

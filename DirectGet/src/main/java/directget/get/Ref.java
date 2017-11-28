@@ -39,7 +39,7 @@ import lombok.val;
 public interface Ref<T> extends HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
-    public static final Ref<RefFactory> refFactory = Ref.ofValue(new RefFactory());
+    public static final RefOf<RefFactory> refFactory = Ref.ofValue(new RefFactory());
     
     
     

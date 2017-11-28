@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import directget.get.Ref;
 import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 public class RefTest {
@@ -69,7 +70,7 @@ public class RefTest {
         assertTrue(ref.get().isEmpty());
         
         // Bad for supplier of supplier
-        Ref<Supplier<String>> strRef = Ref.ofSupplier(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
+        RefOf<Supplier<String>> strRef = Ref.ofSupplier(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
         assertEquals("Hello", Get.the(strRef).get());
     }
     
@@ -82,8 +83,8 @@ public class RefTest {
     
     @Test
     public void testDefaultValue() {
-        Ref<Car> carRef = Ref.forClass(Car.class);
-        assertEquals("FLASH!", Get.the(carRef).zoom());
+        RefFor<Car> carRef = Ref.forClass(Car.class);
+        assertEquals("FLASH!", Get.a(carRef).zoom());
         assertEquals("FLASH!", Get.a(Car.class).zoom());
     }
 
@@ -99,8 +100,8 @@ public class RefTest {
     
     @Test
     public void testOnlyConstructor() {
-        Ref<Driver> driverRef = Ref.forClass(Driver.class);
-        assertEquals("FLASH!", Get.the(driverRef).zoom());
+        RefFor<Driver> driverRef = Ref.forClass(Driver.class);
+        assertEquals("FLASH!", Get.a(driverRef).zoom());
         assertEquals("FLASH!", Get.a(Driver.class).zoom());
     }
     
@@ -137,8 +138,8 @@ public class RefTest {
     
     @Test
     public void testDefaultConstructor() {
-        Ref<Person> personRef = Ref.forClass(Person.class);
-        assertEquals("Meh", Get.the(personRef).zoom());
+        RefFor<Person> personRef = Ref.forClass(Person.class);
+        assertEquals("Meh", Get.a(personRef).zoom());
         assertEquals("Meh", Get.a(Person.class).zoom());
     }
 
@@ -158,8 +159,8 @@ public class RefTest {
     
     @Test
     public void testInjectConstructor() {
-        Ref<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
-        assertEquals("FLASH!", Get.the(personRef).zoom());
+        RefFor<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
+        assertEquals("FLASH!", Get.a(personRef).zoom());
         assertEquals("FLASH!", Get.a(AnotherPerson.class).zoom());
     }
 
@@ -179,20 +180,20 @@ public class RefTest {
     
     @Test
     public void testInjectConstructorConstructor() {
-        Ref<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
-        assertEquals("FLASH!", Get.the(personRef).zoom());
+        RefFor<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
+        assertEquals("FLASH!", Get.a(personRef).zoom());
         assertEquals("FLASH!", Get.a(OneAnotherPerson.class).zoom());
     }
     
     @Test
     public void testThe_forClass_useRefFactory() {
         RefFor<Person> personClassRef = Ref.forClass(Person.class);
-        assertNotNull(Get.the(personClassRef));
+        assertNotNull(Get.a(personClassRef));
     }
     
     @Test
-    public void testThe_nonForClass_returnNull() {
-        Ref<Person> personRef = Ref.of(Person.class);
+    public void testThe_ofClass_returnNull() {
+        RefOf<Person> personRef = Ref.of(Person.class);
         assertNull(Get.the(personRef));
     }
     

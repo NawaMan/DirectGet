@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.the;
 import static directget.get.Run.With;
 import static org.junit.Assert.*;
 
@@ -60,14 +61,6 @@ public class RefTest {
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
     
-    private <T> Supplier<Supplier<T>> supplierOf(Supplier<T> supplier) {
-        return ()->supplier;
-    }
-    
-    private <T, V> Supplier<Function<T, V>> supplierOf(Function<T, V> function) {
-        return ()->function;
-    }
-    
     @Test
     public void testRef_directWithGenericDefault() {
         RefOf<List<String>> ref = Ref.of(List.class, ()->new ArrayList<String>());
@@ -79,12 +72,17 @@ public class RefTest {
         assertFalse(list.isEmpty());
         
         assertTrue(ref.get().isEmpty());
-        
-        // This might be an exceptable way to do supplier.
-        RefOf<Supplier<String>> strRef = Ref.of(Supplier.class, supplierOf(()->"Hello"));
-        assertEquals("Hello", Get.the(strRef).get());
 
-        RefOf<Function<String, String>> funcRef = Ref.of(Function.class, supplierOf(name->"Hello " + name + "!"));
+        RefOf<String> strRef = Ref.ofValue("Hello");
+        assertEquals("Hello", Get.the(strRef));
+
+        RefOf<String> strRef2 = Ref.of(String.class).defaultedToBy(()->"Hello");
+        assertEquals("Hello", Get.the(strRef2));
+        
+        RefOf<Supplier<String>> supplierRef = Ref.ofValue(()->"Hello");
+        assertEquals("Hello", Get.the(supplierRef).get());
+
+        RefOf<Function<String, String>> funcRef = Ref.ofValue(name->"Hello " + name + "!");
         assertEquals("Hello Sir!", Get.the(funcRef).apply("Sir"));
         
         Run.With(funcRef.butProvidedWith(name -> "Hey " + name + "!"))

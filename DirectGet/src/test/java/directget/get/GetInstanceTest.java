@@ -70,7 +70,7 @@ public class GetInstanceTest implements Named.User {
     @Test
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
-    	RefOf<StringBuffer> aBuffer = Ref.ofValue("aList", StringBuffer.class, theBuffer);
+    	RefOf<StringBuffer> aBuffer = Ref.of("aList", StringBuffer.class).defaultedTo(theBuffer);
         assertTrue(App.Get()._the(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
     }
     

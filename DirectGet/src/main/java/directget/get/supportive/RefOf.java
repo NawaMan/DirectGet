@@ -30,7 +30,7 @@ import lombok.val;
  * 
  * @author NawaMan
  **/
-public class RefOf<T> extends AbstractRef<T> implements Ref<T> {
+public class RefOf<T> extends Ref<T> {
     
     static final AtomicLong id = new AtomicLong();
 

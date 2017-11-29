@@ -25,7 +25,7 @@ import lombok.val;
  * 
  * @author NawaMan
  */
-public final class RefFor<T> extends AbstractRef<T> implements Ref<T> {
+public final class RefFor<T> extends Ref<T> {
     
     private final Provider<T> provider;
     
@@ -47,11 +47,11 @@ public final class RefFor<T> extends AbstractRef<T> implements Ref<T> {
     @Override
     @SuppressWarnings("rawtypes")
     public final boolean equals(Object obj) {
-        if (!(obj instanceof AbstractRef)) {
+        if (!(obj instanceof Ref)) {
             return false;
         }
         val thisTargetClass = this.getTargetClass();
-        val thatTargetClass = ((AbstractRef) obj).getTargetClass();
+        val thatTargetClass = ((Ref) obj).getTargetClass();
         return thisTargetClass == thatTargetClass;
     }
     

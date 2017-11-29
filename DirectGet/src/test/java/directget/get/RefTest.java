@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -59,20 +60,37 @@ public class RefTest {
         assertTrue(ref._get().filter(list -> list == theList).isPresent());
     }
     
+    private <T> Supplier<Supplier<T>> supplierOf(Supplier<T> supplier) {
+        return ()->supplier;
+    }
+    
+    private <T, V> Supplier<Function<T, V>> supplierOf(Function<T, V> function) {
+        return ()->function;
+    }
+    
+    @Test
     public void testRef_directWithGenericDefault() {
-        Ref<List<String>> ref = Ref.of(List.class, ()->new ArrayList<String>());
+        RefOf<List<String>> ref = Ref.of(List.class, ()->new ArrayList<String>());
         
         assertTrue(ref.get().isEmpty());
         
         val list = ref.get();
         list.add("Hey");
-        assertFalse(ref.get().isEmpty());
+        assertFalse(list.isEmpty());
         
         assertTrue(ref.get().isEmpty());
         
-        // Bad for supplier of supplier
-        RefOf<Supplier<String>> strRef = Ref.of(Supplier.class, (Supplier<Supplier<String>>)()->{ return ()->"Hello"; });
+        // This might be an exceptable way to do supplier.
+        RefOf<Supplier<String>> strRef = Ref.of(Supplier.class, supplierOf(()->"Hello"));
         assertEquals("Hello", Get.the(strRef).get());
+
+        RefOf<Function<String, String>> funcRef = Ref.of(Function.class, supplierOf(name->"Hello " + name + "!"));
+        assertEquals("Hello Sir!", Get.the(funcRef).apply("Sir"));
+        
+        Run.With(funcRef.butProvidedWith(name -> "Hey " + name + "!"))
+        .run(()->{
+            assertEquals("Hey Sir!", Get.the(funcRef).apply("Sir"));
+        });
     }
     
     
@@ -114,8 +132,7 @@ public class RefTest {
     
     @Test
     public void test_substitute() {
-        RefFor<Driver>   driverRef   = Ref.forClass(Driver.class);
-        RefFor<Car>      carRef      = Ref.forClass(Car.class);
+        RefFor<Car> carRef = Ref.forClass(Car.class);
         assertEquals("SUPER FLASH!!!!", 
                 With(carRef.butProvidedWithA(SuperCar.class))
                 .run(()->

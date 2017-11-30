@@ -16,53 +16,19 @@
 
 package directget.get.supportive;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import directget.get.Get;
-import directget.get.InjectedConstructor;
 import directget.get.Ref;
+import directget.get.exceptions.CreationException;
 import directget.get.exceptions.GetException;
-import directget.get.run.Failable.Supplier;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 /**
  * Factory for a ref. It create an instance of a Ref.
  * 
- * @param <T> the data type of the ref.
- * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ ObjectCreatator.class })
 public class RefFactory {
-    
-    @SuppressWarnings("rawtypes")
-    private Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
-    
-    @SuppressWarnings("rawtypes")
-    private Class injectClass = null;
-    
-    /**
-     * Constructor.
-     */
-    public RefFactory() {
-        injectClass = findInjectClass();
-    }
-    
-    /**
-     * Find the {@code java.inject.Inject} class by name.
-     * @return the class if found or {@code null} if not.
-     */
-    public static Class<?> findInjectClass() {
-        try { 
-            return Class.forName("javax.inject.Inject");
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
     
     /**
      * Create the value for the ref.
@@ -71,72 +37,13 @@ public class RefFactory {
      * @return the created value.
      * @throws GetException
      */
-    @SuppressWarnings("rawtypes")
     public <T> T make(Ref<T> theRef) throws GetException {
+        val clzz = theRef.getTargetClass();
         try {
-            val clzz = theRef.getTargetClass();
-            Supplier supplier = suppliers.get(clzz);
-            if (supplier != null) {
-                val instance = supplier.get();
-                return clzz.cast(instance);
-            }
-
-            val constructor = findConstructor(clzz);
-            supplier = ()->{
-                val params   = getParameters(constructor);
-                val instance = constructor.newInstance(params);
-                return clzz.cast(instance);
-            };
-            
-            suppliers.put(clzz, supplier);
-            val instance = supplier.get();
-            return clzz.cast(instance);
-        } catch (InstantiationException
-               | IllegalAccessException
-               | NoSuchMethodException
-               | SecurityException
-               | IllegalArgumentException
-               | InvocationTargetException e) {
-            throw new GetException(theRef, e);
-        } catch (Throwable e) {
-            throw new GetException(theRef, e);
+            return clzz.createNew();
+        } catch (CreationException cause) {
+            throw new GetException(theRef, cause);
         }
-    }
-
-    @SuppressWarnings("rawtypes")
-    private Object[] getParameters(Constructor constructor) {
-        val params = new Object[constructor.getParameterCount()];
-        val paramsArray = constructor.getParameters();
-        for (int i = 0; i < paramsArray.length; i++) {
-            val param = paramsArray[i];
-            val paramRef = Ref.forClass(param.getType());
-            val paramValue = Get.a(paramRef);
-            params[i] = paramValue;
-        }
-        return params;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private <T> Constructor findConstructor(final java.lang.Class<T> clzz) throws NoSuchMethodException {
-        Constructor foundConstructor = null;
-        for(Constructor c : clzz.getConstructors()) {
-            if (c.getAnnotation(InjectedConstructor.class) != null) {
-                foundConstructor = c;
-                break;
-            }
-            if (injectClass.whenNotNull().map(c::getAnnotation).isPresent()) {
-                foundConstructor = c;
-                break;
-            }
-        }
-        if (foundConstructor == null) {
-            if (clzz.getConstructors().length == 1)
-                 foundConstructor = clzz.getConstructors()[0];
-            else foundConstructor = clzz.getConstructor();
-        }
-        
-        foundConstructor.setAccessible(true);
-        return foundConstructor;
     }
     
 }

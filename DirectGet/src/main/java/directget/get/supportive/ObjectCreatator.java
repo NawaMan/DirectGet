@@ -1,12 +1,13 @@
 package directget.get.supportive;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import directget.get.Get;
 import directget.get.InjectedConstructor;
+import directget.get.exceptions.AbstractClassCreationException;
 import directget.get.exceptions.CreationException;
 import directget.get.run.Failable.Supplier;
 import lombok.NonNull;
@@ -47,6 +48,9 @@ public class ObjectCreatator {
      */
     @SuppressWarnings("rawtypes")
     public static <T> T createNew(@NonNull Class<T> theGivenClass) throws CreationException {
+        if (Modifier.isAbstract(theGivenClass.getModifiers()))
+            throw new AbstractClassCreationException(theGivenClass);
+        
         try {
             Supplier supplier = suppliers.get(theGivenClass);
             if (supplier == null) {
@@ -56,13 +60,6 @@ public class ObjectCreatator {
 
             val instance = supplier.get();
             return theGivenClass.cast(instance);
-        } catch (InstantiationException
-               | IllegalAccessException
-               | NoSuchMethodException
-               | SecurityException
-               | IllegalArgumentException
-               | InvocationTargetException e) {
-            throw new CreationException(theGivenClass, e);
         } catch (Throwable e) {
             throw new CreationException(theGivenClass, e);
         }
@@ -96,7 +93,7 @@ public class ObjectCreatator {
     private static <T> Constructor findConstructor(final java.lang.Class<T> clzz) throws NoSuchMethodException {
         Constructor foundConstructor = null;
         for(Constructor c : clzz.getConstructors()) {
-            if (!c.isAccessible())
+            if (!Modifier.isPublic(c.getModifiers()))
                 continue;
             
             if (c.getAnnotation(InjectedConstructor.class) != null) {
@@ -114,6 +111,7 @@ public class ObjectCreatator {
             else foundConstructor = clzz.getConstructor();
         }
         
+        foundConstructor.setAccessible(true);
         return foundConstructor;
     }
     

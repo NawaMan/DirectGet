@@ -16,29 +16,17 @@
 package directget.get.exceptions;
 
 /**
- * This exception is thrown when creating an object fail.
+ * This exception is thrown when there is an to create an instance of an abstract class .
  * 
  * @author NawaMan
  */
-public class CreationException extends DirectGetRuntimeException {
-    
-    private static final long serialVersionUID = 5414890542605369904L;
+public class AbstractClassCreationException extends CreationException {
 
-    private final Class<?> clazz;
-    
+    private static final long serialVersionUID = 5751024581572983499L;
+
     /** Constructor */
-    public CreationException(Class<?> clazz) {
-        this(clazz, null);
+    public AbstractClassCreationException(Class<?> clazz) {
+        super(clazz);
     }
     
-    /** Constructor */
-    public CreationException(Class<?> clazz, Throwable cause) {
-        super(clazz.getCanonicalName(), cause);
-        this.clazz = clazz;
-    }
-    
-    /** @return the target class with the problem. */
-    public Class<?> getTargetClass() {
-        return clazz;
-    }
 }

@@ -30,7 +30,7 @@ public class ObjectCreatorTest {
     
     @Test
     public void testClassWithOneConstructor() {
-        val complex = Complex.class.createNew();
+        Complex complex = ObjectCreatator.createNew(Complex.class);
         assertTrue(complex          instanceof Complex);
         assertTrue(complex.simple() instanceof Simple);
     }

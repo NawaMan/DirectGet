@@ -15,9 +15,10 @@
 //  ========================================================================
 package directget.get;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,11 +54,11 @@ public class Scope {
     
     private final Scope parentScope;
     
-    private volatile Configuration config;
-    
     final ThreadLocal<GetInstance> threadGet;
     
-    private volatile List<StackTraceElement> stackTraceAtCreation;
+    private volatile Configuration config;
+    
+    private volatile List<StackTraceElement> stackTraceAtCreation = null;
     
     // For AppScope only.
     Scope() {
@@ -75,6 +76,35 @@ public class Scope {
         this.threadGet = ThreadLocal.withInitial(() -> new GetInstance(this));
     }
     
+    // -- For testing only --
+    
+    void reset() {
+        if (parentScope == null) {
+            val stackTrace = Thread.currentThread().getStackTrace();
+            val classNames = asList(
+                    stackTrace[1].getClassName(),
+                    stackTrace[2].getClassName(),
+                    stackTrace[3].getClassName()
+            );
+            val isCallValid = classNames.stream().allMatch(name->{
+                try {
+                    return (Class.forName(name) != null)
+                        && Class.forName(name).getProtectionDomain()
+                            == this.getClass().getProtectionDomain();
+                } catch (ClassNotFoundException e) {
+                    return false;
+                } 
+            });
+            
+            if (!isCallValid)
+                return;
+            
+            config = DEFAULT_CONFIG;
+            stackTraceAtCreation = null;
+            ProposedConfiguration.instance.reset();
+        }
+    }
+    
     // -- For AppScope only ---------------------------------------------------
     void init(Configuration newConfig) throws AppScopeAlreadyInitializedException {
         if (config == DEFAULT_CONFIG) {
@@ -89,21 +119,27 @@ public class Scope {
     }
     
     boolean initIfAbsent(Configuration newConfig) {
+        boolean isInitializedHere = false;
         if (config == DEFAULT_CONFIG) {
             synchronized (lock) {
-                if (config == DEFAULT_CONFIG) {
-                    isInitializing.set(true);
-                    try {
-                        config = forceDictate((newConfig == null) ? new Configuration() : newConfig);
-                        stackTraceAtCreation = Collections.unmodifiableList(Arrays.asList(new Throwable().getStackTrace()));
-                        return true;
-                    } finally {
-                        isInitializing.set(false);
+                val proposedConfiguration = ProposedConfiguration.instance;
+                try {
+                    if (config == DEFAULT_CONFIG) {
+                        isInitializing.set(true);
+                        try {
+                            config = forceDictate((newConfig != null) ? newConfig : proposedConfiguration.getConfiguration());
+                            stackTraceAtCreation = unmodifiableList(asList(new Throwable().getStackTrace()));
+                            isInitializedHere = true;
+                        } finally {
+                            isInitializing.set(false);
+                        }
                     }
+                } finally {
+                    proposedConfiguration.onInitialized();
                 }
             }
         }
-        return false;
+        return isInitializedHere;
     }
     
     boolean isInitialized() {

@@ -96,21 +96,21 @@ public final class GetInstance {
     public <T> T a(Class<T> clzz) {
         val ref      = Ref.forClass(clzz);
         val optValue = scope.doGetA(ref);
-        val value    = optValue.orElse(null);  // TODO - Should we use RefFactory?
+        val value    = optValue.orElse(null);
         return value;
     }
     
     /** @return the value associated with the given class. */
     public <T> T a(RefFor<T> ref) {
         val optValue = scope.doGetA(ref);
-        val value    = optValue.orElse(null);  // TODO - Should we use RefFactory?
+        val value    = optValue.orElse(null);
         return value;
     }
     
     /** @return the optional value associated with the given class. */
     public <T, F extends Factory<T>> T a(Ref<F> factoryRef) {
         val optValue = scope.doGetThe(factoryRef);
-        val value    = optValue.map(Factory::make).orElse(null);  // TODO - Should we use RefFactory?
+        val value    = optValue.map(Factory::make).orElse(null);
         return value;
     }
     

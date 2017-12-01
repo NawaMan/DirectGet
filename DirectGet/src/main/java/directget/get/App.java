@@ -47,6 +47,12 @@ public final class App {
         return scope.get();
     }
     
+    // -- For testing only --
+    
+    static void reset() {
+        scope.reset();
+    }
+    
     /**
      * Initialize the application scope if it has yet to be initialized.
      * @return {@code true} if the initialization actually happen with this call.

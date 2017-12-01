@@ -47,6 +47,16 @@ public class Utilities {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final Function<Map, Map> newTreeMap = (Function<Map, Map>) TreeMap::new;
     
+    /** Returns {@code true} if the object is null. */
+    public static boolean isNull(Object obj) {
+        return (obj == null);
+    }
+
+    /** Returns {@code true} if the object is not null. */
+    public static boolean isNotNull(Object obj) {
+        return (obj != null);
+    }
+    
     /** Returns elseValue if the given object is null. **/
     public static <T> T _or(T theGivenObject, T elseValue) {
         return (theGivenObject == null) ? elseValue : theGivenObject;

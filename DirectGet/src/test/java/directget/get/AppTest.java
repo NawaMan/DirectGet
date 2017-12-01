@@ -32,62 +32,82 @@ import lombok.val;
 public class AppTest {
     
     @Test
-    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testDefaultInitialize() {
-        // This test prove that without setting anything, the Get of the App
-        // scope is ready to use.
-        App.Get().a(ArrayList.class);
+        App.reset();
+        try {
+            // This test prove that without setting anything, the Get of the App
+            // scope is ready to use.
+            App.Get().a(ArrayList.class);
+        } finally {
+            App.reset();
+        }
     }
     
     @Test
-    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testFirstInitialize() throws AppScopeAlreadyInitializedException {
-        // This test prove that first initialize has no problem.
-        App.initialize(null);
+        App.reset();
+        try {
+            // This test prove that first initialize has no problem.
+            App.initialize(null);
+        } finally {
+            App.reset();
+        }
     }
     
     @Test(expected = AppScopeAlreadyInitializedException.class)
-    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testSecondInitialize() throws AppScopeAlreadyInitializedException {
-        // This test prove that first initialize has no problem.
-    	assertFalse(App.isInitialized());
+        App.reset();
         try {
+            // This test prove that first initialize has no problem.
+        	assertFalse(App.isInitialized());
+            try {
+                App.initialize(null);
+            } catch (AppScopeAlreadyInitializedException e) {
+                fail("Oh no! Not from here.");
+            }
+            
+            assertTrue(App.isInitialized());
+            // ... but the second time will throws an exception.
             App.initialize(null);
-        } catch (AppScopeAlreadyInitializedException e) {
-            fail("Oh no! Not from here.");
+        } finally {
+            App.reset();
         }
-        
-        assertTrue(App.isInitialized());
-        // ... but the second time will throws an exception.
-        App.initialize(null);
     }
     
     @Test
-    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testSecondInitialize_onlyAbsent() throws AppScopeAlreadyInitializedException {
-        // This test prove that first initialize has no problem.
-    	assertFalse(App.isInitialized());
-        App.initializeIfAbsent(null);
-        
-        assertTrue(App.isInitialized());
-        // ... but the second time will throws an exception.
-        App.initializeIfAbsent(null);
+        App.reset();
+        try {
+            // This test prove that first initialize has no problem.
+        	assertFalse(App.isInitialized());
+            App.initializeIfAbsent(null);
+            
+            assertTrue(App.isInitialized());
+            // ... but the second time will throws an exception.
+            App.initializeIfAbsent(null);
+        } finally {
+            App.reset();
+        }
     }
     
     @Test
-    @Ignore("This test case can only be run alone. So remove this ignore and run it alone.")
     public void testInitialize_withConfiguration() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
-        val ref2 = Ref.of(String.class).defaultedTo("Ref2");
-        
-        val configuration = new Configuration(
-                ref1.getProvider().butNormal().butWith("Str1"),
-                ref2
-        );
-        App.initializeIfAbsent(configuration);
-        
-        assertEquals("Str1", Get.the(ref1));
-        assertEquals("Ref2", Get.the(ref2));
+        App.reset();
+        try {
+            val ref1 = Ref.of(String.class).defaultedTo("Ref1");
+            val ref2 = Ref.of(String.class).defaultedTo("Ref2");
+            
+            val configuration = new Configuration(
+                    ref1.getProvider().butNormal().butWith("Str1"),
+                    ref2
+            );
+            App.initializeIfAbsent(configuration);
+            
+            assertEquals("Str1", Get.the(ref1));
+            assertEquals("Ref2", Get.the(ref2));
+        } finally {
+            App.reset();
+        }
     }
     
     @Test

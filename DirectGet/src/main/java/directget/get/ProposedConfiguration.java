@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get;
 
-import static java.util.Arrays.asList;
+import static directget.get.supportive.Utilities.isLocalCall;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -68,24 +68,10 @@ public class ProposedConfiguration {
     private ProposedConfiguration() {}
     
     // -- For testing only --
-    
-    void reset() {
-        val stackTrace = Thread.currentThread().getStackTrace();
-        val classNames = asList(
-                stackTrace[1].getClassName(),
-                stackTrace[2].getClassName()
-        );
-        val isCallValid = classNames.stream().allMatch(name->{
-            try {
-                return (Class.forName(name) != null)
-                    && Class.forName(name).getProtectionDomain()
-                        == this.getClass().getProtectionDomain();
-            } catch (ClassNotFoundException e) {
-                return false;
-            } 
-        });
-        
-        if (!isCallValid)
+
+    /** Reset proposed configuration. */
+    public void reset() {
+        if (!isLocalCall())
             return;
         
         providers.clear();

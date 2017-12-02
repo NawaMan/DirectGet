@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.supportive.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -77,26 +78,11 @@ public class Scope {
     }
     
     // -- For testing only --
-    
-    void reset() {
+
+    /** Reset application scope configuration. */
+    public void reset() {
         if (parentScope == null) {
-            val stackTrace = Thread.currentThread().getStackTrace();
-            val classNames = asList(
-                    stackTrace[1].getClassName(),
-                    stackTrace[2].getClassName(),
-                    stackTrace[3].getClassName()
-            );
-            val isCallValid = classNames.stream().allMatch(name->{
-                try {
-                    return (Class.forName(name) != null)
-                        && Class.forName(name).getProtectionDomain()
-                            == this.getClass().getProtectionDomain();
-                } catch (ClassNotFoundException e) {
-                    return false;
-                } 
-            });
-            
-            if (!isCallValid)
+            if (!isLocalCall())
                 return;
             
             config = DEFAULT_CONFIG;

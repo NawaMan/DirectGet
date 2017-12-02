@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.supportive.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -49,7 +50,11 @@ public final class App {
     
     // -- For testing only --
     
-    static void reset() {
+    /** Reset application configuration. */
+    public static void reset() {
+        if (!isLocalCall())
+            return;
+        
         scope.reset();
     }
     

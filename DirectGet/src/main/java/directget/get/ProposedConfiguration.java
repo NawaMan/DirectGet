@@ -171,7 +171,7 @@ public class ProposedConfiguration {
     private Consumer<? super Entry<Provider, Set<BiConsumer<Provider, Status>>>> notifyEvent(Status status) {
         return entry->{
             val provider = entry.getKey();
-            val isInused = provider.isNotNull() && (provider == Get.getProvider(provider.getRef()));
+            val isInused = (boolean)(provider.isNotNull() && (provider == Get.getProvider(provider.getRef())));
             if (isInused != status.isAccepted())
                 return;
             

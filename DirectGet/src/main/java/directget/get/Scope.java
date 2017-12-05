@@ -80,7 +80,7 @@ public class Scope {
     // -- For testing only --
 
     /** Reset application scope configuration. */
-    public void reset() {
+    void reset() {
         if (parentScope == null) {
             if (!isLocalCall())
                 return;

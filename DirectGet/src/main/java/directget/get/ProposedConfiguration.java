@@ -70,7 +70,7 @@ public class ProposedConfiguration {
     // -- For testing only --
 
     /** Reset proposed configuration. */
-    public void reset() {
+    void reset() {
         if (!isLocalCall())
             return;
         

@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.the;
 import static directget.get.supportive.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -22,6 +23,7 @@ import static java.util.Collections.unmodifiableList;
 import java.util.List;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 /**
@@ -33,9 +35,14 @@ import lombok.val;
  */
 public final class App {
     
+    /** Application mode - Default to TEST its the only one without main. */
+    public static final RefOf<AppMode> mode = Ref.ofValue(AppMode.TEST);
+    
+
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */
     public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
-            Ref.refFactory
+            Ref.refFactory,
+            App.mode
     ));
     
     /** The only instance of the Application scope. */
@@ -52,6 +59,10 @@ public final class App {
     
     /** Reset application configuration. */
     public static void reset() {
+        if (!isInitialized())
+            return;
+        if (the(App.mode).isNot(AppMode.TEST))
+            return;
         if (!isLocalCall())
             return;
         

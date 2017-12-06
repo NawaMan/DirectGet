@@ -132,7 +132,22 @@ public final class Get {
         return value;
     }
     
+    /** @return the optional value associated with the given targetClass. */
+    public static <T> Optional<T> _the(Class<T> targetClass) {
+        val optValue = App.scope.get()._the(Ref.defaultOf(targetClass));
+        return optValue;
+    }
+    
+    /** @return the value associated with the given targetClass. */
+    public static <T> T the(Class<T> targetClass) {
+        val optValue = App.scope.get()._the(targetClass);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
     //-- any --
+    
+    // TODO - Any = the(<defaultRef of targetClass>).or(a(<targetClass>))
     
     /** @return the optional value associated with the given ref. */
     public static <T> Optional<T> _any(Ref<T> ref) {

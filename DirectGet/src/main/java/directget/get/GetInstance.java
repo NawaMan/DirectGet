@@ -86,12 +86,6 @@ public final class GetInstance {
         return optValue;
     }
     
-    /** @return the optional value associated with the given class. */
-    public <T, F extends Factory<T>> Optional<T> _a(Ref<F> factoryRef) {
-        val optValue = scope.doGetThe(factoryRef);
-        return optValue.map(Factory::make);
-    }
-    
     /** @return the value associated with the given ref. */
     public <T> T a(Class<T> clzz) {
         val ref      = Ref.forClass(clzz);
@@ -106,14 +100,7 @@ public final class GetInstance {
         val value    = optValue.orElse(null);
         return value;
     }
-    
-    /** @return the optional value associated with the given class. */
-    public <T, F extends Factory<T>> T a(Ref<F> factoryRef) {
-        val optValue = scope.doGetThe(factoryRef);
-        val value    = optValue.map(Factory::make).orElse(null);
-        return value;
-    }
-    
+
     //-- the --
 
     /** @return the optional value associated with the given ref. */
@@ -122,8 +109,23 @@ public final class GetInstance {
         return optValue;
     }
     
-    /** @return the value associated with the given class. */
+    /** @return the value associated with the given ref. */
     public <T> T the(RefOf<T> ref) {
+        val optValue = scope.doGetThe(ref);
+        val value    = optValue.orElse(null);
+        return value;
+    }
+    
+    /** @return the optional value associated with the given targetClass. */
+    public <T> Optional<T> _the(Class<T> targetClass) {
+        val ref      = Ref.defaultOf(targetClass);
+        val optValue = scope.doGetThe(ref);
+        return optValue;
+    }
+    
+    /** @return the value associated with the given class. */
+    public <T> T the(Class<T> targetClass) {
+        val ref      = Ref.defaultOf(targetClass);
         val optValue = scope.doGetThe(ref);
         val value    = optValue.orElse(null);
         return value;

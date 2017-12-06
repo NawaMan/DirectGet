@@ -16,31 +16,31 @@
 package directget.get.exceptions;
 
 /**
- * This exception is thrown when a factory is unable to make something.
+ * This exception is thrown when a there is problem getting default reference of a class.
  * 
  * @author NawaMan
  */
-public class FactoryException extends DirectGetRuntimeException {
+public class DefaultRefException extends DirectGetRuntimeException {
 
     private static final long serialVersionUID = -1444549293673722463L;
 
     /** Constructor */
-    public FactoryException() {
+    public DefaultRefException() {
         super();
     }
     
     /** Constructor */
-    public FactoryException(String message) {
+    public DefaultRefException(String message) {
         super(message);
     }
     
     /** Constructor */
-    public FactoryException(String message, Throwable cause) {
+    public DefaultRefException(String message, Throwable cause) {
         super(message, cause);
     }
     
     /** Constructor */
-    public FactoryException(Throwable cause) {
+    public DefaultRefException(Throwable cause) {
         super(cause);
     }
     

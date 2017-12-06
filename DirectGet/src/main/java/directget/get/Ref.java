@@ -17,9 +17,12 @@ package directget.get;
 
 import static directget.get.supportive.Utilities.whenNotNull;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
@@ -41,6 +44,11 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
     /** The default factory. */
     public static final RefOf<RefFactory> refFactory = Ref.ofValue(new RefFactory());
 
+    private static final String refOfClassName = RefOf.class.getCanonicalName();
+    
+    @SuppressWarnings({ "rawtypes" })
+    private static final ConcurrentHashMap<Class, Optional<RefOf>> defeaultRefs = new ConcurrentHashMap<>();
+    
     
     private final Class<T> targetClass;
     
@@ -112,6 +120,45 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
         }
         
         return this.toString().compareTo(o.toString());
+    }
+    
+    /**
+     * Returns the default reference of the given class.
+     * 
+     * @param targetClass the target class.
+     * @return the default reference or {@code null} if non exist.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T> RefOf<T> defaultOf(Class<T> targetClass) {
+        Optional<RefOf> refOpt = defeaultRefs.get(targetClass);
+        if (refOpt == null) {
+            for (val field : targetClass.getDeclaredFields()) {
+                if (!Modifier.isFinal(field.getModifiers()))
+                    continue;
+                if (!Modifier.isPublic(field.getModifiers()))
+                    continue;
+                if (!Modifier.isStatic(field.getModifiers()))
+                    continue;
+                if (!Ref.class.isAssignableFrom(field.getType()))
+                    continue;
+                if (field.getAnnotation(DefaultRef.class) == null)
+                    continue;
+                val targetClassName  = targetClass.getName();
+                val expectedTypeName = refOfClassName + "<" + targetClassName + ">";
+                val actualTypeName   = field.getGenericType().getTypeName();
+                if(!actualTypeName.equals(expectedTypeName))
+                    continue;
+                
+                try {
+                    refOpt = Optional.of((RefOf<T>)field.get(targetClass));
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    throw new DefaultRefException(e);
+                }
+            }
+            refOpt = (refOpt != null) ? refOpt :Optional.empty();
+            defeaultRefs.put(targetClass, refOpt);
+        }
+        return refOpt.orElse(null);
     }
     
     // == Basic implementations ===============================================

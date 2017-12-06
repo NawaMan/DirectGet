@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.a;
 import static directget.get.Get.the;
 import static directget.get.Run.With;
 import static org.junit.Assert.*;
@@ -32,6 +33,7 @@ import directget.get.Ref;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefFor;
 import directget.get.supportive.RefOf;
+import lombok.Getter;
 import lombok.val;
 
 public class RefTest {
@@ -242,6 +244,49 @@ public class RefTest {
     @Test
     public void testFrom_forFactoryClass() {
         assertTrue(Get.from(CarFactory.class) instanceof Car);
+    }
+    
+    public static class Greeting {
+        
+        @DefaultRef
+        public static final RefOf<Greeting> ref = RefOf.ofValue(new Greeting("Hello"));
+        
+        @Getter
+        private String greeting;
+        
+        public Greeting(String greeting) {
+            this.greeting = greeting;
+        }
+        
+    }
+    
+    @Test
+    public void testDefaultRef() {
+        val ref = Ref.defaultOf(Greeting.class);
+        System.out.println(ref);
+        assertEquals("Hello", the(ref).getGreeting());
+        assertEquals("",      a(Greeting.class).getGreeting());
+
+        assertEquals("Hello", the(Greeting.class).getGreeting());
+    }
+    
+    public static class Greeter {
+
+        @DefaultRef
+        public static final RefOf<Greeter> ref = RefOf.of(Greeter.class).defaultedToA(Ref.forClass(Greeter.class));
+        
+        @Getter
+        private Greeting greeting;
+        
+        public Greeter(@The Greeting greeting) {
+            this.greeting = greeting;
+        }
+        
+    }
+    
+    @Test
+    public void testDefaultRefUser() {
+        assertEquals("Hello", the(Greeter.class).getGreeting().getGreeting());
     }
     
 }

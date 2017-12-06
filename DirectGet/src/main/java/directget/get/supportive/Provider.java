@@ -105,6 +105,11 @@ public class Provider<T> implements HasProvider<T>, HasRef<T>, Supplier<T>, Wrap
         return new ProviderWithRetainer<T>(ref, preferability, supplier);
     }
     
+    /** @return the singleton retainer. */
+    public final ProviderWithRetainer<T> singleton() {
+        return retained().globally().forAlways();
+    }
+    
     //== Wither =======================================================================================================
     
     /**

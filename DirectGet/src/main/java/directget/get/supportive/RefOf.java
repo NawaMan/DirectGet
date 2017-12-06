@@ -32,6 +32,8 @@ import lombok.val;
  **/
 public class RefOf<T> extends Ref<T> {
     
+    // Default RefOf - of a target class.
+    
     static final AtomicLong id = new AtomicLong();
 
     /**

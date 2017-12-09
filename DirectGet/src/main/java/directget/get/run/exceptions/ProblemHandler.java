@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import directget.get.Ref;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 
 /**
  * Handler of a problem.
@@ -37,7 +37,7 @@ public class ProblemHandler {
             = Ref.of(ProblemHandler.class).defaultedToBy(()->new ProblemHandler(problem->{}));
     
     /** Default problem handler. */
-    public static final RefOf<ProblemHandler> problemHandler
+    public static final RefTo<ProblemHandler> problemHandler
             = Ref.of(ProblemHandler.class).defaultedToA(printStackTrace);
     
     private final String name;

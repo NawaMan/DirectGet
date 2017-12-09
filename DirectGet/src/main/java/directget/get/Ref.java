@@ -28,7 +28,7 @@ import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefFactory;
 import directget.get.supportive.RefFor;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 import lombok.val;
 
 /***
@@ -42,12 +42,12 @@ import lombok.val;
 public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
-    public static final RefOf<RefFactory> refFactory = Ref.ofValue(new RefFactory());
+    public static final RefTo<RefFactory> refFactory = Ref.ofValue(new RefFactory());
 
-    private static final String refOfClassName = RefOf.class.getCanonicalName();
+    private static final String refToClassName = RefTo.class.getCanonicalName();
     
     @SuppressWarnings({ "rawtypes" })
-    private static final ConcurrentHashMap<Class, Optional<RefOf>> defeaultRefs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class, Optional<RefTo>> defeaultRefs = new ConcurrentHashMap<>();
     
     
     private final Class<T> targetClass;
@@ -129,8 +129,8 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * @return the default reference or {@code null} if non exist.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T> RefOf<T> defaultOf(Class<T> targetClass) {
-        Optional<RefOf> refOpt = defeaultRefs.get(targetClass);
+    public static <T> RefTo<T> defaultOf(Class<T> targetClass) {
+        Optional<RefTo> refOpt = defeaultRefs.get(targetClass);
         if (refOpt == null) {
             for (val field : targetClass.getDeclaredFields()) {
                 if (!Modifier.isFinal(field.getModifiers()))
@@ -141,16 +141,14 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
                     continue;
                 if (!Ref.class.isAssignableFrom(field.getType()))
                     continue;
-                if (field.getAnnotation(DefaultRef.class) == null)
-                    continue;
                 val targetClassName  = targetClass.getName();
-                val expectedTypeName = refOfClassName + "<" + targetClassName + ">";
+                val expectedTypeName = refToClassName + "<" + targetClassName + ">";
                 val actualTypeName   = field.getGenericType().getTypeName();
                 if(!actualTypeName.equals(expectedTypeName))
                     continue;
                 
                 try {
-                    refOpt = Optional.of((RefOf<T>)field.get(targetClass));
+                    refOpt = Optional.of((RefTo<T>)field.get(targetClass));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     throw new DefaultRefException(e);
                 }
@@ -170,10 +168,10 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
         return new RefFor<>(targetClass);
     }
     
-    // -- RefOf ---------------------------------------------------------------
+    // -- RefTo ---------------------------------------------------------------
     
     /** Create and return a reference to a target class with default factory. **/
-    public static <T> RefOf<T> of(Class<T> targetClass) {
+    public static <T> RefTo<T> of(Class<T> targetClass) {
         return ofValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
     }
     
@@ -181,7 +179,7 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference with a human readable name to a target
      * class with default factory.
      **/
-    public static <T> RefOf<T> of(String name, Class<T> targetClass) {
+    public static <T> RefTo<T> of(String name, Class<T> targetClass) {
         return ofValue(name, targetClass, Preferability.Default, null);
     }
     
@@ -191,8 +189,8 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference to a target class with the default supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> RefOf<V> of(Class<T> targetClass, Supplier<V> valueSupplier) {
-        return (RefOf<V>)ofValue(null, (Class<V>)targetClass, Preferability.Default, (V)null)
+    public static <T, V extends T> RefTo<V> of(Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (RefTo<V>)ofValue(null, (Class<V>)targetClass, Preferability.Default, (V)null)
                 .defaultedToBy(valueSupplier);
     }
     
@@ -201,8 +199,8 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * class with the given supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> RefOf<V> of(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
-        return (RefOf<V>)ofValue(name, (Class<V>)targetClass, Preferability.Default, (V)null)
+    public static <T, V extends T> RefTo<V> of(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
+        return (RefTo<V>)ofValue(name, (Class<V>)targetClass, Preferability.Default, (V)null)
                 .defaultedToBy(valueSupplier);
     }
     
@@ -212,7 +210,7 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference to a target class with the given supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> RefOf<V> of(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+    public static <T, V extends T> RefTo<V> of(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
         return ofValue(null, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
     }
     
@@ -221,7 +219,7 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * class with the default supplier.
      **/
     @SuppressWarnings("unchecked")
-    public static <T, V extends T> RefOf<V> of(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
+    public static <T, V extends T> RefTo<V> of(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
         return ofValue(name, (Class<V>)targetClass, preferability, (V)null).defaultedToBy(valueSupplier);
     }
 //    
@@ -229,12 +227,12 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
 //    
     /** Create and return a reference to the default value's class default to the default factory. **/
     @SuppressWarnings("unchecked")
-    public static <T> RefOf<T> ofValue(T defaultValue) {
-        return ((RefOf<T>)of(defaultValue.getClass())).defaultedTo(defaultValue);
+    public static <T> RefTo<T> ofValue(T defaultValue) {
+        return ((RefTo<T>)of(defaultValue.getClass())).defaultedTo(defaultValue);
     }
     
     /** Create and return a reference to the default value's class default to the default factory. **/
-    public static <T> RefOf<T> ofValue(String name, T defaultValue) {
+    public static <T> RefTo<T> ofValue(String name, T defaultValue) {
         @SuppressWarnings("unchecked")
         val targetClass = (Class<T>)defaultValue.getClass();
         return ofValue(name, targetClass, Preferability.Default, defaultValue);
@@ -244,10 +242,10 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference with a human readable name to a target
      * class with the default value.
      **/
-    private static <T, V extends T> RefOf<T> ofValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        val theName    = whenNotNull(name).orElseGet(()->"#" + RefOf.getNewId());
+    private static <T, V extends T> RefTo<T> ofValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
+        val theName    = whenNotNull(name).orElseGet(()->"#" + RefTo.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
-        return new RefOf<>(theName, targetClass, Preferability.Default, theFactory);
+        return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
     }
     
     //-- factory --
@@ -256,9 +254,9 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference to a target factory class with the default factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T, V extends T> RefOf<Factory<T>> ofFactory(Factory<V> valueFactory) {
+    public static <T, V extends T> RefTo<Factory<T>> ofFactory(Factory<V> valueFactory) {
         Ref ref = of(Factory.class).defaultedTo(valueFactory);
-        return (RefOf<Factory<T>>)ref;
+        return (RefTo<Factory<T>>)ref;
     }
     
     /**
@@ -266,9 +264,9 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * factory class with the given supplier.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T, V extends T> RefOf<Factory<T>> ofFactory(String name, Class<T> targetClass, Factory<V> valueFactory) {
+    public static <T, V extends T> RefTo<Factory<T>> ofFactory(String name, Class<T> targetClass, Factory<V> valueFactory) {
         Ref ref = of(name, Factory.class).defaultedTo(valueFactory);
-        return (RefOf<Factory<T>>)ref;
+        return (RefTo<Factory<T>>)ref;
     }
     
     //-- with other preferability factory --
@@ -277,9 +275,9 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * Create and return a reference to a target factory class with the default factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T, V extends T> RefOf<Factory<T>> ofFactory(Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
+    public static <T, V extends T> RefTo<Factory<T>> ofFactory(Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
         Ref ref = of(Factory.class).providedWith(preferability, valueFactory);
-        return (RefOf<Factory<T>>)ref;
+        return (RefTo<Factory<T>>)ref;
     }
     
     /**
@@ -287,9 +285,9 @@ public abstract class Ref<T> implements HasProvider<T>, HasRef<T>, Comparable<Re
      * class with the default factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T, V extends T> RefOf<Factory<T>> ofFactory(String name, Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
+    public static <T, V extends T> RefTo<Factory<T>> ofFactory(String name, Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
         Ref ref = of(name, Factory.class).providedWith(preferability, valueFactory);
-        return (RefOf<Factory<T>>)ref;
+        return (RefTo<Factory<T>>)ref;
     }
     
     

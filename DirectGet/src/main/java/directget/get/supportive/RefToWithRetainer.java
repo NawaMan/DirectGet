@@ -30,10 +30,10 @@ import lombok.val;
  *
  * @param <T> the type of data this will be reference to.
  */
-public class RefOfWithRetainer<T> extends RefOf<T> implements WithRetainer<T, RefOfWithRetainer<T>> {
+public class RefToWithRetainer<T> extends RefTo<T> implements WithRetainer<T, RefToWithRetainer<T>> {
     
     /** Constructor. */
-    public RefOfWithRetainer(String name, Class<T> targetClass, Preferability preferability,
+    public RefToWithRetainer(String name, Class<T> targetClass, Preferability preferability,
             Supplier<? extends T> factory) {
         super(name, targetClass, preferability, factory);
     }
@@ -49,12 +49,12 @@ public class RefOfWithRetainer<T> extends RefOf<T> implements WithRetainer<T, Re
     }
 
     /** Change the supplier. */
-    public RefOfWithRetainer<T> __but(Supplier<T> newSupplier) {
+    public RefToWithRetainer<T> __but(Supplier<T> newSupplier) {
         val supplier = getProvider().getSupplier();
         if (newSupplier == supplier) {
             return this;
         }
-        return new RefOfWithRetainer<>(this.getName(), this.getTargetClass(), this.getPreferability(), newSupplier);
+        return new RefToWithRetainer<>(this.getName(), this.getTargetClass(), this.getPreferability(), newSupplier);
     }
     
 }

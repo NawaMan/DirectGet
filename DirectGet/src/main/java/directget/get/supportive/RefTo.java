@@ -30,9 +30,7 @@ import lombok.val;
  * 
  * @author NawaMan
  **/
-public class RefOf<T> extends Ref<T> {
-    
-    // Default RefOf - of a target class.
+public class RefTo<T> extends Ref<T> {
     
     static final AtomicLong id = new AtomicLong();
 
@@ -61,7 +59,7 @@ public class RefOf<T> extends Ref<T> {
      * @param factory
      *          the value factory.
      */
-    public RefOf(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
+    public RefTo(String name, Class<T> targetClass, Preferability preferability, Supplier<? extends T> factory) {
         super(targetClass);
         val prefer = (preferability != null) ? preferability : Preferability.Default;
         
@@ -121,36 +119,36 @@ public class RefOf<T> extends Ref<T> {
     }
     
     /** Returns the retainer. */
-    public RefOfWithRetainer<T> retained() {
-        return new RefOfWithRetainer<>(name, getTargetClass(), getPreferability(), provider.getSupplier());
+    public RefToWithRetainer<T> retained() {
+        return new RefToWithRetainer<>(name, getTargetClass(), getPreferability(), provider.getSupplier());
     }
     
     //== Modifier =====================================================================================================
     
     /** Create a provider that dictate the given value. */
-    public <V extends T> RefOf<T> dictatedTo(V value) {
+    public <V extends T> RefTo<T> dictatedTo(V value) {
         return providedBy(Preferability.Dictate, new Named.ValueSupplier<T>(value));
     }
     
     /** Create the provider that dictate the value of the given ref. */
-    public <V extends T> RefOf<T> dictatedToA(Ref<V> ref) {
+    public <V extends T> RefTo<T> dictatedToA(Ref<V> ref) {
         return providedBy(Preferability.Dictate, new Named.RefSupplier<V>(ref));
     }
     
     /** Create the provider that dictate the result of the given supplier. */
-    public <V extends T> RefOf<T> dictatedBy(Supplier<V> supplier) {
+    public <V extends T> RefTo<T> dictatedBy(Supplier<V> supplier) {
         return providedBy(Preferability.Dictate, supplier);
     }
     
     /** Create the provider (normal preferability) the given value. */
-    public <V extends T> RefOf<T> providedWith(V value) {
+    public <V extends T> RefTo<T> providedWith(V value) {
         return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
     
     /**
      * Create the provider (normal preferability) the value of the given ref.
      */
-    public <V extends T> RefOf<T> providedWithA(Ref<V> ref) {
+    public <V extends T> RefTo<T> providedWithA(Ref<V> ref) {
         return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
     }
     
@@ -158,12 +156,12 @@ public class RefOf<T> extends Ref<T> {
      * Create the provider (normal preferability) the result of the given
      * supplier.
      */
-    public <V extends T> RefOf<T> providedBy(Supplier<V> supplier) {
+    public <V extends T> RefTo<T> providedBy(Supplier<V> supplier) {
         return providedBy(Preferability.Normal, supplier);
     }
     
     /** Create the provider (using the given preferability) the given value. */
-    public <V extends T> RefOf<T> providedWith(Preferability preferability, V value) {
+    public <V extends T> RefTo<T> providedWith(Preferability preferability, V value) {
         return providedBy(preferability, new Named.ValueSupplier<T>(value));
     }
     
@@ -171,7 +169,7 @@ public class RefOf<T> extends Ref<T> {
      * Create the provider (using the given preferability) the value of the
      * given ref.
      */
-    public <V extends T> RefOf<T> providedWithA(Preferability preferability, Ref<V> ref) {
+    public <V extends T> RefTo<T> providedWithA(Preferability preferability, Ref<V> ref) {
         return providedBy(preferability, new Named.RefSupplier<V>(ref));
     }
     
@@ -179,8 +177,8 @@ public class RefOf<T> extends Ref<T> {
      * Create the provider (using the given preferability) the result of the
      * given supplier.
      */
-    public <V extends T> RefOf<T> providedBy(Preferability preferability, Supplier<V> supplier) {
-        return new RefOf<>(
+    public <V extends T> RefTo<T> providedBy(Preferability preferability, Supplier<V> supplier) {
+        return new RefTo<>(
                 this.getName(),
                 this.getTargetClass(),
                 preferability,
@@ -188,19 +186,19 @@ public class RefOf<T> extends Ref<T> {
     }
     
     /** Create the provider that default to the given value. */
-    public <V extends T> RefOf<T> defaultedTo(V value) {
+    public <V extends T> RefTo<T> defaultedTo(V value) {
         return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
     }
     
     /** Create the provider that default to the value of the given ref. */
-    public <V extends T> RefOf<T> defaultedToA(Ref<V> ref) {
+    public <V extends T> RefTo<T> defaultedToA(Ref<V> ref) {
         return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
     }
     
     /**
      * Create the provider that default to the result of the given supplier.
      */
-    public <V extends T> RefOf<T> defaultedToBy(Supplier<V> supplier) {
+    public <V extends T> RefTo<T> defaultedToBy(Supplier<V> supplier) {
         return providedBy(Preferability.Normal, supplier);
     }
 

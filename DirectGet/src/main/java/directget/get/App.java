@@ -23,7 +23,7 @@ import static java.util.Collections.unmodifiableList;
 import java.util.List;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 import lombok.val;
 
 /**
@@ -36,7 +36,7 @@ import lombok.val;
 public final class App {
     
     /** Application mode - Default to TEST its the only one without main. */
-    public static final RefOf<AppMode> mode = Ref.ofValue(AppMode.TEST);
+    public static final RefTo<AppMode> mode = Ref.ofValue(AppMode.TEST);
     
 
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */

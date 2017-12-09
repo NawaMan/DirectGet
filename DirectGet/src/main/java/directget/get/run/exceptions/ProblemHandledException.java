@@ -17,7 +17,7 @@ package directget.get.run.exceptions;
 
 import directget.get.Get;
 import directget.get.Ref;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 
 /**
  * This throwable indicates that there was some problem but it has been handled.
@@ -28,7 +28,7 @@ public class ProblemHandledException extends DirectRunRuntimeException {
     
     // TODO - Current time should be put in separate place.
     /** The ref to get current time. */
-    public static RefOf<Long> currentTime = Ref.of(Long.class).defaultedToBy(System::currentTimeMillis);
+    public static RefTo<Long> currentTime = Ref.of(Long.class).defaultedToBy(System::currentTimeMillis);
     
     private static final long serialVersionUID = -5350585488754817001L;
     

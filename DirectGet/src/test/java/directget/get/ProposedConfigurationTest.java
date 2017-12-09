@@ -8,12 +8,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 import lombok.val;
 
 public class ProposedConfigurationTest {
     
-    static final RefOf<String> text = Ref.ofValue("Hello world!");
+    static final RefTo<String> text = Ref.ofValue("Hello world!");
     
     @Test
     public void testAddingProviderToProposedConfigurationEndedUpBeingUsedAfterInitializing() {

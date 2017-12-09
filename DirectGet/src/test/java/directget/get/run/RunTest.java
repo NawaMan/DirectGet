@@ -34,12 +34,12 @@ import directget.get.Ref;
 import directget.get.Run;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 import lombok.val;
 
 public class RunTest {
     
-    private static RefOf<Integer> num = Ref.ofValue(1);
+    private static RefTo<Integer> num = Ref.ofValue(1);
     
     @Test
     public void testSameThreadSupplier() {

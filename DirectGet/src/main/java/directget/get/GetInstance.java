@@ -30,7 +30,7 @@ import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
 import directget.get.supportive.RefFor;
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -104,13 +104,13 @@ public final class GetInstance {
     //-- the --
 
     /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _the(RefOf<T> ref) {
+    public <T> Optional<T> _the(RefTo<T> ref) {
         val optValue = scope.doGetThe(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
-    public <T> T the(RefOf<T> ref) {
+    public <T> T the(RefTo<T> ref) {
         val optValue = scope.doGetThe(ref);
         val value    = optValue.orElse(null);
         return value;

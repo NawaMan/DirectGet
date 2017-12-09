@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 
 /**
  * The retainer.
@@ -105,7 +105,7 @@ public abstract class Retainer<V> implements Supplier<V> {
     }
 
     /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('same' rule). **/
-    public <R> Retainer<V> forSame(RefOf<R> ref) {
+    public <R> Retainer<V> forSame(RefTo<R> ref) {
         @SuppressWarnings("rawtypes")
         Predicate<Predicate<V>> sameShouldRetain
                 = shouldRetain ->
@@ -118,7 +118,7 @@ public abstract class Retainer<V> implements Supplier<V> {
     }
 
     /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
-    public <R> Retainer<V> forEquivalent(RefOf<R> ref) {
+    public <R> Retainer<V> forEquivalent(RefTo<R> ref) {
         @SuppressWarnings("rawtypes")
         Predicate<Predicate<V>> sameShouldRetain
                 = shouldRetain ->

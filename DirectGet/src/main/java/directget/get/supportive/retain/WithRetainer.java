@@ -18,7 +18,7 @@ package directget.get.supportive.retain;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import directget.get.supportive.RefOf;
+import directget.get.supportive.RefTo;
 
 /**
  * This interface is for classes that has a retainer.
@@ -60,12 +60,12 @@ public interface WithRetainer<T, WR extends WithRetainer<T, WR>> {
     }
 
     /** @return the new provider similar to this one except that it retains its value follow the give reference value ('same' rule). **/
-    public default <R> WR forSame(RefOf<R> ref) {
+    public default <R> WR forSame(RefTo<R> ref) {
         return __but(getRetainer().forSame(ref));
     }
 
     /** @return the new provider similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
-    public default <R> WR forEquivalent(RefOf<R> ref) {
+    public default <R> WR forEquivalent(RefTo<R> ref) {
         return __but(getRetainer().forEquivalent(ref));
     }
 

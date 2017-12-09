@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import directget.get.Get;
 import directget.get.InjectedConstructor;
-import directget.get.The;
 import directget.get.exceptions.AbstractClassCreationException;
 import directget.get.exceptions.CreationException;
 import directget.get.run.Failable.Supplier;
@@ -86,9 +85,8 @@ public class ObjectCreatator {
         val paramsArray = constructor.getParameters();
         for (int i = 0; i < paramsArray.length; i++) {
             val param      = paramsArray[i];
-            val isThe      = param.getAnnotation(The.class) != null;
             val paramType  = param.getType();
-            val paramValue = isThe? Get.the(paramType) : Get.a(paramType);
+            val paramValue = Get.a(paramType);  // TODO -Ensure thi
             params[i] = paramValue;
         }
         return params;

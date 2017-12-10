@@ -20,7 +20,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import directget.get.App;
-import directget.get.HasRef;
 import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
@@ -33,7 +32,7 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  **/
 @ExtensionMethod({ Utilities.class })
-public class Provider<T> implements HasProvider<T>, HasRef<T>, Supplier<T>, Wrapper {
+public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
     

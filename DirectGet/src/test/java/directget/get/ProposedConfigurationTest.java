@@ -13,7 +13,7 @@ import lombok.val;
 
 public class ProposedConfigurationTest {
     
-    static final RefTo<String> text = Ref.ofValue("Hello world!");
+    static final RefTo<String> text = Ref.toValue("Hello world!");
     
     @Test
     public void testAddingProviderToProposedConfigurationEndedUpBeingUsedAfterInitializing() {

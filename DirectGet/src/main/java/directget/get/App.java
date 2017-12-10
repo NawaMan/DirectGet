@@ -36,7 +36,7 @@ import lombok.val;
 public final class App {
     
     /** Application mode - Default to TEST its the only one without main. */
-    public static final RefTo<AppMode> mode = Ref.ofValue(AppMode.TEST);
+    public static final RefTo<AppMode> mode = Ref.toValue(AppMode.TEST);
     
 
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */

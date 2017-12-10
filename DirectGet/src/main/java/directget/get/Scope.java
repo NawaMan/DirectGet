@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.supportive.Provider;
-import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import lombok.val;
 
 /***
@@ -183,11 +183,11 @@ public class Scope {
         return Optional.empty();
     }
     
-    <T> Optional<T> doGetA(RefFor<T> ref) {
+    <T> Optional<T> doGetA(RefOf<T> ref) {
         val optValue = doGetThe(ref);
         if (optValue.isPresent())
              return optValue;
-        else return ref._get();
+        else return ref._getValue();
     }
     
     /** {@inheritDoc} */

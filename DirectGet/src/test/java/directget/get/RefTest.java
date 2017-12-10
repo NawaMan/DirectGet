@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import directget.get.Ref;
 import directget.get.exceptions.FactoryException;
-import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import lombok.Getter;
 import lombok.val;
@@ -42,16 +42,16 @@ public class RefTest {
     @Test
     @SuppressWarnings("rawtypes")
     public void testRef_forClass() {
-        RefFor<List> ref1 = Ref.forClass(List.class);
-        RefFor<List> ref2 = Ref.forClass(List.class);
+        RefOf<List> ref1 = Ref.forClass(List.class);
+        RefOf<List> ref2 = Ref.forClass(List.class);
         assertEquals(ref1, ref2);
     }
     
     @Test
     @SuppressWarnings("rawtypes")
     public void testRef_direct() {
-        Ref<List> ref1 = Ref.of(List.class);
-        Ref<List> ref2 = Ref.of(List.class);
+        Ref<List> ref1 = Ref.to(List.class);
+        Ref<List> ref2 = Ref.to(List.class);
         assertNotEquals(ref1, ref2);
     }
     
@@ -59,33 +59,33 @@ public class RefTest {
     @SuppressWarnings("rawtypes")
     public void testRef_directWithDefault() {
         List theList = new ArrayList();
-        RefTo<List> ref = Ref.of(List.class).defaultedTo(theList);
-        assertTrue(ref._get().isPresent());
-        assertTrue(ref._get().filter(list -> list == theList).isPresent());
+        RefTo<List> ref = Ref.to(List.class).defaultedTo(theList);
+        assertTrue(ref._getValue().isPresent());
+        assertTrue(ref._getValue().filter(list -> list == theList).isPresent());
     }
     
     @Test
     public void testRef_directWithGenericDefault() {
-        RefTo<List<String>> ref = Ref.of(List.class, ()->new ArrayList<String>());
+        RefTo<List<String>> ref = Ref.to(List.class, ()->new ArrayList<String>());
         
-        assertTrue(ref.get().isEmpty());
+        assertTrue(ref.getValue().isEmpty());
         
-        val list = ref.get();
+        val list = ref.getValue();
         list.add("Hey");
         assertFalse(list.isEmpty());
         
-        assertTrue(ref.get().isEmpty());
+        assertTrue(ref.getValue().isEmpty());
 
-        RefTo<String> strRef = Ref.ofValue("Hello");
+        RefTo<String> strRef = Ref.toValue("Hello");
         assertEquals("Hello", Get.the(strRef));
 
-        RefTo<String> strRef2 = Ref.of(String.class).defaultedToBy(()->"Hello");
+        RefTo<String> strRef2 = Ref.to(String.class).defaultedToBy(()->"Hello");
         assertEquals("Hello", Get.the(strRef2));
         
-        RefTo<Supplier<String>> supplierRef = Ref.ofValue(()->"Hello");
+        RefTo<Supplier<String>> supplierRef = Ref.toValue(()->"Hello");
         assertEquals("Hello", Get.the(supplierRef).get());
 
-        RefTo<Function<String, String>> funcRef = Ref.ofValue(name->"Hello " + name + "!");
+        RefTo<Function<String, String>> funcRef = Ref.toValue(name->"Hello " + name + "!");
         assertEquals("Hello Sir!", Get.the(funcRef).apply("Sir"));
         
         Run.With(funcRef.butProvidedWith(name -> "Hey " + name + "!"))
@@ -103,7 +103,7 @@ public class RefTest {
     
     @Test
     public void testDefaultValue() {
-        RefFor<Car> carRef = Ref.forClass(Car.class);
+        RefOf<Car> carRef = Ref.forClass(Car.class);
         assertEquals("FLASH!", Get.a(carRef).zoom());
         assertEquals("FLASH!", Get.a(Car.class).zoom());
     }
@@ -121,7 +121,7 @@ public class RefTest {
     @Ignore("Thing break")
     @Test
     public void testOnlyConstructor() {
-        RefFor<Driver> driverRef = Ref.forClass(Driver.class);
+        RefOf<Driver> driverRef = Ref.forClass(Driver.class);
         assertEquals("FLASH!", Get.a(driverRef).zoom());
         assertEquals("FLASH!", Get.a(Driver.class).zoom());
     }
@@ -135,7 +135,7 @@ public class RefTest {
     @Ignore("Thing break")
     @Test
     public void test_substitute() {
-        RefFor<Car> carRef = Ref.forClass(Car.class);
+        RefOf<Car> carRef = Ref.forClass(Car.class);
         assertEquals("SUPER FLASH!!!!", 
                 With(carRef.butProvidedWithA(SuperCar.class))
                 .run(()->
@@ -159,7 +159,7 @@ public class RefTest {
     
     @Test
     public void testDefaultConstructor() {
-        RefFor<Person> personRef = Ref.forClass(Person.class);
+        RefOf<Person> personRef = Ref.forClass(Person.class);
         assertEquals("Meh", Get.a(personRef).zoom());
         assertEquals("Meh", Get.a(Person.class).zoom());
     }
@@ -181,7 +181,7 @@ public class RefTest {
     @Ignore("Thing break")
     @Test
     public void testInjectConstructor() {
-        RefFor<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
+        RefOf<AnotherPerson> personRef = Ref.forClass(AnotherPerson.class);
         assertEquals("FLASH!", Get.a(personRef).zoom());
         assertEquals("FLASH!", Get.a(AnotherPerson.class).zoom());
     }
@@ -203,33 +203,33 @@ public class RefTest {
     @Ignore("Thing break")
     @Test
     public void testInjectConstructorConstructor() {
-        RefFor<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
+        RefOf<OneAnotherPerson> personRef = Ref.forClass(OneAnotherPerson.class);
         assertEquals("FLASH!", Get.a(personRef).zoom());
         assertEquals("FLASH!", Get.a(OneAnotherPerson.class).zoom());
     }
     
     @Test
     public void testThe_forClass_useRefFactory() {
-        RefFor<Person> personClassRef = Ref.forClass(Person.class);
+        RefOf<Person> personClassRef = Ref.forClass(Person.class);
         assertNotNull(Get.a(personClassRef));
     }
     
     @Test
     public void testThe_ofClass_returnNull() {
-        RefTo<Person> personRef = Ref.of(Person.class);
+        RefTo<Person> personRef = Ref.to(Person.class);
         assertNull(Get.the(personRef));
     }
     
     @Test
     public void testA_forClass_useRefFactory() {
-        RefFor<Person> personClassRef = Ref.forClass(Person.class);
+        RefOf<Person> personClassRef = Ref.forClass(Person.class);
         assertNotNull(Get.a(personClassRef));
         assertNotNull(Get.a(Person.class));
     }
     
     @Test
     public void testA_forFactory() {
-        RefTo<Factory<Car>> carFactory = Ref.ofFactory(()->new Car());
+        RefTo<Factory<Car>> carFactory = Ref.toFactory(()->new Car());
         assertTrue(Get.from(carFactory) instanceof Car);
     }
     
@@ -254,7 +254,7 @@ public class RefTest {
     public static class Greeting {
         
         @DefaultRef
-        public static final RefTo<Greeting> ref = RefTo.ofValue(new Greeting("Hello"));
+        public static final RefTo<Greeting> ref = RefTo.toValue(new Greeting("Hello"));
         
         @Getter
         private String greeting;
@@ -278,7 +278,7 @@ public class RefTest {
     public static class Greeter {
 
         @DefaultRef
-        public static final RefTo<Greeter> ref = RefTo.of(Greeter.class).defaultedToA(Ref.forClass(Greeter.class));
+        public static final RefTo<Greeter> ref = RefTo.to(Greeter.class).defaultedToA(Ref.forClass(Greeter.class));
         
         @Getter
         private Greeting greeting;

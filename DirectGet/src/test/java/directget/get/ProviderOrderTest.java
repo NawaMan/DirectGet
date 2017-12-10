@@ -58,8 +58,8 @@ public class ProviderOrderTest {
     // Get parent default - when included
     // Ref default
     
-    private final RefTo<String> ref = Ref.ofValue("RefDefault");
-    private final RefTo<String> refNoDefault = Ref.of(String.class);
+    private final RefTo<String> ref = Ref.toValue("RefDefault");
+    private final RefTo<String> refNoDefault = Ref.to(String.class);
     
     private final Provider<String> getParentDictate = new Provider<>(ref, Preferability.Dictate,
             () -> "GetParentDictate");
@@ -522,7 +522,7 @@ public class ProviderOrderTest {
 
     
     private static final String REF_DICTATE = "RefDictate";
-    private static final RefTo<String> dictatedRef = Ref.of(String.class).dictatedTo(REF_DICTATE);
+    private static final RefTo<String> dictatedRef = Ref.to(String.class).dictatedTo(REF_DICTATE);
     
     @Test
     public void testRefDictate() {
@@ -534,7 +534,7 @@ public class ProviderOrderTest {
     }
     
     private static final String REF_NORMAL = "RefNormal";
-    private static final RefTo<String> normalRef = Ref.of(String.class).providedWith(REF_NORMAL);
+    private static final RefTo<String> normalRef = Ref.to(String.class).providedWith(REF_NORMAL);
     
     @Test
     public void testRefNormal() {

@@ -39,7 +39,7 @@ import lombok.val;
 
 public class RunTest {
     
-    private static RefTo<Integer> num = Ref.ofValue(1);
+    private static RefTo<Integer> num = Ref.toValue(1);
     
     @Test
     public void testSameThreadSupplier() {

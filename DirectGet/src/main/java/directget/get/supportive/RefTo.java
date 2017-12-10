@@ -76,9 +76,9 @@ public class RefTo<T> extends Ref<T> {
     
     /** @return the default object. */
     @Override
-    public final T get() {
+    public final T getValue() {
         if (provider == null) {
-            return super.get();
+            return super.getValue();
         } else {
             return provider.get();
         }
@@ -86,8 +86,8 @@ public class RefTo<T> extends Ref<T> {
     
     /** @return the optional default object. */
     @Override
-    public final Optional<T> _get() {
-        return Optional.ofNullable(get());
+    public final Optional<T> _getValue() {
+        return Optional.ofNullable(getValue());
     }
     
     @Override

@@ -25,7 +25,7 @@ import directget.get.run.Named.Predicate;
 import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.get.supportive.Provider;
-import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import lombok.val;
 
@@ -46,10 +46,10 @@ public final class Get {
     
     
     /** The reference to the thread factory. */
-    public static final RefTo<ThreadFactory> DefaultThreadFactory = Ref.of(ThreadFactory.class).defaultedTo(CounterThreadFactory.instance);
+    public static final RefTo<ThreadFactory> DefaultThreadFactory = Ref.to(ThreadFactory.class).defaultedTo(CounterThreadFactory.instance);
     
     /** The reference to the executor. */
-    public static final RefTo<Executor> DefaultExecutor = Ref.of(Executor.class).defaultedToBy(()->GetThreadFactoryExecutor.instance);
+    public static final RefTo<Executor> DefaultExecutor = Ref.to(Executor.class).defaultedToBy(()->GetThreadFactoryExecutor.instance);
     
     
     private Get() {
@@ -94,7 +94,7 @@ public final class Get {
     //-- a --
     
     /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _a(RefFor<T> ref) {
+    public static <T> Optional<T> _a(RefOf<T> ref) {
         val optValue = App.scope.get()._a(ref);
         return optValue;
     }
@@ -112,7 +112,7 @@ public final class Get {
     }
     
     /** @return the value associated with the given class. */
-    public static <T> T a(RefFor<T> ref) {
+    public static <T> T a(RefOf<T> ref) {
         val optValue = App.scope.get().a(ref);
         return optValue;
     }

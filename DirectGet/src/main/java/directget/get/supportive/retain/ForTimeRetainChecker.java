@@ -41,7 +41,7 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
     
     /** Ref for current time in milliseconds. */
     static final RefTo<Long> currentTimeMillis
-            = Ref.of(Long.class, ()->Long.valueOf(System.currentTimeMillis()));
+            = Ref.to(Long.class, ()->Long.valueOf(System.currentTimeMillis()));
     
     static final Supplier<Long> nextExpire(long time, TimeUnit unit) {
         return ()->the(currentTimeMillis) + unit.toMillis(time);

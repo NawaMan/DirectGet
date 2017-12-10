@@ -28,7 +28,7 @@ public class ProblemHandledException extends DirectRunRuntimeException {
     
     // TODO - Current time should be put in separate place.
     /** The ref to get current time. */
-    public static RefTo<Long> currentTime = Ref.of(Long.class).defaultedToBy(System::currentTimeMillis);
+    public static RefTo<Long> currentTime = Ref.to(Long.class).defaultedToBy(System::currentTimeMillis);
     
     private static final long serialVersionUID = -5350585488754817001L;
     

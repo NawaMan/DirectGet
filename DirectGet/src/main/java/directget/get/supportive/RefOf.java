@@ -25,7 +25,7 @@ import lombok.val;
  * 
  * @author NawaMan
  */
-public final class RefFor<T> extends Ref<T> {
+public final class RefOf<T> extends Ref<T> {
     
     private final Provider<T> provider;
     
@@ -35,9 +35,9 @@ public final class RefFor<T> extends Ref<T> {
      * @param targetClass
      *          the target class.
      */
-    public RefFor(Class<T> targetClass) {
+    public RefOf(Class<T> targetClass) {
         super(targetClass);
-        this.provider = new Provider<>(this, Preferability.Default, () -> get());
+        this.provider = new Provider<>(this, Preferability.Default, () -> getValue());
     }
     
     /**

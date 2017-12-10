@@ -11,11 +11,11 @@ public class ConfigurationTest {
 
     @Test
     public void testConfiguration() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
-        val ref2 = Ref.of(String.class).defaultedTo("Ref2");
+        val ref1 = Ref.to(String.class).defaultedTo("Ref1");
+        val ref2 = Ref.to(String.class).defaultedTo("Ref2");
         
-        assertEquals("Ref1", ref1.get());
-        assertEquals("Ref2", ref2.get());
+        assertEquals("Ref1", ref1.getValue());
+        assertEquals("Ref2", ref2.getValue());
         
         val configuration = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -28,9 +28,9 @@ public class ConfigurationTest {
     
     @Test
     public void testConfiguration_withDuplicateRef() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
+        val ref1 = Ref.to(String.class).defaultedTo("Ref1");
         
-        assertEquals("Ref1", ref1.get());
+        assertEquals("Ref1", ref1.getValue());
         
         val configuration = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -42,13 +42,13 @@ public class ConfigurationTest {
     
     @Test
     public void testConfiguration_combine() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
-        val ref2 = Ref.of(String.class).defaultedTo("Ref2");
-        val ref3 = Ref.of(String.class).defaultedTo("Ref3");
+        val ref1 = Ref.to(String.class).defaultedTo("Ref1");
+        val ref2 = Ref.to(String.class).defaultedTo("Ref2");
+        val ref3 = Ref.to(String.class).defaultedTo("Ref3");
         
-        assertEquals("Ref1", ref1.get());
-        assertEquals("Ref2", ref2.get());
-        assertEquals("Ref3", ref3.get());
+        assertEquals("Ref1", ref1.getValue());
+        assertEquals("Ref2", ref2.getValue());
+        assertEquals("Ref3", ref3.getValue());
         
         val configuration1 = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -66,13 +66,13 @@ public class ConfigurationTest {
     
     @Test
     public void testConfiguration_combine_withDuplicateRefs() throws AppScopeAlreadyInitializedException {
-        val ref1 = Ref.of(String.class).defaultedTo("Ref1");
-        val ref2 = Ref.of(String.class).defaultedTo("Ref2");
-        val ref3 = Ref.of(String.class).defaultedTo("Ref3");
+        val ref1 = Ref.to(String.class).defaultedTo("Ref1");
+        val ref2 = Ref.to(String.class).defaultedTo("Ref2");
+        val ref3 = Ref.to(String.class).defaultedTo("Ref3");
         
-        assertEquals("Ref1", ref1.get());
-        assertEquals("Ref2", ref2.get());
-        assertEquals("Ref3", ref3.get());
+        assertEquals("Ref1", ref1.getValue());
+        assertEquals("Ref2", ref2.getValue());
+        assertEquals("Ref3", ref3.getValue());
         
         val configuration1 = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -91,7 +91,7 @@ public class ConfigurationTest {
     
     @Test
     public void testConfiguration_combine_preferenceSame() throws AppScopeAlreadyInitializedException {
-        val ref = Ref.of(String.class).defaultedTo("Ref");
+        val ref = Ref.to(String.class).defaultedTo("Ref");
         
         val configuration1 = new Configuration(
                 ref.getProvider().butWith("Str1")
@@ -106,7 +106,7 @@ public class ConfigurationTest {
     
     @Test
     public void testConfiguration_combine_preferenceDiffer() throws AppScopeAlreadyInitializedException {
-        val ref = Ref.of(String.class).defaultedTo("Ref");
+        val ref = Ref.to(String.class).defaultedTo("Ref");
         
         val configuration1 = new Configuration(
                 ref.getProvider().butWith("Str1")

@@ -94,8 +94,8 @@ public class AppTest {
     public void testInitialize_withConfiguration() throws AppScopeAlreadyInitializedException {
         App.reset();
         try {
-            val ref1 = Ref.of(String.class).defaultedTo("Ref1");
-            val ref2 = Ref.of(String.class).defaultedTo("Ref2");
+            val ref1 = Ref.to(String.class).defaultedTo("Ref1");
+            val ref2 = Ref.to(String.class).defaultedTo("Ref2");
             
             val configuration = new Configuration(
                     ref1.getProvider().butNormal().butWith("Str1"),
@@ -112,7 +112,7 @@ public class AppTest {
     
     @Test
     public void testInitializeGet() {
-        val ref = Ref.of(String.class).defaultedTo("Ref1");
+        val ref = Ref.to(String.class).defaultedTo("Ref1");
         assertEquals("Ref1", Get.the(ref));
         
         assertTrue(App.isInitialized());

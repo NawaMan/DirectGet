@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
-import directget.get.supportive.RefFor;
+import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import directget.get.supportive.Utilities;
 import lombok.val;
@@ -74,7 +74,7 @@ public final class GetInstance {
     //-- a --
     
     /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _a(RefFor<T> ref) {
+    public <T> Optional<T> _a(RefOf<T> ref) {
         val optValue = scope.doGetA(ref);
         return optValue;
     }
@@ -95,7 +95,7 @@ public final class GetInstance {
     }
     
     /** @return the value associated with the given class. */
-    public <T> T a(RefFor<T> ref) {
+    public <T> T a(RefOf<T> ref) {
         val optValue = scope.doGetA(ref);
         val value    = optValue.orElse(null);
         return value;
@@ -135,16 +135,16 @@ public final class GetInstance {
     
     /** @return the optional value associated with the given ref. */
     public <T> Optional<T> _any(Ref<T> ref) {
-        val optValue = (ref instanceof RefFor)
-                     ? _a((RefFor<T>)ref)
+        val optValue = (ref instanceof RefOf)
+                     ? _a((RefOf<T>)ref)
                      : scope.doGetThe(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
     public <T> T any(Ref<T> ref) {
-        val optValue = (ref instanceof RefFor)
-                ? _a((RefFor<T>)ref)
+        val optValue = (ref instanceof RefOf)
+                ? _a((RefOf<T>)ref)
                 : scope.doGetThe(ref);
         val value = optValue.orElse(null);
         return value;

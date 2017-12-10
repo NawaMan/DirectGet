@@ -72,7 +72,7 @@ public class RefWithSubstitute<T> {
     
     /** Create the provider that dictate the value of the given target class. */
     public <V extends T> Provider<T> butDictatedToA(Class<V> targetClass) {
-        return new Provider<>(this.theRef, Preferability.Dictate, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
+        return new Provider<>(this.theRef, Preferability.Dictate, new Named.RefSupplier<V>(Ref.of(targetClass)));
     }
     
     /** Create the provider that dictate the result of the given supplier. */
@@ -96,7 +96,7 @@ public class RefWithSubstitute<T> {
      * Create the provider (normal preferability) the value of the given target class.
      */
     public <V extends T> Provider<T> butProvidedWithA(Class<V> targetClass) {
-        return new Provider<>(this.theRef, Preferability.Normal, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
+        return new Provider<>(this.theRef, Preferability.Normal, new Named.RefSupplier<V>(Ref.of(targetClass)));
     }
     
     /**
@@ -125,7 +125,7 @@ public class RefWithSubstitute<T> {
      * given target class.
      */
     public <V extends T> Provider<T> butProvidedWithA(Preferability preferability, Class<V> targetClass) {
-        return new Provider<>(this.theRef, preferability, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
+        return new Provider<>(this.theRef, preferability, new Named.RefSupplier<V>(Ref.of(targetClass)));
     }
     
     /**
@@ -148,7 +148,7 @@ public class RefWithSubstitute<T> {
     
     /** Create the provider that default to the value of the given target class. */
     public <V extends T> Provider<T> butDefaultedToA(Class<V> targetClass) {
-        return new Provider<>(this.theRef, Preferability.Normal, new Named.RefSupplier<V>(Ref.forClass(targetClass)));
+        return new Provider<>(this.theRef, Preferability.Normal, new Named.RefSupplier<V>(Ref.of(targetClass)));
     }
     
     /**

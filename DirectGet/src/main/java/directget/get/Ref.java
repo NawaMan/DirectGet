@@ -15,10 +15,17 @@
 //  ========================================================================
 package directget.get;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Modifier;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import directcommon.common.Nulls;
+import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
@@ -122,26 +129,21 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
         return this.toString().compareTo(o.toString());
     }
     
-    /**
-     * Returns the default reference of the given class.
-     * 
-     * @param targetClass the target class.
-     * @return the default reference or {@code null} if non exist.
-     */
-    public static <T> RefTo<T> defaultOf(Class<T> targetClass) {
-        return DefaultRef.Util.defaultOf(targetClass);
-    }
-    
     // == Factory method ======================================================
     
-    // -- RefFor --------------------------------------------------------------
+    // -- RefOf ---------------------------------------------------------------
     
     /** @return the reference that represent the target class directly. */
-    public static <T> RefOf<T> forClass(Class<T> targetClass) {
+    public static <T> RefOf<T> of(Class<T> targetClass) {
         return new RefOf<>(targetClass);
     }
     
     // -- RefTo ---------------------------------------------------------------
+
+    /** Create and return a reference to a target class with default factory. **/
+    public static <T> RefTo<T> toA(Class<T> targetClass) {
+        return to(targetClass).defaultedToA(Ref.of(targetClass));
+    }
     
     /** Create and return a reference to a target class with default factory. **/
     public static <T> RefTo<T> to(Class<T> targetClass) {
@@ -261,6 +263,65 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     public static <T, V extends T> RefTo<Factory<T>> toFactory(String name, Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
         Ref ref = to(name, Factory.class).providedWith(preferability, valueFactory);
         return (RefTo<Factory<T>>)ref;
+    }
+    
+    //== Default ==============================================================
+
+    private static final String refToClassName = RefTo.class.getCanonicalName();
+    
+    @SuppressWarnings({ "rawtypes" })
+    private static final ConcurrentHashMap<Class, Optional<RefTo>> defeaultRefs = new ConcurrentHashMap<>();
+
+    // NOTE: Put it here to use 'Ref' as a namespace.
+    
+    /**
+     * This annotation is used to mark a static field of Ref of the same class,
+     *   so that its value is used as a default ref when Get.the(class).
+     */
+    @Target(value=ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Default {
+    }
+
+    
+    /**
+     * Returns the default reference of the given class.
+     * 
+     * @param targetClass the target class.
+     * @return the default reference or {@code null} if non exist.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> RefTo<T> defaultOf(Class<T> targetClass) {
+        @SuppressWarnings("rawtypes")
+        Optional<RefTo> refOpt = defeaultRefs.get(targetClass);
+        if (refOpt == null) {
+            for (val field : targetClass.getDeclaredFields()) {
+                if (!Modifier.isFinal(field.getModifiers()))
+                    continue;
+                if (!Modifier.isPublic(field.getModifiers()))
+                    continue;
+                if (!Modifier.isStatic(field.getModifiers()))
+                    continue;
+                if (!Ref.class.isAssignableFrom(field.getType()))
+                    continue;
+                
+                // This is hacky -- but no better way now.
+                val targetClassName  = targetClass.getName();
+                val expectedTypeName = refToClassName + "<" + targetClassName + ">";
+                val actualTypeName   = field.getGenericType().getTypeName();
+                if(!actualTypeName.equals(expectedTypeName))
+                    continue;
+                
+                try {
+                    refOpt = Optional.of((RefTo<T>)field.get(targetClass));
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    throw new DefaultRefException(e);
+                }
+            }
+            refOpt = (refOpt != null) ? refOpt : Optional.of(Ref.to(targetClass).defaultedToA(Ref.of(targetClass)));
+            defeaultRefs.put(targetClass, refOpt);
+        }
+        return refOpt.orElse(null);
     }
     
 }

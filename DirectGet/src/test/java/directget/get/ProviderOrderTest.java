@@ -201,7 +201,7 @@ public class ProviderOrderTest {
     
     @Test(expected = GetException.class)
     public void test_refDefault_withNoDefaultConstruction_exceptionIsThrown() {
-        App.scope.get().a(Ref.forClass(List.class));
+        App.scope.get().a(Ref.of(List.class));
     }
     
     @Test

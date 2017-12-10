@@ -82,14 +82,14 @@ public final class GetInstance {
     
     /** @return the optional value associated with the given class. */
     public <T> Optional<T> _a(Class<T> clzz) {
-        val ref      = Ref.forClass(clzz);
+        val ref      = Ref.of(clzz);
         val optValue = scope.doGetA(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
     public <T> T a(Class<T> clzz) {
-        val ref      = Ref.forClass(clzz);
+        val ref      = Ref.of(clzz);
         val optValue = scope.doGetA(ref);
         val value    = optValue.orElse(null);
         return value;

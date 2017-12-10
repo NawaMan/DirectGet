@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import directcommon.common.Nulls;
 import directget.get.supportive.Provider;
 import directget.get.supportive.Utilities;
 import lombok.val;
@@ -37,7 +38,7 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  */
 @SuppressWarnings("rawtypes")
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Utilities.class, Nulls.class })
 public class ProposedConfiguration {
     
     /** The instance of the proposed configuration. */

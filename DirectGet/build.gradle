@@ -11,10 +11,14 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     jcenter()
 }
 
 dependencies {
+    compile     'directcommon:direct-common:1.0.8-SNAPSHOT'
+    
+    
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'
 }

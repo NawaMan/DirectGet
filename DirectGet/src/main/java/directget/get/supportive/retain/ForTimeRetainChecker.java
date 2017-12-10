@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import directcommon.common.Nulls;
 import directget.get.Ref;
 import directget.get.supportive.RefTo;
-import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -36,7 +36,7 @@ import lombok.experimental.ExtensionMethod;
  *
  * @param <V> the type that is retained.
  */
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Nulls.class })
 public class ForTimeRetainChecker<V> implements Predicate<V> {
     
     /** Ref for current time in milliseconds. */
@@ -76,7 +76,7 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
      *          the time unit.
      */
     public ForTimeRetainChecker(Long startMilliseconds, long time, TimeUnit unit) {
-        long startTime = startMilliseconds._or(nextExpire(time, unit));
+        long startTime = startMilliseconds.or(nextExpire(time, unit));
         
         this.expiredValue = new AtomicLong(startTime);
         this.time = time;

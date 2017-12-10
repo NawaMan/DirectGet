@@ -19,6 +19,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
+import directcommon.common.Nulls;
 import directget.get.Ref;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -29,7 +30,7 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Utilities.class, Nulls.class })
 public class ProviderStackMap extends TreeMap<Ref, Stack<Provider>> {
     
     private static final long serialVersionUID = -8113998773064688984L;
@@ -43,7 +44,7 @@ public class ProviderStackMap extends TreeMap<Ref, Stack<Provider>> {
     
     @Override
     public Stack<Provider> get(Object ref) {
-        Stack<Provider> stack = super.get(ref)._or(ensureValue((Ref) ref));
+        Stack<Provider> stack = super.get(ref).or(ensureValue((Ref) ref));
         return stack;
     }
     

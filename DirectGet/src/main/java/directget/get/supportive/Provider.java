@@ -15,10 +15,13 @@
 //  ========================================================================
 package directget.get.supportive;
 
+import static directget.get.Preferability.Default;
+
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import directcommon.common.Nulls;
 import directget.get.App;
 import directget.get.Preferability;
 import directget.get.Ref;
@@ -31,7 +34,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  **/
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Nulls.class })
 public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
@@ -53,8 +56,8 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
         this.ref = Objects.requireNonNull(ref);
-        this.preferability = preferability._or(Preferability.Default);
-        this.supplier = supplier._or((Supplier)()->null);
+        this.preferability = preferability.or(Default);
+        this.supplier = supplier.or((Supplier)()->null);
     }
 
     @Override

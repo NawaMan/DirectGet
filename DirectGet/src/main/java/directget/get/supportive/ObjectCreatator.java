@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import directcommon.common.Nulls;
 import directget.get.Get;
 import directget.get.InjectedConstructor;
 import directget.get.exceptions.AbstractClassCreationException;
@@ -19,7 +20,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Nulls.class })
 public class ObjectCreatator {
     
     // TODO - All @The to the InjectedConstructor ...

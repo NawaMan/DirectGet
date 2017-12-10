@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import directcommon.common.Nulls;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
@@ -40,7 +41,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Utilities.class, Nulls.class })
 public final class GetInstance {
     
     private final Scope scope;
@@ -257,7 +258,7 @@ public final class GetInstance {
                         ._toList();
             };
             List<Provider> list
-                = refsToInherit._toNullable()
+                = refsToInherit.whenNotNull()
                     .filter(notInteritNone)
                     .map(filterRefs)
                     .orElse(emptyProviderList.get());

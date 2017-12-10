@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -95,11 +94,6 @@ public class Utilities {
     /** Collect the given stream into a list. */
     public static <T> List<T> _toList(Stream<T> theGivenStream) {
         return theGivenStream.collect(Collectors.toList());
-    }
-    
-    /** Returns the nullable optional of the given object. */
-    public static <T> Optional<T> _toNullable(T theGivenObject) {
-        return Optional.ofNullable(theGivenObject);
     }
     
     /** Collects the non-null elements of the given collection into a list. **/

@@ -37,6 +37,8 @@ import lombok.val;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DefaultRef {
 
+    //NOTE: This annotation contains no attribute
+    
     
     
     //== Utility class ==
@@ -70,6 +72,8 @@ public @interface DefaultRef {
                         continue;
                     if (!Ref.class.isAssignableFrom(field.getType()))
                         continue;
+                    
+                    // This is hacky -- but no better way now.
                     val targetClassName  = targetClass.getName();
                     val expectedTypeName = refToClassName + "<" + targetClassName + ">";
                     val actualTypeName   = field.getGenericType().getTypeName();

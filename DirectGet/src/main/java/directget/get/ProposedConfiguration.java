@@ -91,6 +91,7 @@ public class ProposedConfiguration {
         return App.isInitialized();
     }
     
+    // TODO - Share the same code with the one in Configuration and print it out to log. 
     /**
      * Add the provider to the proposed configuration.
      * 

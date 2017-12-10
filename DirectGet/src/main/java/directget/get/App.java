@@ -16,7 +16,6 @@
 package directget.get;
 
 import static directget.get.Get.the;
-import static directget.get.supportive.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -28,8 +27,6 @@ import lombok.val;
 
 /**
  * This is the application scope.
- * 
- * IMPORTANT NOTE: This class is complicated to test. So you should have a really really good reason to change it!!!
  * 
  * @author NawaMan
  */
@@ -62,8 +59,6 @@ public final class App {
         if (!isInitialized())
             return;
         if (the(App.mode).isNot(AppMode.TEST))
-            return;
-        if (!isLocalCall())
             return;
         
         scope.reset();

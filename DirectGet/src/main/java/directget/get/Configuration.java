@@ -31,8 +31,6 @@ import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
-// TODO - Convenient method to create configuration from different sources.
-
 /**
  * This class contains the providers for a scope.
  * 
@@ -53,8 +51,6 @@ public final class Configuration {
         this((Map<Ref, Provider>) null);
     }
     
-    
-
     /** Constructor. */
     public Configuration(HasProvider ... hasProviders) {
         this(Arrays.asList(hasProviders).stream().map(HasProvider::getProvider));
@@ -75,6 +71,7 @@ public final class Configuration {
         this(toMap(providers));
     }
     
+    // TODO - Have this printed out.
     private static Map<Ref, Provider> toMap(Stream<Provider> providers) {
         val theMap = new TreeMap<Ref, Provider>();
         providers
@@ -94,8 +91,6 @@ public final class Configuration {
         });
         return theMap;
     }
-    
-    // TODO - Merge and cascade configurations.
     
     private Configuration(Map<Ref, Provider> providers) {
         this.providers = providers._toUnmodifiableSortedMap();

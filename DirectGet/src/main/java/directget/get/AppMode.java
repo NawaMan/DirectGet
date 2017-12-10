@@ -15,15 +15,11 @@
 //  ========================================================================
 package directget.get;
 
-import directget.get.supportive.Utilities;
-import lombok.experimental.ExtensionMethod;
-
 /**
  * Application mode.
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class })
 public class AppMode {
     
     /** This application is run in production. */

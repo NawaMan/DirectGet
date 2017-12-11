@@ -72,27 +72,47 @@ public final class GetInstance {
 
     //-- the --
 
-    /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _the(Ref<T> ref) {
-        val optValue = scope.doGetThe(ref);
+    /**
+     * The optional value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the optional value associated with theGivenRef.
+     **/
+    public <T> Optional<T> _the(Ref<T> theGivenRef) {
+        val optValue = scope.doGetThe(theGivenRef);
         return optValue;
     }
     
-    /** @return the value associated with the given ref. */
-    public <T> T the(Ref<T> ref) {
-        val optValue = scope.doGetThe(ref);
+    /**
+     * The value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the value associated with theGivenRef.
+     **/
+    public <T> T the(Ref<T> theGivenRef) {
+        val optValue = scope.doGetThe(theGivenRef);
         val value    = optValue.orElse(null);
         return value;
     }
     
-    /** @return the optional value associated with the given targetClass. */
+    /**
+     * Return the optional value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the optional value associated with the given targetClass.
+     **/
     public <T> Optional<T> _the(Class<T> targetClass) {
         val ref      = Ref.defaultOf(targetClass);
         val optValue = scope.doGetThe(ref);
         return optValue;
     }
     
-    /** @return the value associated with the given class. */
+    /**
+     * Return the value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the value associated with the given targetClass.
+     **/
     public <T> T the(Class<T> targetClass) {
         val ref      = Ref.defaultOf(targetClass);
         val optValue = scope.doGetThe(ref);
@@ -104,6 +124,9 @@ public final class GetInstance {
     
     /**
      * Substitute the given providers and run the runnable.
+     * 
+     * @param providers the provider to be substitute.
+     * @param runnable  the runnable body.
      */
     @SuppressWarnings({ "rawtypes" })
     public void substitute(Stream<Provider> providers, Runnable runnable) {
@@ -122,6 +145,10 @@ public final class GetInstance {
     
     /**
      * Substitute the given providers and run the action.
+     * 
+     * @param providers the provider to be substitute.
+     * @param supplier  the supplier body.
+     * @return the result of the computation.
      */
     @SuppressWarnings("rawtypes")
     synchronized public <V> V substitute(Stream<Provider> providers, Supplier<V> supplier) {
@@ -165,8 +192,10 @@ public final class GetInstance {
     }
     
     /**
-     * Run the given runnable asynchronously and inherits the providers of
-     * those given refs.
+     * Run the given runnable asynchronously and inherits the providers of those given refs.
+     * 
+     * @param refsToInherit the list of Ref to inherit.
+     * @param runnable      the runnable body.
      **/
     @SuppressWarnings("rawtypes")
     public void runAsync(List<Ref> refsToInherit, Runnable runnable) {
@@ -176,6 +205,9 @@ public final class GetInstance {
     /**
      * Run the given runnable asynchronously and inherits the substitution
      * from the current Get (all Ref that pass the predicate test).
+     * 
+     * @param refsToInherit  the list of Ref to inherit.
+     * @param runnable       the runnable body.
      **/
     @SuppressWarnings("rawtypes")
     public void runAsync(Predicate<Ref> refsToInherit, Runnable runnable) {
@@ -217,7 +249,11 @@ public final class GetInstance {
         }
     }
     
-    /** Return the detail string representation of this object. */
+    /**
+     * Return the detail string representation of this object.
+     * 
+     * @return the detail string representation of this object
+     **/
     public final String toXRayString() {
         String toString = "Get(" + scope + ")";
         return toString;

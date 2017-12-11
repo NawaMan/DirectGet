@@ -198,7 +198,7 @@ public class DefaultRefTest {
 
     public static class GreetingWithRefWithValueFromClass {
         @Ref.Default
-        public static final RefTo<GreetingWithRefWithValueFromClass> instance = Ref.toA(GreetingWithRefWithValueFromClass.class);
+        public static final RefTo<GreetingWithRefWithValueFromClass> instance = Ref.toValueOf(GreetingWithRefWithValueFromClass.class);
         private final String greeting;
         public GreetingWithRefWithValueFromClass() {
             this("Hey!");

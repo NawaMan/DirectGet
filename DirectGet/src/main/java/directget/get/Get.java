@@ -75,14 +75,13 @@ public final class Get {
     }
 
     /**
-     * Initialize the App scope with the given configuration if it has not yet been iniialized.
+     * Initialize the App scope with the given configuration if it has not yet been initialized.
      * 
      * @param theGivenConfiguration
      * @return {@code true} if the initialization actually happen with this call.
-     * @throws AppScopeAlreadyInitializedException
      */
-    public static boolean initializeIfAbsent(Configuration configuration) {
-        return App.initializeIfAbsent(configuration);
+    public static boolean initializeIfAbsent(Configuration theGivenConfiguration) {
+        return App.initializeIfAbsent(theGivenConfiguration);
     }
     
     
@@ -92,26 +91,46 @@ public final class Get {
     
     //-- the --
     
-    /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _the(Ref<T> ref) {
-        val optValue = App.scope.get()._the(ref);
+    /**
+     * The optional value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the optional value associated with theGivenRef.
+     **/
+    public static <T> Optional<T> _the(Ref<T> theGivenRef) {
+        val optValue = App.scope.get()._the(theGivenRef);
         return optValue;
     }
     
-    /** @return the value associated with the given ref. */
-    public static <T> T the(Ref<T> ref) {
-        val optValue = App.scope.get()._the(ref);
+    /**
+     * The value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the value associated with theGivenRef.
+     **/
+    public static <T> T the(Ref<T> theGivenRef) {
+        val optValue = App.scope.get()._the(theGivenRef);
         val value = optValue.orElse(null);
         return value;
     }
     
-    /** @return the optional value associated with the given targetClass. */
+    /**
+     * Return the optional value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the optional value associated with the given targetClass.
+     **/
     public static <T> Optional<T> _the(Class<T> targetClass) {
         val optValue = App.scope.get()._the(Ref.defaultOf(targetClass));
         return optValue;
     }
     
-    /** @return the value associated with the given targetClass. */
+    /**
+     * Return the value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the value associated with the given targetClass.
+     **/
     public static <T> T the(Class<T> targetClass) {
         val optValue = App.scope.get()._the(targetClass);
         val value = optValue.orElse(null);
@@ -120,25 +139,45 @@ public final class Get {
     
     //-- From --
 
-    /** @return the optional value of object create from the factory. */
+    /**
+     * Return the optional value of object create from the factory.
+     * 
+     * @param factoryRef 
+     * @return the optional value of object create from the factory.
+     **/
     public static <T, F extends Factory<T>> Optional<T> _from(Class<F> factoryRef) {
         val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make);
     }
 
-    /** @return the optional value of object create from the factory. */
+    /**
+     * Return the optional value of object create from the factory.
+     * 
+     * @param factoryRef 
+     * @return the optional value of object create from the factory.
+     **/
     public static <T, F extends Factory<T>> T from(Class<F> factoryRef) {
         val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make).orElse(null);
     }
 
-    /** @return the optional value of object create from the factory. */
+    /**
+     * Return the optional value of object create from the factory.
+     * 
+     * @param factoryRef 
+     * @return the optional value of object create from the factory.
+     **/
     public static <T, F extends Factory<T>> Optional<T> _from(Ref<F> factoryRef) {
         val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make);
     }
 
-    /** @return the optional value of object create from the factory. */
+    /**
+     * Return the optional value of object create from the factory.
+     * 
+     * @param factoryRef 
+     * @return the optional value of object create from the factory.
+     **/
     public static <T, F extends Factory<T>> T from(Ref<F> factoryRef) {
         val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make).orElse(null);

@@ -29,11 +29,20 @@ public class Failable {
     private Failable() {
     }
     
-    /** Failable runnable.  */
+    /**
+     * Failable runnable.
+     *   
+     * @param <T> the throwable type.
+     **/
     @FunctionalInterface
     public static interface Runnable<T extends Throwable> {
         
-        /** Convenient factory method to allow lambda */
+        /**
+         * Convenient factory method to allow lambda 
+         * 
+         * @param runnable 
+         * @return the failable runnable.
+         **/
         public static <T extends Throwable> Runnable<T> of(Runnable<T> runnable) {
             return runnable;
         }

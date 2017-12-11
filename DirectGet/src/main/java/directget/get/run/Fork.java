@@ -42,14 +42,23 @@ public class Fork {
         this.forkSession.set(fork);
     }
     
-    /** Run something. */
+    /**
+     * Run something. 
+     * 
+     * @param runnable 
+     * @return the runnable.
+     **/
     public Runnable run(Runnable runnable) {
         val fork = new Session(runnable);
         this.setSession(fork);
         return fork.runnable();
     }
     
-    /** Join the latest run with this thread. */
+    /**
+     * Join the latest run with this thread. 
+     * 
+     * @throws Throwable
+     **/
     public void join() throws Throwable {
         this.forkSession.get()._do(joinSession.gracefully());
     }
@@ -63,12 +72,20 @@ public class Fork {
         
         private final Runnable runnable;
         
-        /** Constructor */
+        /**
+         * Constructor 
+         * 
+         * @param runnable
+         **/
         public Session(Runnable runnable) {
             this.runnable = runnable;
         }
         
-        /** Get the forked runnable - **NOT THE ORIGINAL RUNNABLE** */
+        /**
+         * Get the forked runnable - **NOT THE ORIGINAL RUNNABLE** 
+         * 
+         * @return the runnable.
+         **/
         public Runnable runnable() {
             return () -> {
                 try {
@@ -81,7 +98,11 @@ public class Fork {
             };
         }
         
-        /** Join the latest run with the current thread. */
+        /**
+         * Join the latest run with the current thread.
+         * 
+         * @throws Throwable
+         **/
         public void join() throws Throwable {
             latch.await();
             Throwable theProblem = problem.get();

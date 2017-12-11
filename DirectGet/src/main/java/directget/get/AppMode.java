@@ -41,7 +41,11 @@ public class AppMode {
         this.name = name;
     }
     
-    /** @returns the name of the mode. */
+    /**
+     * Return the name.
+     * 
+     * @return the name of the mode.
+     **/
     public String name() {
         return this.name;
     }

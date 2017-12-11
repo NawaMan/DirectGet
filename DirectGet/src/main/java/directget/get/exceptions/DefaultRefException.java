@@ -29,17 +29,30 @@ public class DefaultRefException extends DirectGetRuntimeException {
         super();
     }
     
-    /** Constructor */
+    /**
+     * Constructor
+     * 
+     * @param message
+     **/
     public DefaultRefException(String message) {
         super(message);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message 
+     * @param cause
+     **/
     public DefaultRefException(String message, Throwable cause) {
         super(message, cause);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param cause
+     **/
     public DefaultRefException(Throwable cause) {
         super(cause);
     }

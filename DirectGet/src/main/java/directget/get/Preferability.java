@@ -56,22 +56,26 @@ public enum Preferability {
     private static Function<String, String> addingTabIndentation = str -> str.replaceAll("\n", "\n\t");
     
     /**
-     * @return {@code true} if the given preferability is the same as this
-     *         preferability.
+     * Check if this is the same with the preferability.
+     * 
+     * @param theGivenPreferability 
+     * @return {@code true} if the given preferability is the same as this preferability.
      */
-    public boolean is(Preferability preferability) {
-        return this == preferability;
+    public boolean is(Preferability theGivenPreferability) {
+        return this == theGivenPreferability;
     }
     
     /**
-     * @return {@code true} if the given provider has the same preferability as
-     *         this preferability.
+     * Returns if the given provider has the same preferability.
+     * 
+     * @param theGivenProvider 
+     * @return {@code true} if the given provider has the same preferability as this preferability.
      */
-    public <T> boolean is(Provider<T> provider) {
-        if (provider == null) {
+    public <T> boolean is(Provider<T> theGivenProvider) {
+        if (theGivenProvider == null) {
             return false;
         }
-        return is(provider.getPreferability());
+        return is(theGivenProvider.getPreferability());
     }
     
     /** */
@@ -84,8 +88,20 @@ public enum Preferability {
     @FunctionalInterface
     public static interface DetermineProviderListener {
         
-        /**  */
-        public <T> void onDetermine(Ref<T> ref, String from, Provider<T> result, Supplier<String> stackTraceSupplier,
+        /**
+         * Listen to when the provider is determined.
+         * 
+         * @param theRef 
+         * @param from 
+         * @param theResultProvider 
+         * @param stackTraceSupplier 
+         * @param xraySupplier
+         **/
+        public <T> void onDetermine(
+                Ref<T> theRef, 
+                String from, 
+                Provider<T> theResultProvider, 
+                Supplier<String> stackTraceSupplier,
                 Supplier<String> xraySupplier);
         
     }
@@ -98,40 +114,45 @@ public enum Preferability {
     /**
      * Determine the provider for Get.
      * 
+     * @param theRef 
+     * @param parentScope 
+     * @param currentScope 
+     * @param stacks 
+     * 
      * @return the provider.
      */
-    public static <T> Provider<T> determineProvider(Ref<T> ref, Scope parentScope, Scope currentScope,
+    public static <T> Provider<T> determineProvider(Ref<T> theRef, Scope parentScope, Scope currentScope,
             ProviderStackMap stacks) {
         // TODO - This code is terrible.
         Optional<BiConsumer<String, Provider<T>>> alarm = Optional
                 .ofNullable(
-                        (!_ListenerEnabled_.get() || (ref == DefaultListener) || currentScope.isInitializing.get())
+                        (!_ListenerEnabled_.get() || (theRef == DefaultListener) || currentScope.isInitializing.get())
                         ? null
                         : the(DefaultListener))
                 .map(listener -> (foundSource, foundProvider) -> {
-                    listener.onDetermine(ref, foundSource, foundProvider, Preferability::callStackToString,
-                            getXRayString(ref, parentScope, currentScope, stacks));
+                    listener.onDetermine(theRef, foundSource, foundProvider, Preferability::callStackToString,
+                            getXRayString(theRef, parentScope, currentScope, stacks));
                 });
         
-        val refProvider = ref.getProvider();
+        val refProvider = theRef.getProvider();
         if (Dictate.is(refProvider)) {
             alarm.ifPresent(it -> it.accept("Ref", refProvider));
             return refProvider;
         }
         
-        val parentProvider = (parentScope != null) ? parentScope.getProvider(ref) : null;
+        val parentProvider = (parentScope != null) ? parentScope.getProvider(theRef) : null;
         if (Dictate.is(parentProvider)) {
             alarm.ifPresent(it -> it.accept("Parent", parentProvider));
             return parentProvider;
         }
         
-        val configProvider = currentScope.getProvider(ref);
+        val configProvider = currentScope.getProvider(theRef);
         if (Dictate.is(configProvider)) {
             alarm.ifPresent(it -> it.accept("Config", configProvider));
             return configProvider;
         }
         
-        val stackProvider = stacks.peek(ref);
+        val stackProvider = stacks.peek(theRef);
         if (Dictate.is(stackProvider)) {
             alarm.ifPresent(it -> it.accept("Stack", stackProvider));
             return stackProvider;

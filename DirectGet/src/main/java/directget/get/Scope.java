@@ -188,22 +188,35 @@ public class Scope {
         return name + "(" + config + ")";
     }
     
-    /** Return the detail string representation of this object. */
+    /**
+     * Return the detail string representation of this object.
+     * 
+     * @return the XRay string.
+     **/
     public final String toXRayString() {
         return name + "(" + config.toXRayString() + ")";
     }
     
-    /** Create and return a new sub scope with the given configuration. */
-    public Scope newSubScope(Configuration config) {
-        val subScope = new Scope(null, this, config);
+    /**
+     * Create and return a new sub scope with the given configuration. 
+     * 
+     * @param configuration  the configuration.
+     * @return the new sub scope.
+     **/
+    public Scope newSubScope(Configuration configuration) {
+        val subScope = new Scope(null, this, configuration);
         return subScope;
     }
     
     /**
      * Create and return a new sub scope with the given name and configuration.
+     * 
+     * @param name
+     * @param configuration
+     * @return the new sub scope.
      */
-    public Scope newSubScope(String name, Configuration config) {
-        val subScope = new Scope(name, this, config);
+    public Scope newSubScope(String name, Configuration configuration) {
+        val subScope = new Scope(name, this, configuration);
         return subScope;
     }
 

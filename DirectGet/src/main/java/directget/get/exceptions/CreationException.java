@@ -26,12 +26,21 @@ public class CreationException extends DirectGetRuntimeException {
 
     private final Class<?> clazz;
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param clazz  the class that this fail creation is attempted too.
+     **/
     public CreationException(Class<?> clazz) {
         this(clazz, null);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param clazz 
+     * @param cause
+     **/
     public CreationException(Class<?> clazz, Throwable cause) {
         super(clazz.getCanonicalName(), cause);
         this.clazz = clazz;

@@ -76,6 +76,8 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * 
      * This value is for the benefit of human who look at it. There is no use in
      * the program in anyway (except debugging/logging/auditing purposes).
+     * 
+     * @return the name.
      **/
     public String getName() {
         return this.targetClassName;
@@ -133,19 +135,24 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     // -- RefOf ---------------------------------------------------------------
     
-    /** @return the reference that represent the target class directly. */
+    /**
+     * Create a RefOf of a class.
+     * 
+     * @param targetClass 
+     * @return the reference that represent the target class directly.
+     **/
     public static <T> RefOf<T> of(Class<T> targetClass) {
         return new RefOf<>(targetClass);
     }
     
     // -- RefTo ---------------------------------------------------------------
-
-    /** Create and return a reference to a target class with default factory. **/
-    public static <T> RefTo<T> toA(Class<T> targetClass) {
-        return to(targetClass).defaultedToA(Ref.of(targetClass));
-    }
     
-    /** Create and return a reference to a target class with default factory. **/
+    /**
+     * Create and return a reference to a target class with default factory. 
+     * 
+     * @param targetClass 
+     * @return the ref.
+     **/
     public static <T> RefTo<T> to(Class<T> targetClass) {
         return toValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
     }
@@ -153,6 +160,10 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     /**
      * Create and return a reference with a human readable name to a target
      * class with default factory.
+     * 
+     * @param name 
+     * @param targetClass 
+     * @return the ref.
      **/
     public static <T> RefTo<T> to(String name, Class<T> targetClass) {
         return toValue(name, targetClass, Preferability.Default, null);
@@ -162,6 +173,10 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /**
      * Create and return a reference to a target class with the default supplier.
+     * 
+     * @param targetClass 
+     * @param valueSupplier 
+     * @return the ref.
      **/
     @SuppressWarnings("unchecked")
     public static <T, V extends T> RefTo<V> to(Class<T> targetClass, Supplier<V> valueSupplier) {
@@ -172,6 +187,11 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     /**
      * Create and return a reference with a human readable name to a target
      * class with the given supplier.
+     * 
+     * @param name 
+     * @param targetClass 
+     * @param valueSupplier 
+     * @return the ref.
      **/
     @SuppressWarnings("unchecked")
     public static <T, V extends T> RefTo<V> to(String name, Class<T> targetClass, Supplier<V> valueSupplier) {
@@ -183,6 +203,11 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /**
      * Create and return a reference to a target class with the given supplier.
+     * 
+     * @param targetClass 
+     * @param preferability 
+     * @param valueSupplier 
+     * @return the ref.
      **/
     @SuppressWarnings("unchecked")
     public static <T, V extends T> RefTo<V> to(Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
@@ -192,6 +217,12 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     /**
      * Create and return a reference with a human readable name to a target
      * class with the default supplier.
+     * 
+     * @param name 
+     * @param targetClass 
+     * @param preferability 
+     * @param valueSupplier
+     * @return the ref.
      **/
     @SuppressWarnings("unchecked")
     public static <T, V extends T> RefTo<V> to(String name, Class<T> targetClass, Preferability preferability, Supplier<V> valueSupplier) {
@@ -200,13 +231,24 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
 //    
 //    //-- with default value --
 //    
-    /** Create and return a reference to the default value's class default to the default factory. **/
+    /**
+     * Create and return a reference to the default value's class default to the default factory. 
+     * 
+     * @param defaultValue 
+     * @return the ref.
+     **/
     @SuppressWarnings("unchecked")
     public static <T> RefTo<T> toValue(T defaultValue) {
         return ((RefTo<T>)to(defaultValue.getClass())).defaultedTo(defaultValue);
     }
     
-    /** Create and return a reference to the default value's class default to the default factory. **/
+    /**
+     * Create and return a reference to the default value's class default to the default factory. 
+     * 
+     * @param name 
+     * @param defaultValue 
+     * @return the ref.
+     **/
     public static <T> RefTo<T> toValue(String name, T defaultValue) {
         @SuppressWarnings("unchecked")
         val targetClass = (Class<T>)defaultValue.getClass();
@@ -218,15 +260,28 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * class with the default value.
      **/
     private static <T, V extends T> RefTo<T> toValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        val theName    = name.whenNotNull().orElseGet(()->"#" + RefTo.getNewId());
+        val theName    = (String)name.whenNotNull().orElseGet(()->"#" + RefTo.getNewId());
         val theFactory = new Named.ValueSupplier<T>(defaultValue);
         return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
+    }
+
+    /**
+     * Create and return a reference to a target class with default factory.
+     * 
+     * @param targetClass 
+     * @return a reference to the given class.
+     **/
+    public static <T> RefTo<T> toValueOf(Class<T> targetClass) {
+        return to(targetClass).defaultedToA(Ref.of(targetClass));
     }
     
     //-- factory --
     
     /**
      * Create and return a reference to a target factory class with the default factory.
+     * 
+     * @param valueFactory 
+     * @return a reference to the factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T, V extends T> RefTo<Factory<T>> toFactory(Factory<V> valueFactory) {
@@ -235,8 +290,13 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     }
     
     /**
-     * Create and return a reference with a human readable name to a target
-     * factory class with the given supplier.
+     * Create and return a reference with a human readable name to a target factory class with 
+     *   the given supplier.
+     * 
+     * @param name 
+     * @param targetClass 
+     * @param valueFactory 
+     * @return a reference to the factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T, V extends T> RefTo<Factory<T>> toFactory(String name, Class<T> targetClass, Factory<V> valueFactory) {
@@ -248,6 +308,11 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /**
      * Create and return a reference to a target factory class with the default factory.
+     * 
+     * @param targetClass 
+     * @param preferability 
+     * @param valueFactory 
+     * @return a reference to the factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T, V extends T> RefTo<Factory<T>> toFactory(Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {
@@ -258,6 +323,12 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     /**
      * Create and return a reference with a human readable name to a target
      * class with the default factory.
+     * 
+     * @param name 
+     * @param targetClass 
+     * @param preferability 
+     * @param valueFactory 
+     * @return a reference to the factory.
      **/
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T, V extends T> RefTo<Factory<T>> toFactory(String name, Class<T> targetClass, Preferability preferability, Factory<V> valueFactory) {

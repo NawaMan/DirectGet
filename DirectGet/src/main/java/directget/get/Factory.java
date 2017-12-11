@@ -26,7 +26,12 @@ import directget.get.exceptions.FactoryException;
  */
 public interface Factory<T> {
     
-    /** @return the newly created data. */
+    /**
+     * Return the newly created data. 
+     * 
+     * @return the newly created data. 
+     * @throws FactoryException  when the creation fail.
+     **/
     public T make() throws FactoryException;
     
 }

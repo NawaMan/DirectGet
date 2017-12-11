@@ -24,7 +24,11 @@ public class FailableException extends DirectRunRuntimeException {
     
     private static final long serialVersionUID = 1L;
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param cause
+     **/
     public FailableException(Throwable cause) {
         super(cause);
     }

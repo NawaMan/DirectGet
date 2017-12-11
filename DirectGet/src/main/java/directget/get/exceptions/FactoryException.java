@@ -29,17 +29,30 @@ public class FactoryException extends DirectGetRuntimeException {
         super();
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message
+     **/
     public FactoryException(String message) {
         super(message);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message 
+     * @param cause
+     **/
     public FactoryException(String message, Throwable cause) {
         super(message, cause);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param cause
+     **/
     public FactoryException(Throwable cause) {
         super(cause);
     }

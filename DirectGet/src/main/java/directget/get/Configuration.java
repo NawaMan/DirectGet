@@ -51,22 +51,38 @@ public final class Configuration {
         this((Map<Ref, Provider>) null);
     }
     
-    /** Constructor. */
+    /**
+     * Constructor. 
+     * 
+     * @param hasProviders  the array of object with primitive.
+     **/
     public Configuration(HasProvider ... hasProviders) {
         this(Arrays.asList(hasProviders).stream().map(HasProvider::getProvider));
     }
     
-    /** Constructor. */
+    /**
+     * Constructor. 
+     * 
+     * @param providers
+     **/
     public Configuration(Provider... providers) {
         this(Arrays.asList(providers));
     }
     
-    /** Constructor. */
+    /**
+     * Constructor.
+     * 
+     * @param providers  the collection of providers.
+     **/
     public Configuration(Collection<Provider> providers) {
         this(providers.stream());
     }
     
-    /** Constructor. */
+    /**
+     * Constructor.
+     * 
+     * @param providers  the stream of providers.
+     **/
     public Configuration(Stream<Provider> providers) {
         this(toMap(providers));
     }
@@ -106,15 +122,25 @@ public final class Configuration {
         return providers.values().stream();
     }
     
-    /** @return the provider for the given ref. */
-    public <T> Provider<T> getProvider(Ref<T> ref) {
-        val provider = providers.get(ref);
+    /**
+     * Return the provider for the given ref.
+     * 
+     * @param theGivenRef 
+     * @return the provider for the given ref.
+     **/
+    public <T> Provider<T> getProvider(Ref<T> theGivenRef) {
+        val provider = providers.get(theGivenRef);
         return provider;
     }
     
-    /** @return {@code} if this configuration specified the provider for the given ref. */
-    public <T> boolean hasProvider(Ref<T> ref) {
-        val hasProvider = providers.containsKey(ref);
+    /**
+     * Return if this configuration specified the provider for the given ref.
+     * 
+     * @param theGivenRef 
+     * @return {@code true} if this configuration specified the provider for the given ref.
+     **/
+    public <T> boolean hasProvider(Ref<T> theGivenRef) {
+        val hasProvider = providers.containsKey(theGivenRef);
         return hasProvider;
     }
     
@@ -125,7 +151,11 @@ public final class Configuration {
         return toString;
     }
     
-    /** Return the detail string representation of this object. */
+    /**
+     * Return the detail string representation of this object. 
+     * 
+     * @return the detail string representation of this object. 
+     **/
     public String toXRayString() {
         val isEmpty = providers.isEmpty();
         if (isEmpty) {

@@ -34,107 +34,192 @@ import lombok.val;
  **/
 public class Run {
     
-    /** Specify that the running should be done under the given scope */
+    /**
+     * Specify that the running should be done under the given scope .
+     * 
+     * @param scope 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder under(Scope scope) {
         return new SyncSessionBuilder().under(scope);
     }
     
-    /** Specify that the running should be done under the given scope */
+    /**
+     * Specify that the running should be done under the given scope.
+     * 
+     * @param scope
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder Under(Scope scope) {
         return new SyncSessionBuilder().under(scope);
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper 
+     * 
+     * @param wrappers 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder with(Wrapper... wrappers) {
         return with(Stream.of(wrappers));
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper 
+     * 
+     * @param wrappers 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder With(Wrapper... wrappers) {
         return with(Stream.of(wrappers));
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper 
+     * 
+     * @param wrappers 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder with(Collection<Wrapper> wrappers) {
         return with(wrappers.stream());
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper 
+     * 
+     * @param wrappers 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder With(Collection<Wrapper> wrappers) {
         return with(wrappers.stream());
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper 
+     * 
+     * @param providers 
+     * @return the session builder.
+     **/
     public static SyncSessionBuilder With(Stream<Wrapper> providers) {
         return with(providers);
     }
     
-    /** Add the wrapper */
+    /**
+     * Add the wrapper
+     * 
+     * @param wrappers 
+     * @return a session builder.
+     **/
     public static SyncSessionBuilder with(Stream<Wrapper> wrappers) {
         SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.with(wrappers);
         return sessionBuilder;
     }
     
-    /** Mark that this run should handle the exception. */
+    /**
+     * Mark that this run should handle the exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder HandleProblem() {
         return handleProblem();
     }
     
-    /** Mark that this run should handle the exception. */
+    /**
+     * Mark that this run should handle the exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder handleProblem() {
         val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleProblem();
         return sessionBuilder;
     }
     
-    /** Mark that this run should handle the exception. */
+    /**
+     * Mark that this run should handle the exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder HandleThenIgnoreProblem() {
         return handleThenIgnoreProblem();
     }
     
-    /** Mark that this run should ignore thrown exception. */
+    /**
+     * Mark that this run should ignore thrown exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
         val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleThenIgnoreProblem();
         return sessionBuilder;
     }
     
-    /** Mark that this run should ignore all the handled problem. */
+    /** 
+     * Mark that this run should ignore all the handled problem. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncSessionBuilder IgnoreHandledProblem() {
         return ignoreHandledProblem();
     }
     
-    /** Mark that this run should ignore thrown exception. */
+    /**
+     * Mark that this run should ignore thrown exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder IgnoreException() {
         return ignoreException();
     }
     
-        /** Mark that this run should ignore all the handled problem. */
+    /**
+     * Mark that this run should ignore all the handled problem. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncSessionBuilder ignoreHandledProblem() {
         val sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.ignoreHandledProblem();
         return sessionBuilder;
     }
     
-    /** Mark that this run should ignore thrown exception. */
+    /**
+     * Mark that this run should ignore thrown exception. 
+     * 
+     * @return a session builder.
+     **/
     public static SyncNoCheckExceptionSessionBuilder ignoreException() {
         val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.ignoreException();
         return sessionBuilder;
     }
     
-    /** Make the run to be run on a new thread. */
+    /**
+     * Make the run to be run on a new thread. 
+     * 
+     * @return a session builder.
+     **/
     public static AsyncSessionBuilder Asynchronously() {
         return new SyncSessionBuilder().asynchronously();
     }
     
-    /** Make the run to be run on a new thread. */
+    /**
+     * Make the run to be run on a new thread. 
+     * 
+     * @return a session builder.
+     **/
     public static AsyncSessionBuilder asynchronously() {
         return new SyncSessionBuilder().asynchronously();
     }
     
-    /** Run the session now. */
+    /**
+     * Run the session now. 
+     * 
+     * @param runnable 
+     * @throws T -- the throwable.
+     **/
     public static <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
         SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.run(runnable);
@@ -143,7 +228,9 @@ public class Run {
     /**
      * Run the given supplier and return a value.
      * 
-     * @throws T
+     * @param supplier 
+     * @return the result from the supplier.
+     * @throws T -- the throwable.
      */
     public static <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
         SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();

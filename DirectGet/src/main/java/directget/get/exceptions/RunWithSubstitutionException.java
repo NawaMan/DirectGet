@@ -25,7 +25,11 @@ public class RunWithSubstitutionException extends DirectGetRuntimeException {
     
     private static final long serialVersionUID = -6016449881081091295L;
     
-    /** Default */
+    /**
+     * Default 
+     * 
+     * @param cause
+     **/
     public RunWithSubstitutionException(Throwable cause) {
         super(cause);
     }

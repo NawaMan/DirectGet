@@ -29,17 +29,30 @@ public abstract class DirectRunRuntimeException extends RuntimeException {
         super();
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message
+     **/
     public DirectRunRuntimeException(String message) {
         super(message);
     }
     
-    /** Constructor */
+    /**
+     * Constructor
+     * 
+     * @param message 
+     * @param cause
+     **/
     public DirectRunRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param cause
+     **/
     public DirectRunRuntimeException(Throwable cause) {
         super(cause);
     }

@@ -33,6 +33,7 @@ import lombok.experimental.ExtensionMethod;
  * Instance of this class can provide data.
  * 
  * @author NawaMan
+ * @param <T> the data type.
  **/
 @ExtensionMethod({ Nulls.class })
 public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {

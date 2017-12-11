@@ -24,7 +24,11 @@ public class AbstractClassCreationException extends CreationException {
 
     private static final long serialVersionUID = 5751024581572983499L;
 
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param clazz  the class that this fail creation is attempted too.
+     **/
     public AbstractClassCreationException(Class<?> clazz) {
         super(clazz);
     }

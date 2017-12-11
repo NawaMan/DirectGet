@@ -45,7 +45,11 @@ public class ProblemHandler {
     private final Consumer<Throwable> action;
     
     
-    /** Factory method to create 
+    /**
+     * Factory method to create 
+     * 
+     * @param action 
+     * @return the supplier of the problem handler.
      */
     public static Supplier<ProblemHandler> of(Consumer<Throwable> action) {
         return ()->new ProblemHandler(action);
@@ -71,7 +75,12 @@ public class ProblemHandler {
         this.name   = (name   != null) ? name   : this.action .toString();
     }
     
-    /** Handle the given problem. **/
+    /**
+     * Handle the given problem. 
+     * 
+     * @param problem 
+     * @throws ProblemHandledException
+     **/
     public final void handle(Throwable problem) throws ProblemHandledException {
         action.accept(problem);
         if(problem instanceof ProblemHandledException) {

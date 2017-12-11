@@ -75,6 +75,10 @@ public final class App {
     
     /**
      * Initialize the application scope. This method can only be run once.
+     * 
+     * @param config  the configuration.
+     * @return the scope object.
+     * @throws AppScopeAlreadyInitializedException 
      **/
     public static Scope initialize(Configuration config) throws AppScopeAlreadyInitializedException {
         scope.init(config);
@@ -83,6 +87,8 @@ public final class App {
     
     /**
      * Initialize the application scope if it has yet to be initialized.
+     * 
+     * @param configuration  the configuration.
      * @return {@code true} if the initialization actually happen with this call.
      */
     public static boolean initializeIfAbsent(Configuration configuration) {

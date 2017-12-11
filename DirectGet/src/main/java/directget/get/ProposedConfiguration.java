@@ -131,7 +131,12 @@ public class ProposedConfiguration {
             this.isLate       = isLate;
         }
         
-        /** Add onAccepted listener. **/
+        /** 
+         * Add onAccepted listener. 
+         * 
+         * @param onAccepted  the event to be called when accepted.
+         * @return this propose configuration.
+         **/
         public ProposedConfigurationWithLastProvider onAccepted(BiConsumer<Provider, Status> onAccepted) {
             if (lastProvider.isNotNull() && onAccepted.isNotNull()) {
                 onAccepteds.putIfAbsent(lastProvider, new HashSet<>());
@@ -141,7 +146,12 @@ public class ProposedConfiguration {
             return this;
         }
 
-        /** Add onReject listener. **/
+        /**
+         * Add onReject listener. 
+         * 
+         * @param onRejected  the event to be called when rejected.
+         * @return this propose configuration.
+         **/
         public ProposedConfigurationWithLastProvider onRejected(BiConsumer<Provider, Status> onRejected) {
             if (lastProvider.isNotNull() && onRejected.isNotNull()) {
                 if (isLate) {

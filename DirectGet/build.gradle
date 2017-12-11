@@ -1,6 +1,6 @@
 def thisGroup    = 'directget'
 def thisArtifact = 'get'
-def thisVersion  = '0.10.2'
+def thisVersion  = '0.10.3'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compile     'directcommon:direct-common:1.0.8-SNAPSHOT'
+    compile     'directcommon:direct-common:1.0.9'
     
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'

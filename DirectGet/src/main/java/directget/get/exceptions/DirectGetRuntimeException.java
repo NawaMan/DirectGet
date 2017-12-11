@@ -29,17 +29,30 @@ public abstract class DirectGetRuntimeException extends RuntimeException {
         super();
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message
+     **/
     public DirectGetRuntimeException(String message) {
         super(message);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param message 
+     * @param cause
+     **/
     public DirectGetRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param cause
+     **/
     public DirectGetRuntimeException(Throwable cause) {
         super(cause);
     }

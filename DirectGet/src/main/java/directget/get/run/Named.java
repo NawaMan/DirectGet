@@ -31,10 +31,20 @@ public interface Named {
     public static Named.User instance = new User() {
     };
     
-    /** Returns the name. */
+    /**
+     * Returns the name. 
+     * 
+     * @return the name.
+     **/
     public String getName();
     
-    /** Add name to the given predicate. */
+    /**
+     * Add name to the given predicate. 
+     * 
+     * @param name 
+     * @param check 
+     * @return the named predicate.
+     **/
     public static <T> Predicate<T> predicate(String name, java.util.function.Predicate<T> check) {
         return instance.predicate(name, check);
     }

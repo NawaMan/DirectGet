@@ -28,7 +28,12 @@ public class GetException extends DirectGetRuntimeException {
     
     private final Ref<?> ref;
     
-    /** Constructor */
+    /**
+     * Constructor 
+     * 
+     * @param ref 
+     * @param cause
+     **/
     public GetException(Ref<?> ref, Throwable cause) {
         super(ref.toString(), cause);
         this.ref = ref;

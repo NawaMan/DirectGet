@@ -15,7 +15,6 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.Get.a;
 import static directget.get.Get.the;
 import static directget.get.Run.Asynchronously;
 import static directget.get.Run.With;

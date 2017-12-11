@@ -63,7 +63,7 @@ public class GetInstanceTest implements Named.User {
     
     @Test
     public void testBasic() {
-    	StringBuffer buffer = Get._a(StringBuffer.class).orElse(null);
+    	StringBuffer buffer = Get._the(StringBuffer.class).orElse(null);
         assertNotNull(buffer);
     }
     

@@ -37,7 +37,7 @@ public class AppTest {
         try {
             // This test prove that without setting anything, the Get of the App
             // scope is ready to use.
-            App.Get().a(ArrayList.class);
+            App.Get().the(ArrayList.class);
         } finally {
             App.reset();
         }

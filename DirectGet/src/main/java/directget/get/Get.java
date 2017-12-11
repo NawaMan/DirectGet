@@ -25,7 +25,6 @@ import directget.get.run.Named.Predicate;
 import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.get.supportive.Provider;
-import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import lombok.val;
 
@@ -91,44 +90,16 @@ public final class Get {
         return App.Get().getProvider(ref);
     }
     
-    // TODO - Remove a and any .... 
-    
-    //-- a --
-    
-    /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _a(RefOf<T> ref) {
-        val optValue = App.scope.get()._a(ref);
-        return optValue;
-    }
-    
-    /** @return the optional value associated with the given class. */
-    public static <T> Optional<T> _a(Class<T> clzz) {
-        val optValue = App.scope.get()._a(clzz);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given ref. */
-    public static <T> T a(Class<T> clzz) {
-        val optValue = App.scope.get().a(clzz);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given class. */
-    public static <T> T a(RefOf<T> ref) {
-        val optValue = App.scope.get().a(ref);
-        return optValue;
-    }
-    
     //-- the --
     
     /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _the(RefTo<T> ref) {
+    public static <T> Optional<T> _the(Ref<T> ref) {
         val optValue = App.scope.get()._the(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
-    public static <T> T the(RefTo<T> ref) {
+    public static <T> T the(Ref<T> ref) {
         val optValue = App.scope.get()._the(ref);
         val value = optValue.orElse(null);
         return value;
@@ -147,46 +118,29 @@ public final class Get {
         return value;
     }
     
-    //-- any --
-    
-    // TODO - Any = the(<defaultRef of targetClass>).or(a(<targetClass>))
-    
-    /** @return the optional value associated with the given ref. */
-    public static <T> Optional<T> _any(Ref<T> ref) {
-        val optValue = App.scope.get()._any(ref);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given ref. */
-    public static <T> T any(Ref<T> ref) {
-        val optValue = App.scope.get()._any(ref);
-        val value = optValue.orElse(null);
-        return value;
-    }
-    
     //-- From --
 
     /** @return the optional value of object create from the factory. */
     public static <T, F extends Factory<T>> Optional<T> _from(Class<F> factoryRef) {
-        val optValue = App.scope.get()._a(factoryRef);
+        val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make);
     }
 
     /** @return the optional value of object create from the factory. */
     public static <T, F extends Factory<T>> T from(Class<F> factoryRef) {
-        val optValue = App.scope.get()._a(factoryRef);
+        val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make).orElse(null);
     }
 
     /** @return the optional value of object create from the factory. */
     public static <T, F extends Factory<T>> Optional<T> _from(Ref<F> factoryRef) {
-        val optValue = App.scope.get()._any(factoryRef);
+        val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make);
     }
 
     /** @return the optional value of object create from the factory. */
     public static <T, F extends Factory<T>> T from(Ref<F> factoryRef) {
-        val optValue = App.scope.get()._any(factoryRef);
+        val optValue = App.scope.get()._the(factoryRef);
         return optValue.map(Factory::make).orElse(null);
     }
     

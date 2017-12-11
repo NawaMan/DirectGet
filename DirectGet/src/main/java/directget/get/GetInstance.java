@@ -30,8 +30,6 @@ import directcommon.common.Nulls;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
-import directget.get.supportive.RefOf;
-import directget.get.supportive.RefTo;
 import directget.get.supportive.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -71,47 +69,17 @@ public final class GetInstance {
         val provider = Preferability.determineProvider(ref, scope.getParentScope(), scope, providerStacks);
         return provider;
     }
-    
-    //-- a --
-    
-    /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _a(RefOf<T> ref) {
-        val optValue = scope.doGetA(ref);
-        return optValue;
-    }
-    
-    /** @return the optional value associated with the given class. */
-    public <T> Optional<T> _a(Class<T> clzz) {
-        val ref      = Ref.of(clzz);
-        val optValue = scope.doGetA(ref);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given ref. */
-    public <T> T a(Class<T> clzz) {
-        val ref      = Ref.of(clzz);
-        val optValue = scope.doGetA(ref);
-        val value    = optValue.orElse(null);
-        return value;
-    }
-    
-    /** @return the value associated with the given class. */
-    public <T> T a(RefOf<T> ref) {
-        val optValue = scope.doGetA(ref);
-        val value    = optValue.orElse(null);
-        return value;
-    }
 
     //-- the --
 
     /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _the(RefTo<T> ref) {
+    public <T> Optional<T> _the(Ref<T> ref) {
         val optValue = scope.doGetThe(ref);
         return optValue;
     }
     
     /** @return the value associated with the given ref. */
-    public <T> T the(RefTo<T> ref) {
+    public <T> T the(Ref<T> ref) {
         val optValue = scope.doGetThe(ref);
         val value    = optValue.orElse(null);
         return value;
@@ -129,25 +97,6 @@ public final class GetInstance {
         val ref      = Ref.defaultOf(targetClass);
         val optValue = scope.doGetThe(ref);
         val value    = optValue.orElse(null);
-        return value;
-    }
-    
-    //-- any --
-    
-    /** @return the optional value associated with the given ref. */
-    public <T> Optional<T> _any(Ref<T> ref) {
-        val optValue = (ref instanceof RefOf)
-                     ? _a((RefOf<T>)ref)
-                     : scope.doGetThe(ref);
-        return optValue;
-    }
-    
-    /** @return the value associated with the given ref. */
-    public <T> T any(Ref<T> ref) {
-        val optValue = (ref instanceof RefOf)
-                ? _a((RefOf<T>)ref)
-                : scope.doGetThe(ref);
-        val value = optValue.orElse(null);
         return value;
     }
     

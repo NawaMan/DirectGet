@@ -15,14 +15,9 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.Get.a;
-import static directget.get.Get.the;
-import static directget.get.Run.With;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -30,15 +25,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
-import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
-import lombok.Getter;
 import lombok.val;
 
 public class RefTest {

@@ -1,14 +1,20 @@
+def thisGroup    = 'directget'
+def thisArtifact = 'get'
+def thisVersion  = '0.10.2'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
-group = 'directget'
-version = '0.10.1'
+group   = thisGroup
+version = thisVersion
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+// Dependencies
 
 repositories {
     mavenLocal()
@@ -18,36 +24,60 @@ repositories {
 dependencies {
     compile     'directcommon:direct-common:1.0.8-SNAPSHOT'
     
-    
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+
+// IDE
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-tasks.withType(Javadoc).all { enabled = false }
+// Building/Publishing
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId 'directget'
-            artifactId 'get'
-            version '0.10.1'
-            
             from components.java
+            
+            artifact sourceJar
+            artifact packageJavadoc
         }
     }
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+javadoc {
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
+    
+    options {
+        setMemberLevel JavadocMemberLevel.PUBLIC
+        setAuthor true
+        
+        links "https://docs.oracle.com/javase/8/docs/api/"
+    }
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task packageJavadoc(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) { options.compilerArgs << "-parameters" }
 }

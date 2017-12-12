@@ -27,12 +27,18 @@ import lombok.val;
  * The local (thread) retainer.
  * 
  * @author NawaMan
+ * @param <V>  the data type.
  **/
 public class LocalRetainer<V> extends Retainer<V> {
     
     private final ThreadLocal<Optional<V>> cache = ThreadLocal.withInitial(()->null);
     
-    /** Constructs a global retainer. */
+    /**
+     * Constructs a global retainer.
+     * 
+     * @param supplier      the supplier.
+     * @param shouldRetain  the predicate to determine if the value should be retained.
+     **/
     public LocalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
         super(supplier, shouldRetain);
     }

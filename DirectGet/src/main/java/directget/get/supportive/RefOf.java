@@ -21,9 +21,10 @@ import lombok.val;
 
 /**
  * This implements allow reference to a specific class. All instance of this
- * reference for the same class refer to the same thing.
+ * reference of the same class refer to the same thing.
  * 
  * @author NawaMan
+ * @param <T>  the type of the data this ref is refering to.
  */
 public final class RefOf<T> extends Ref<T> {
     

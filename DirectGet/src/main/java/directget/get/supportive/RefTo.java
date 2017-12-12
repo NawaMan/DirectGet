@@ -29,6 +29,7 @@ import lombok.val;
  * mean different things.
  * 
  * @author NawaMan
+ * @param <T>  the type of the data this ref is refering to.
  **/
 public class RefTo<T> extends Ref<T> {
     
@@ -118,7 +119,7 @@ public class RefTo<T> extends Ref<T> {
         return "Ref<" + this.name + ":" + this.getTargetClass().getName() + ">";
     }
     
-    /** Returns the retainer. */
+    /** @return the retainer. */
     public RefToWithRetainer<T> retained() {
         return new RefToWithRetainer<>(name, getTargetClass(), getPreferability(), provider.getSupplier());
     }

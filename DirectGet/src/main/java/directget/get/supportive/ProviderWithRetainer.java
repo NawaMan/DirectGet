@@ -33,7 +33,13 @@ import lombok.val;
  */
 public class ProviderWithRetainer<T> extends Provider<T> implements WithRetainer<T, ProviderWithRetainer<T>> {
 
-    /** Constructor. */
+    /**
+     * Constructor. 
+     * 
+     * @param ref            the ref.
+     * @param preferability  the preferability.
+     * @param supplier       the supplier.
+     **/
     public ProviderWithRetainer(
             Ref<T>                ref, 
             Preferability         preferability, 

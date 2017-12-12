@@ -26,6 +26,7 @@ import directget.get.supportive.RefTo;
  * The retainer.
  * 
  * @author NawaMan
+ * @param <V>  the data type.
  **/
 public abstract class Retainer<V> implements Supplier<V> {
     
@@ -46,7 +47,16 @@ public abstract class Retainer<V> implements Supplier<V> {
     
     abstract BiFunction<Supplier<V>, Predicate<V>, Retainer<V>> getCloner();
     
-    Retainer<V> newRetainer(Predicate<Predicate<V>> sameShouldRetain, Supplier<Predicate<V>> newShouldRetain) {
+    
+    // TODO - explain better.
+    /**
+     * Create a new retainer for the same supplier of this one.
+     * 
+     * @param sameShouldRetain  the predicate to check if the current shouldRetain is the one expected.
+     * @param newShouldRetain   the supplier of the new shouldRetain value.
+     * @return  a new retainer.
+     */
+    public Retainer<V> newRetainer(Predicate<Predicate<V>> sameShouldRetain, Supplier<Predicate<V>> newShouldRetain) {
         if (sameShouldRetain.test(this.shouldRetain)) {
             return this;
         }
@@ -104,7 +114,12 @@ public abstract class Retainer<V> implements Supplier<V> {
         return newRetainer;
     }
 
-    /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('same' rule). **/
+    /**
+     * Create a retainer for same value which is obtained from the ref.
+     * 
+     * @param ref  the reference to get the data from.
+     * @return the new retainer similar to this one except that it retains its value follow the give reference value ('same' rule).
+     **/
     public <R> Retainer<V> forSame(RefTo<R> ref) {
         @SuppressWarnings("rawtypes")
         Predicate<Predicate<V>> sameShouldRetain
@@ -117,7 +132,12 @@ public abstract class Retainer<V> implements Supplier<V> {
         return newRetainer;
     }
 
-    /** @return the new retainer similar to this one except that it retains its value follow the give reference value ('equivalent' rule). **/
+    /**
+     * Create a retainer for equivalent value which is obtained from the ref.
+     * 
+     * @param ref  the reference to get the data from. 
+     * @return the new retainer similar to this one except that it retains its value follow the give reference value ('equivalent' rule).
+     **/
     public <R> Retainer<V> forEquivalent(RefTo<R> ref) {
         @SuppressWarnings("rawtypes")
         Predicate<Predicate<V>> sameShouldRetain
@@ -130,22 +150,46 @@ public abstract class Retainer<V> implements Supplier<V> {
         return newRetainer;
     }
 
-    /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
+    /**
+     * 
+     * 
+     * @param time 
+     * @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond).
+     **/
     public <R> Retainer<V> forTime(long time) {
         return forTime(null, time, TimeUnit.MILLISECONDS);
     }
 
-    /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
+    /**
+     * Retain for a specific amount of time.
+     * 
+     * @param time  the time amount.
+     * @param unit  the time unit.
+     * @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond).
+     **/
     public <R> Retainer<V> forTime(long time, TimeUnit unit) {
         return forTime(null, time, unit);
     }
 
-    /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
+    /**
+     * Retain for a specific amount of time after an initial start millisecond.
+     * 
+     * @param startMilliseconds  the initial start time.
+     * @param time               the retain time in millisecond.
+     * @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond).
+     **/
     public <R> Retainer<V> forTime(Long startMilliseconds, long time) {
         return forTime(startMilliseconds, time, TimeUnit.MILLISECONDS);
     }
 
-    /** @return the new retainer similar to this one except that it retains its value for a given time period (in millisecond). **/
+    /**
+     * Retain for a specific amount of time after an initial start millisecond.
+     * 
+     * @param startMilliseconds  the initial start time.
+     * @param time               the retain time in the time unit.
+     * @param unit               the time unit.
+     * @return the new retainer similar to this one except that it retains its value for a given time period (in the unit).
+     **/
     public <R> Retainer<V> forTime(Long startMilliseconds, long time, TimeUnit unit) {
         @SuppressWarnings("rawtypes")
         Predicate<Predicate<V>> sameShouldRetain

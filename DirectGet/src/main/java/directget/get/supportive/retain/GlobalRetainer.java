@@ -27,12 +27,18 @@ import lombok.val;
  * The global retainer.
  * 
  * @author NawaMan
+ * @param <V>  the data type.
  **/
 public class GlobalRetainer<V> extends Retainer<V> {
     
     private final AtomicReference<Optional<V>> cache = new AtomicReference<Optional<V>>(null);
     
-    /** Constructs a global retainer. */
+    /**
+     * Constructs a global retainer. 
+     * 
+     * @param supplier 
+     * @param shouldRetain
+     **/
     public GlobalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
         super(supplier, shouldRetain);
     }

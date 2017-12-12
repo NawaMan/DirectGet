@@ -137,6 +137,9 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     }
     
     /**
+     * Return the modified provider from this provider to provide the given value.
+     * 
+     * @param value  the given value.
      * @return the new provider similar to this one except with the value.
      **/
     public Provider<T> butWith(T value) {
@@ -144,13 +147,21 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     }
     
     /**
+     * Return the modified provider from this provider to provide the value from the given ref.
+     * 
+     * @param ref  the given ref.
      * @return the new provider similar to this one except with the value.
      **/
     public Provider<T> butWithA(Ref<T> ref) {
         return new Provider<>(ref, preferability, new Named.RefSupplier<T>(ref));
     }
     
-    /** @return the new provider similar to this one except the supplied by the given supplier. **/
+    /**
+     * Return the modified provider from this provider to provide the value from the given supplier.
+     * 
+     * @param supplier  the given supplier.
+     * @return the new provider similar to this one except the supplied by the given supplier.
+     **/
     public Provider<T> butBy(Supplier<T> supplier) {
         return new Provider<>(ref, preferability, supplier);
     }

@@ -32,10 +32,19 @@ import lombok.val;
  */
 public class RefToWithRetainer<T> extends RefTo<T> implements WithRetainer<T, RefToWithRetainer<T>> {
     
-    /** Constructor. */
-    public RefToWithRetainer(String name, Class<T> targetClass, Preferability preferability,
-            Supplier<? extends T> factory) {
-        super(name, targetClass, preferability, factory);
+    /** Constructor.
+     * 
+     * @param name           the name of the ref.
+     * @param targetClass    the target class.
+     * @param preferability  the preferability.
+     * @param supplier       the supplier.
+     **/
+    public RefToWithRetainer(
+            String name,
+            Class<T> targetClass,
+            Preferability preferability,
+            Supplier<? extends T> supplier) {
+        super(name, targetClass, preferability, supplier);
     }
     
     /** Returns the retainer. */

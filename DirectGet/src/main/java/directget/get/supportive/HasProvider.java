@@ -19,6 +19,7 @@ package directget.get.supportive;
  * Classes implementing this interface as a provider.
  * 
  * @author NawaMan
+ * @param <T>  the type of the data provided.
  **/
 public interface HasProvider<T> {
     

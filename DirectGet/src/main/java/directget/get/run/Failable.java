@@ -47,15 +47,27 @@ public class Failable {
             return runnable;
         }
         
-        /** Run this runnable. */
+        /**
+         * Run this runnable.
+
+         * @throws T the thrown exception.
+         **/
         public void run() throws T;
         
-        /** Change to regular runnable. */
+        /**
+         * Change to regular runnable.
+         *  
+         * @return Java's Runnable.
+         **/
         public default java.lang.Runnable toRunnable() {
             return gracefully();
         }
         
-        /** Convert to a regular runnable and throw FailableException if there is an exception. */
+        /**
+         * Convert to a regular runnable and throw FailableException if there is an exception.
+         *  
+         * @return Java's Runnable.
+         **/
         public default java.lang.Runnable gracefully() {
             return () -> {
                 try {
@@ -68,7 +80,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular runnable that completely ignore the exception throw from it. */
+        /**
+         * Convert to a regular runnable that completely ignore the exception throw from it.
+         * 
+         * @return Java's Runnable.
+         **/
         public default java.lang.Runnable carelessly() {
             return () -> {
                 try {
@@ -78,7 +94,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular runnable that handle the problem using {@code ProblemHandler}. */
+        /**
+         * Convert to a regular runnable that handle the problem using {@code ProblemHandler}. 
+         * 
+         * @return Java's Runnable.
+         **/
         public default java.lang.Runnable handledly() {
             return () -> {
                 try {
@@ -91,24 +111,47 @@ public class Failable {
         
     }
     
-    /** Failable consumer. **/
+    /**
+     * Failable consumer.
+     * 
+     * @param <V>  the type of the return value.
+     * @param <T>  the type of the thrown exception.
+     **/
     @FunctionalInterface
     public static interface Supplier<V, T extends Throwable> {
 
-        /** Convenient factory method to allow lambda */
+        /**
+         * Convenient factory method to allow lambda
+         *  
+         * @param supplier the failable supplier
+         * @return a failable supplier.
+         **/
         public static <V, T extends Throwable> Supplier<V, T> of(Supplier<V, T> supplier) {
             return supplier;
         }
         
-        /** Run this supplier. */
+        /**
+         * Run this supplier. 
+         * 
+         * @return  the result value.
+         * @throws T the thrown exception.
+         **/
         public V get() throws T;
         
-        /** Convert to a regular supplier and throw FailableException if there is an exception. */
+        /**
+         * Convert to a regular supplier and throw FailableException if there is an exception.
+         *  
+         * @return  Java Supplier.
+         **/
         public default java.util.function.Supplier<V> toSupplier() {
             return gracefully();
         }
         
-        /** Convert to a regular supplier and throw FailableException if there is an exception. */
+        /**
+         * Convert to a regular supplier and throw FailableException if there is an exception. 
+         * 
+         * @return   Java Supplier.
+         **/
         public default java.util.function.Supplier<V> gracefully() {
             return () -> {
                 try {
@@ -121,7 +164,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular supplier that completely ignore the exception throw from it. */
+        /**
+         * Convert to a regular supplier that completely ignore the exception throw from it. 
+         * 
+         * @return   Java Supplier.
+         **/
         public default java.util.function.Supplier<V> carelessly() {
             return () -> {
                 try {
@@ -132,7 +179,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        /**
+         * Convert to a regular supplier that handle the problem using {@code ProblemHandler}. 
+         * 
+         * @return  Java Supplier.
+         **/
         public default java.util.function.Supplier<V> handledly() {
             return () -> {
                 try {
@@ -146,24 +197,47 @@ public class Failable {
         
     }
     
-    /** Failable consumer. **/
+    /**
+     * Failable consumer. 
+     * 
+     * @param <V>  the value data type.
+     * @param <T>  the type of the thrown exception.
+     **/
     @FunctionalInterface
     public static interface Consumer<V, T extends Throwable> {
 
-        /** Convenient factory method to allow lambda */
+        /**
+         * Convenient factory method to allow lambda.
+         * 
+         * @param consumer  the failable consumer.
+         * @return  the failable consumer.
+         **/
         public static <V, T extends Throwable> Consumer<V, T> of(Consumer<V, T> consumer) {
             return consumer;
         }
         
-        /** Run this consumer. */
+        /**
+         * Run this consumer. 
+         * 
+         * @param value the accepted value.
+         * @throws T  the thrown exception.
+         **/
         public void accept(V value) throws T;
         
-        /** Convert to a regular consumer and throw FailableException if there is an exception. */
+        /**
+         * Convert to a regular consumer and throw FailableException if there is an exception.
+         * 
+         * @return  Java Consumer.
+         **/
         public default java.util.function.Consumer<V> toConsumer() {
             return gracefully();
         }
         
-        /** Convert to a regular consumer and throw FailableException if there is an exception. */        
+        /**
+         * Convert to a regular consumer and throw FailableException if there is an exception. 
+         * 
+         * @return  Java Consumer.
+         **/        
         public default java.util.function.Consumer<V> gracefully() {
             return v -> {
                 try {
@@ -176,7 +250,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular consumer that completely ignore the exception throw from it. */
+        /**
+         * Convert to a regular consumer that completely ignore the exception throw from it. 
+         * 
+         * @return  Java Consumer.
+         **/
         public default java.util.function.Consumer<V> carelessly() {
             return v -> {
                 try {
@@ -186,7 +264,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        /**
+         * Convert to a regular supplier that handle the problem using {@code ProblemHandler}.
+         * 
+         * @return  Java Consumer.
+         **/
         public default java.util.function.Consumer<V> handledly() {
             return value -> {
                 try {
@@ -198,24 +280,49 @@ public class Failable {
         }
     }
     
-    /** Failable function. **/
+    /**
+     * Failable function.
+     * 
+     * @param <V>  the input data type.
+     * @param <R>  the returned data type.
+     * @param <T>  the type of the thrown exception.
+     **/
     @FunctionalInterface
     public static interface Function<V, R, T extends Throwable> {
 
-        /** Convenient factory method to allow lambda */
+        /**
+         * Convenient factory method to allow lambda.
+         * 
+         * @param function  the failable function.
+         * @return  the failable function.
+         **/
         public static <V, R, T extends Throwable> Function<V, R, T> of(Function<V, R, T> function) {
             return function;
         }
         
-        /** Run this function. */
+        /**
+         * Run this function. 
+         * 
+         * @param value  the input value.
+         * @return  the returned value.
+         * @throws T  the thrown exception.
+         **/
         public R apply(V value) throws T;
         
-        /** Convert to a regular function and throw FailableException if there is an exception. */
+        /**
+         * Convert to a regular function and throw FailableException if there is an exception. 
+         * 
+         * @return  Java Function.
+         **/
         public default java.util.function.Function<V, R> toFunction() {
             return gracefully();
         }
         
-        /** Convert to a regular function and throw FailableException if there is an exception. */        
+        /**
+         * Convert to a regular function and throw FailableException if there is an exception. 
+         * 
+         * @return  Java Function.
+         **/        
         public default java.util.function.Function<V, R> gracefully() {
             return v -> {
                 try {
@@ -228,7 +335,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular function that completely ignore the exception throw from it. */
+        /**
+         * Convert to a regular function that completely ignore the exception throw from it. 
+         * 
+         * @return  Java Function.
+         **/
         public default java.util.function.Function<V, R> carelessly() {
             return v -> {
                 try {
@@ -239,7 +350,11 @@ public class Failable {
             };
         }
         
-        /** Convert to a regular supplier that handle the problem using {@code ProblemHandler}. */
+        /**
+         * Convert to a regular supplier that handle the problem using {@code ProblemHandler}. 
+         * 
+         * @return  Java Function.
+         **/
         public default java.util.function.Function<V, R> handledly() {
             return value -> {
                 try {

@@ -67,7 +67,7 @@ public class DefaultRefTest {
     public void test_substitute() {
         RefOf<Car> carRef = Ref.of(Car.class);
         assertEquals("SUPER FLASH!!!!", 
-                With(carRef.butProvidedWithA(SuperCar.class))
+                With(carRef.butProvidedWithThe(SuperCar.class))
                 .run(()->
                     Get.the(Driver.class).zoom()
                 )

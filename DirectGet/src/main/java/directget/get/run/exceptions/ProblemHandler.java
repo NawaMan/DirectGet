@@ -38,7 +38,7 @@ public class ProblemHandler {
     
     /** Default problem handler. */
     public static final RefTo<ProblemHandler> problemHandler
-            = Ref.to(ProblemHandler.class).defaultedToA(printStackTrace);
+            = Ref.to(ProblemHandler.class).defaultedToThe(printStackTrace);
     
     private final String name;
     

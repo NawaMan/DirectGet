@@ -132,7 +132,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /** Create the provider that dictate the value of the given ref. */
-    public <V extends T> RefTo<T> dictatedToA(Ref<V> ref) {
+    public <V extends T> RefTo<T> dictatedToThe(Ref<V> ref) {
         return providedBy(Preferability.Dictate, new Named.RefSupplier<V>(ref));
     }
     
@@ -149,7 +149,7 @@ public class RefTo<T> extends Ref<T> {
     /**
      * Create the provider (normal preferability) the value of the given ref.
      */
-    public <V extends T> RefTo<T> providedWithA(Ref<V> ref) {
+    public <V extends T> RefTo<T> providedWithThe(Ref<V> ref) {
         return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
     }
     
@@ -170,7 +170,7 @@ public class RefTo<T> extends Ref<T> {
      * Create the provider (using the given preferability) the value of the
      * given ref.
      */
-    public <V extends T> RefTo<T> providedWithA(Preferability preferability, Ref<V> ref) {
+    public <V extends T> RefTo<T> providedWithThe(Preferability preferability, Ref<V> ref) {
         return providedBy(preferability, new Named.RefSupplier<V>(ref));
     }
     
@@ -192,7 +192,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /** Create the provider that default to the value of the given ref. */
-    public <V extends T> RefTo<T> defaultedToA(Ref<V> ref) {
+    public <V extends T> RefTo<T> defaultedToThe(Ref<V> ref) {
         return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
     }
     

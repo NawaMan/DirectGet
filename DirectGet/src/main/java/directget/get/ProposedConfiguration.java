@@ -198,6 +198,7 @@ public class ProposedConfiguration {
 
     Configuration getConfiguration() {
         // TODO - Get SPI and ask for all proposal.
+        // See https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html#Service_Provider
         
         Stream<Provider> theProviders = providers.values().stream();
         Stream<Provider> theDefauls  = DEFAULT_PROVIDERS.stream();

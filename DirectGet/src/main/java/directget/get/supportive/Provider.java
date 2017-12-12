@@ -152,7 +152,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @param ref  the given ref.
      * @return the new provider similar to this one except with the value.
      **/
-    public Provider<T> butWithA(Ref<T> ref) {
+    public Provider<T> butWithThe(Ref<T> ref) {
         return new Provider<>(ref, preferability, new Named.RefSupplier<T>(ref));
     }
     

@@ -273,7 +273,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a reference to the given class.
      **/
     public static <T> RefTo<T> toValueOf(Class<T> targetClass) {
-        return to(targetClass).defaultedToA(Ref.of(targetClass));
+        return to(targetClass).defaultedToThe(Ref.of(targetClass));
     }
     
     //-- factory --
@@ -385,7 +385,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
                     throw new DefaultRefException(e);
                 }
             }
-            refOpt = (refOpt != null) ? refOpt : Optional.of(Ref.to(targetClass).defaultedToA(Ref.of(targetClass)));
+            refOpt = (refOpt != null) ? refOpt : Optional.of(Ref.to(targetClass).defaultedToThe(Ref.of(targetClass)));
             defeaultRefs.put(targetClass, refOpt);
         }
         return refOpt.orElse(null);

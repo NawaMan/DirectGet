@@ -147,8 +147,7 @@ public class ProposedConfiguration {
     //== Sub class ==
     
     /**
-     * @author manusitn
-     *
+     * Instances of this class hold the last provider so listener can be added to it.
      */
     public static class ProposedConfigurationWithLastProvider extends ProposedConfiguration {
         
@@ -198,6 +197,8 @@ public class ProposedConfiguration {
     }
 
     Configuration getConfiguration() {
+        // TODO - Get SPI and ask for all proposal.
+        
         Stream<Provider> theProviders = providers.values().stream();
         Stream<Provider> theDefauls  = DEFAULT_PROVIDERS.stream();
         return new Configuration(Stream.concat(theProviders, theDefauls));

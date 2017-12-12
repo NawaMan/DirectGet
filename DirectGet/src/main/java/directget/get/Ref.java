@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -337,8 +338,6 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     }
     
     //== Default ==============================================================
-
-    private static final String refToClassName = RefTo.class.getCanonicalName();
     
     @SuppressWarnings({ "rawtypes" })
     private static final ConcurrentHashMap<Class, Optional<RefTo>> defeaultRefs = new ConcurrentHashMap<>();
@@ -376,11 +375,8 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
                 if (!Ref.class.isAssignableFrom(field.getType()))
                     continue;
                 
-                // This is hacky -- but no better way now.
-                val targetClassName  = targetClass.getName();
-                val expectedTypeName = refToClassName + "<" + targetClassName + ">";
-                val actualTypeName   = field.getGenericType().getTypeName();
-                if(!actualTypeName.equals(expectedTypeName))
+                val actualType = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+                if(!actualType.equals(targetClass))
                     continue;
                 
                 try {

@@ -6,13 +6,22 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Supplier;
+
+import javax.annotations.Nullable;
 import javax.inject.Inject;
 
 import org.junit.Test;
 
+import directcommon.common.Nulls;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
+import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
 // This test involve the default value got when no substitution or configuration is made.
 public class DefaultRefTest {
@@ -215,5 +224,101 @@ public class DefaultRefTest {
     public void testThat_whenDefaultRefGivenWithValueFromClass_theValueIsFromObjectFactory() {
         assertEquals("Hey!", Get.the(GreetingWithRefWithValueFromClass.class).getGreeting());
     }
-  
+    
+    public static interface Department {
+        public String name();
+    }
+
+    @ExtensionMethod({ Nulls.class })
+    public static class Employee {
+        private Department department;
+        public Employee(Optional<Department> department) {
+            this.department = department.orElse(null);
+        }
+        public String departmentName() {
+            return department.whenNotNull().map(Department::name).orElse(null);
+        }
+    }
+    
+    @Test
+    public void testThat_OptionalEmptyIsGivenIfTheValueCannotBeObtained() {
+        // Since Department is an interface an no default is given, so its value can't be found.
+        assertNull(Get.the(Employee.class).departmentName());
+        
+        // With default given, now we can get the value.
+        val mainDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Main");
+        assertEquals("Main", With(mainDepartment).run(()->Get.the(Employee.class).departmentName()));
+    }
+
+    @ExtensionMethod({ Nulls.class })
+    public static class Manager {
+        private Department department;
+        public Manager(@Nullable Department department) {
+            this.department = department;
+        }
+        public String departmentName() {
+            return department.whenNotNull().map(Department::name).orElse(null);
+        }
+    }
+    
+    @Test
+    public void testThat_nullIsGivenToNullableParameterIfTheValueCannotBeObtained() {
+        // Since Department is an interface an no default is given, so its value can't be found.
+        assertNull(Get.the(Manager.class).departmentName());
+        
+        // With default given, now we can get the value.
+        val specialDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Special");
+        assertEquals("Special", With(specialDepartment).run(()->Get.the(Manager.class).departmentName()));
+    }
+
+    
+    @ExtensionMethod({ Nulls.class })
+    public static class Executive {
+        private Optional<Department> department;
+        public Executive(@Nullable Optional<Department> department) {
+            this.department = department;
+        }
+        public Optional<Department> department() {
+            return department;
+        }
+    }
+    
+    @Test
+    public void testThat_nullIsGivenToNullableOptionalParameterIfTheValueCannotBeObtainedDueToException() {
+        // Since Department is an interface an no default is given, so its value can't be found.
+        assertNull(Get.the(Executive.class).department());
+        
+        // With default given as no, now we can get the value as Optiona.empty.
+        val nullDepartment = Ref.of(Department.class).butDefaultedTo(null);
+        assertTrue(With(nullDepartment).run(()->Get.the(Executive.class).department().equals(Optional.empty())));
+        
+        // With default given, now we can get the value.
+        val secretDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Secret");
+        assertEquals("Secret", With(secretDepartment).run(()->Get.the(Manager.class).departmentName()));
+    }
+    
+
+    @ExtensionMethod({ Nulls.class })
+    public static class Company {
+        private Supplier<Integer> revenueSupplier;
+        public Company(Supplier<Integer> revenueSupplier) {
+            this.revenueSupplier = revenueSupplier;
+        }
+        public int revenue() {
+            return revenueSupplier.get();
+        }
+    }
+    
+    @Test
+    public void testThat_withSupplierAsParameter_aSupplierToGetIsGiven() {
+        val company = Get.the(Company.class);
+        
+        assertEquals(0, company.revenue());
+
+        // Notice that company is created once but the revenue returns different value as it is substitue.
+        val revenueCalculator = Ref.of(Integer.class).butDefaultedTo(10000);
+        assertEquals(10000, With(revenueCalculator).run(()->company.revenue()).intValue());
+        
+        assertEquals(0, company.revenue());
+    }
 }

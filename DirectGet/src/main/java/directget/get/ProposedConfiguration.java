@@ -17,7 +17,11 @@ package directget.get;
 
 import static directget.get.supportive.Utilities.isLocalCall;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -25,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import directcommon.common.Nulls;
 import directget.get.supportive.Provider;
@@ -65,6 +70,31 @@ public class ProposedConfiguration {
 
     private final static Map<Provider, Set<BiConsumer<Provider,Status>>> onAccepteds = new ConcurrentHashMap<>();
     private final static Map<Provider, Set<BiConsumer<Provider,Status>>> onRejecteds = new ConcurrentHashMap<>();
+    
+    private final static List<Provider> DEFAULT_PROVIDERS = Arrays.asList(
+            Ref.of(byte.class)   .butDefaultedTo((byte)0),
+            Ref.of(short.class)  .butDefaultedTo((short)0),
+            Ref.of(int.class)    .butDefaultedTo(0),
+            Ref.of(long.class)   .butDefaultedTo(0L),
+            Ref.of(float.class)  .butDefaultedTo((float)0.0),
+            Ref.of(double.class) .butDefaultedTo(0.0),
+            Ref.of(char.class)   .butDefaultedTo(' '),
+            Ref.of(boolean.class).butDefaultedTo(false),
+            
+            Ref.of(Byte.class)     .butDefaultedTo((byte)0),
+            Ref.of(Short.class)    .butDefaultedTo((short)0),
+            Ref.of(Integer.class)  .butDefaultedTo(0),
+            Ref.of(Long.class)     .butDefaultedTo(0L),
+            Ref.of(Float.class)    .butDefaultedTo((float)0.0),
+            Ref.of(Double.class)   .butDefaultedTo(0.0),
+            Ref.of(Character.class).butDefaultedTo(' '),
+            Ref.of(Boolean.class).butDefaultedTo(false),
+            
+            Ref.of(String.class)      .butDefaultedTo(""),
+            Ref.of(CharSequence.class).butDefaultedTo(""),
+            Ref.of(BigInteger.class)  .butDefaultedTo(BigInteger.ZERO),
+            Ref.of(BigDecimal.class)  .butDefaultedTo(BigDecimal.ZERO)
+    );
     
     private ProposedConfiguration() {}
     
@@ -168,7 +198,9 @@ public class ProposedConfiguration {
     }
 
     Configuration getConfiguration() {
-        return new Configuration(providers.values().stream());
+        Stream<Provider> theProviders = providers.values().stream();
+        Stream<Provider> theDefauls  = DEFAULT_PROVIDERS.stream();
+        return new Configuration(Stream.concat(theProviders, theDefauls));
     }
 
     /**

@@ -118,7 +118,7 @@ public class AppTest {
         assertTrue(App.isInitialized());
         assertTrue(App.scope
                 .getConfiguration()
-                .getProvider(Ref.refFactory)
+                .getProvider(Ref.objectFactory)
                 .getPreferability()
                 .is(Preferability.Dictate));
     }

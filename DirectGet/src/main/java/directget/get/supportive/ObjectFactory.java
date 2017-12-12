@@ -20,16 +20,18 @@ import directget.get.Ref;
 import directget.get.exceptions.CreationException;
 import directget.get.exceptions.GetException;
 import lombok.val;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * Factory for a ref. It create an instance of a Ref.
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ ObjectCreatator.class })
-public class RefFactory {
-    // TODO - Change this to ObjectFactory
+public interface ObjectFactory {
+    
+    /** A usable object factory that use Object creator to create an object. */
+    public static final ObjectFactory instance = new ObjectFactory() {};
+    
+    
     
     /**
      * Create the value for the ref.
@@ -38,10 +40,10 @@ public class RefFactory {
      * @return the created value.
      * @throws GetException
      */
-    public <T> T make(Ref<T> theRef) throws GetException {
+    public default <T> T make(Ref<T> theRef) throws GetException {
         val clzz = theRef.getTargetClass();
         try {
-            return clzz.createNew();
+            return ObjectCreator.createNew(clzz);
         } catch (CreationException cause) {
             throw new GetException(theRef, cause);
         }

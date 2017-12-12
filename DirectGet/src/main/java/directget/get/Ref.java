@@ -29,7 +29,7 @@ import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
-import directget.get.supportive.RefFactory;
+import directget.get.supportive.ObjectFactory;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import directget.get.supportive.RefWithSubstitute;
@@ -51,7 +51,7 @@ import lombok.experimental.ExtensionMethod;
 public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
-    public static final RefTo<RefFactory> refFactory = Ref.toValue(new RefFactory());
+    public static final RefTo<ObjectFactory> objectFactory = Ref.toValue(ObjectFactory.instance);
     
     
     private final Class<T> targetClass;
@@ -105,7 +105,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /** @return the default object. */
     public T getValue() {
-        return Get.the(refFactory).make(this);
+        return Get.the(objectFactory).make(this);
     }
     
     /** @return the optional default object. */

@@ -9,7 +9,7 @@ import lombok.val;
 import lombok.experimental.Accessors;
 import lombok.experimental.ExtensionMethod;
 
-@ExtensionMethod({ ObjectCreatator.class })
+@ExtensionMethod({ ObjectCreator.class })
 public class ObjectCreatorTest {
     
     public static class Simple {}
@@ -30,7 +30,7 @@ public class ObjectCreatorTest {
     
     @Test
     public void testClassWithOneConstructor() {
-        Complex complex = ObjectCreatator.createNew(Complex.class);
+        Complex complex = ObjectCreator.createNew(Complex.class);
         assertTrue(complex          instanceof Complex);
         assertTrue(complex.simple() instanceof Simple);
     }

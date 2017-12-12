@@ -38,7 +38,7 @@ public final class App {
 
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */
     public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
-            Ref.refFactory,
+            Ref.objectFactory,
             App.mode
     ));
     

@@ -24,7 +24,7 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  */
 @ExtensionMethod({ Nulls.class })
-public class ObjectCreatator {
+public class ObjectCreator {
     
     @SuppressWarnings("rawtypes")
     private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();

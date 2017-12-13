@@ -121,6 +121,16 @@ public class ProposedConfiguration {
         return App.isInitialized();
     }
     
+    /**
+     * Propose application mode.
+     * 
+     * @param mode  the propose application mode.
+     * @return the proposed configuration.
+     */
+    public ProposedConfigurationWithLastProvider appMode(AppMode mode) {
+        return this.add(App.mode.butDictatedTo(mode));
+    }
+    
     // TODO - Share the same code with the one in Configuration and print it out to log. 
     /**
      * Add the provider to the proposed configuration.
@@ -129,17 +139,8 @@ public class ProposedConfiguration {
      * @return the proposed configuration.
      */
     public <T> ProposedConfigurationWithLastProvider add(Provider<T> provider) {
-        if (provider.isNotNull()) {
-            val ref = provider.getRef();
-            if (providers.containsKey(ref)) {
-                val thisPreferability = providers.get(ref).getPreferability();
-                val thatPreferability = provider.getPreferability();
-                if (thisPreferability.compareTo(thatPreferability) < 0)
-                    providers.put(ref, provider);
-            } else {
-                providers.put(ref, provider);
-            }
-        }
+        if (provider.isNotNull())
+            Configuration.addToMap(providers, provider);
         
         return new ProposedConfigurationWithLastProvider(provider, App.isInitialized());
     }
@@ -166,6 +167,30 @@ public class ProposedConfiguration {
          * @param onAccepted  the event to be called when accepted.
          * @return this propose configuration.
          **/
+        public ProposedConfigurationWithLastProvider onAccepted(Runnable onAccepted) {
+            return onAccepted((provider, status)->{
+                onAccepted.run(); 
+            });
+        }
+        
+        /** 
+         * Add onAccepted listener. 
+         * 
+         * @param onAccepted  the event to be called when accepted.
+         * @return this propose configuration.
+         **/
+        public ProposedConfigurationWithLastProvider onAccepted(Consumer<Provider> onAccepted) {
+            return onAccepted((provider, status)->{
+                onAccepted.accept(provider); 
+            });
+        }
+        
+        /** 
+         * Add onAccepted listener. 
+         * 
+         * @param onAccepted  the event to be called when accepted.
+         * @return this propose configuration.
+         **/
         public ProposedConfigurationWithLastProvider onAccepted(BiConsumer<Provider, Status> onAccepted) {
             if (lastProvider.isNotNull() && onAccepted.isNotNull()) {
                 onAccepteds.putIfAbsent(lastProvider, new HashSet<>());
@@ -181,10 +206,34 @@ public class ProposedConfiguration {
          * @param onRejected  the event to be called when rejected.
          * @return this propose configuration.
          **/
+        public ProposedConfigurationWithLastProvider onRejected(Runnable onRejected) {
+            return onRejected((provider, status)->{
+                onRejected.run(); 
+            });
+        }
+
+        /**
+         * Add onReject listener. 
+         * 
+         * @param onRejected  the event to be called when rejected.
+         * @return this propose configuration.
+         **/
+        public ProposedConfigurationWithLastProvider onRejected(Consumer<Provider> onRejected) {
+            return onRejected((provider, status)->{
+                onRejected.accept(provider); 
+            });
+        }
+
+        /**
+         * Add onReject listener. 
+         * 
+         * @param onRejected  the event to be called when rejected.
+         * @return this propose configuration.
+         **/
         public ProposedConfigurationWithLastProvider onRejected(BiConsumer<Provider, Status> onRejected) {
             if (lastProvider.isNotNull() && onRejected.isNotNull()) {
                 if (isLate) {
-                    notifyReject(lastProvider, onRejected);
+                    notifyEvent(lastProvider, onRejected, Status.REJECTED);
                 } else {
                     onRejecteds.putIfAbsent(lastProvider, new HashSet<>());
                     onRejecteds.get(lastProvider).add(onRejected);
@@ -192,6 +241,50 @@ public class ProposedConfiguration {
             }
             
             return this;
+        }
+        
+        /**
+         * Cause a system halt if the previous proposal is not accepted.
+         * 
+         * @return propose configuration.
+         */
+        public ProposedConfigurationWithLastProvider orSystemHalt() {
+           return orSystemHalt(-1); 
+        }
+        
+        /**
+         * Cause a system halt if the previous proposal is not accepted.
+         * 
+         * @param  message  the exit message - use default if null given.
+         * @return propose configuration.
+         */
+        public ProposedConfigurationWithLastProvider orSystemHalt(String message) {
+           return orSystemHalt(message, -1); 
+        }
+        
+        /**
+         * Cause a system halt if the previous proposal is not accepted.
+         * 
+         * @param exitStatus  the exit status.
+         * @return propose configuration.
+         */
+        public ProposedConfigurationWithLastProvider orSystemHalt(int exitStatus) {
+           return orSystemHalt(null, exitStatus); 
+        }
+        
+        /**
+         * Cause a system halt if the previous proposal is not accepted.
+         * 
+         * @param message     the exit message - use default if null given.
+         * @param exitStatus  the exit status.
+         * @return propose configuration.
+         */
+        public ProposedConfigurationWithLastProvider orSystemHalt(String message, int exitStatus) {
+            return onRejected(provider->{
+                System.err.println(message.or("Application is already initialized!"));
+                System.err.println("Provider: " + provider);
+                System.exit(exitStatus);
+            });
         }
         
     }
@@ -226,22 +319,23 @@ public class ProposedConfiguration {
                 listeners.stream()
                 .filter(Objects::nonNull)
                 .forEach(listener->{
-                    try {
-                        listener.accept(provider, status);
-                    } catch (Exception e) {
-                        // TODO Think about this.
-                    }
+                    notifyEvent(provider, listener, status);
                 });
             }
         };
     }
 
-    private static void notifyReject(Provider provider, BiConsumer<Provider, Status> onRejected) {
+    private static void notifyEvent(Provider provider, BiConsumer<Provider, Status> listener, Status status) {
         if (provider.isNull())
             return;
-        if (onRejected.isNull())
+        if (listener.isNull())
             return;
-        onRejected.accept(provider, Status.REJECTED);
+        try {
+            listener.accept(provider, status);
+        } catch (Exception e) {
+            // TODO - May do more.
+            e.printStackTrace();
+        }
     }
     
 }

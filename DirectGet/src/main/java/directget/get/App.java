@@ -21,7 +21,9 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
+import directget.get.ProposedConfiguration.ProposedConfigurationWithLastProvider;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
+import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
 import lombok.val;
 
@@ -100,6 +102,28 @@ public final class App {
     public static boolean isInitialized() {
         val isInitialized = scope.isInitialized();
         return isInitialized;
+    }
+    
+    /**
+     * Ensure that the application mode is as specified.
+     * If that is not the case the system will be force to halt.
+     * 
+     * @param appMode the application mode.
+     */
+    public static void ensureMode(AppMode appMode) {
+        ProposedConfiguration.instance
+            .appMode(appMode)
+            .orSystemHalt();
+    }
+
+    /**
+     * Propose the provider.
+     * 
+     * @param provider the provider.
+     * @return the proposed configuration.
+     */
+    public <T> ProposedConfigurationWithLastProvider propose(Provider<T> provider) {
+        return ProposedConfiguration.instance.add(provider);
     }
     
     /** Private part */

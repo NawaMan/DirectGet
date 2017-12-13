@@ -21,10 +21,10 @@ import static java.util.Arrays.stream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import directcommon.common.Nulls;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
 import directget.get.supportive.Utilities;
@@ -41,7 +41,7 @@ import lombok.experimental.ExtensionMethod;
                                                // the alternative to have it on
                                                // every method is
                                                // just as bad if not worse.
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Utilities.class, Nulls.class })
 public final class Configuration {
     
     private final Map<Ref, Provider> providers;
@@ -90,22 +90,30 @@ public final class Configuration {
     // TODO - Have this printed out.
     private static Map<Ref, Provider> toMap(Stream<Provider> providers) {
         val theMap = new TreeMap<Ref, Provider>();
-        providers
-        .filter(Objects::nonNull)
-        .forEach(provider->{
-            val ref = provider.getRef();
-            if (theMap.containsKey(ref)) {
-                val thisPreferability = theMap.get(ref).getPreferability();
-                val thatPreferability = provider.getPreferability();
-                if (thisPreferability.compareTo(thatPreferability) >= 0)
-                    return;
-                
-                theMap.put(ref, provider);
-            }
-            
-            theMap.put(ref, provider);
+        providers.forEach(provider->{
+            addToMap(theMap, provider);
         });
         return theMap;
+    }
+    
+    /**
+     * Add the provider into the map if its preferability is better than the one alraedy in there.
+     * 
+     * @param theMap    the map.
+     * @param provider  the provider.
+     */
+    public static void addToMap(Map<Ref, Provider> theMap, Provider provider) {
+        if (provider.isNull())
+            return;
+        
+        val ref = provider.getRef();
+        if (theMap.containsKey(ref)) {
+            val thisPreferability = theMap.get(ref).getPreferability();
+            val thatPreferability = provider.getPreferability();
+            if (thisPreferability.compareTo(thatPreferability) >= 0)
+                return;
+        }
+        theMap.put(ref, provider);
     }
     
     private Configuration(Map<Ref, Provider> providers) {

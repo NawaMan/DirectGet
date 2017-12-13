@@ -116,4 +116,22 @@ public class ProposedConfigurationTest {
         }
     }
     
+    @Ignore("This test will stop all tests.")
+    @Test
+    public void testSystemHalt() {
+        App.reset();
+        try {
+            assertFalse(App.isInitialized());
+            App.initialize();
+            
+            ProposedConfiguration.instance
+            .add(Ref.of(String.class).butDefaultedTo("Hello")).orSystemHalt();
+            
+            fail("This line should never be run.");
+        } finally {
+            App.reset();
+        }
+        
+    }
+    
 }

@@ -1,6 +1,6 @@
 def thisGroup    = 'directget'
 def thisArtifact = 'get'
-def thisVersion  = '0.11.5'
+def thisVersion  = '0.11.6'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'

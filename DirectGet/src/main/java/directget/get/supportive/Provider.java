@@ -17,6 +17,7 @@ package directget.get.supportive;
 
 import static directget.get.Preferability.Default;
 import static directget.get.supportive.Caller.trace;
+import static java.lang.String.format;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -28,6 +29,7 @@ import directget.get.Ref;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
 import directget.get.supportive.Caller.Capture;
+import lombok.val;
 
 /**
  * Instance of this class can provide data.
@@ -102,7 +104,16 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     }
     
     public String toString() {
-        return "Provider (" + preferability + ":" + ref + "): " + supplier + "@(" + this.caller + ")";
+        val preferabilityStr = preferability.toString();
+        val refCaller        = this.ref.getCallerTrace();
+        val providerCaller   = (this.caller != null) ? this.caller : "";
+        val length           = Math.max(preferabilityStr.length(), Math.max(refCaller.length(), providerCaller.length()));
+        val template         = "%-" + length + "s <--- %s";
+        return "Provider { \n" 
+                + format(template, preferability,  "preferability")  + "\n"
+                + format(template, refCaller,      "Ref<" + this.ref.getName() + ":" + this.ref.getTargetClass() + ">") + "\n" 
+                + format(template, providerCaller, supplier)
+                + "\n}";
     }
 
     @Override

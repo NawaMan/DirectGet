@@ -50,10 +50,14 @@ public class CallerTest {
         assertEquals(callerTraceExpected, hello.getCallerTrace());
         assertEquals(callerTraceExpected, hello.getProvider().getCallerTrace());
         
-        val ref_toStringExpected = "RefTo<:java.lang.String>@(directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45))";
+        val ref_toStringExpected = "RefTo<:java.lang.String> at {\ndirectget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)\n}";
         assertEquals(ref_toStringExpected, hello.toString());
         
-        val provider_toStringExpected = "Provider (Normal:RefTo<:java.lang.String>@(directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45))): Supplier(FromValue)@(directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45))";
+        val provider_toStringExpected = "Provider { \n" + 
+                "Normal                                                           <--- preferability\n" + 
+                "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45) <--- Ref<:class java.lang.String>\n" + 
+                "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45) <--- Supplier(FromValue)\n" + 
+                "}";
         assertEquals(provider_toStringExpected, hello.getProvider().toString());
     }
     
@@ -62,7 +66,7 @@ public class CallerTest {
 
     @Test
     public void testFieldCaller_withRefModification() {
-        val expected = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:61)";
+        val expected = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:65)";
         assertEquals(expected, hi.getCallerTrace());
         assertEquals(expected, hi.getProvider().getCallerTrace());
     }
@@ -71,7 +75,7 @@ public class CallerTest {
     public void testFieldCaller_withSubstitution() {
         val hey = hello.butDictatedTo("Hey");
         val refExpected      = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)";
-        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution(CallerTest.java:72)";
+        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution(CallerTest.java:76)";
         Run.with(hey).run(()->{
             assertEquals(refExpected,      hey.getRef().getCallerTrace());
             assertEquals(providerExpected, hey.getCallerTrace());
@@ -83,7 +87,7 @@ public class CallerTest {
         val hey = hello.butDictatedTo("Hey");
         val ho  = hey.butWith("Ho");
         val refExpected      = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)";
-        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution_andSubstitue(CallerTest.java:84)";
+        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution_andSubstitue(CallerTest.java:88)";
         Run.with(hey).run(()->{
             assertEquals(refExpected,      ho.getRef().getCallerTrace());
             assertEquals(providerExpected, ho.getCallerTrace());
@@ -96,7 +100,7 @@ public class CallerTest {
                 .butDictatedTo("Hey")
                 .retained().singleton();
         val refExpected      = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)";
-        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution_withRetainer(CallerTest.java:97)";
+        val providerExpected = "directget.get.supportive.CallerTest.testFieldCaller_withSubstitution_withRetainer(CallerTest.java:101)";
         Run.with(hey).run(()->{
             assertEquals(refExpected,      hey.getRef().getCallerTrace());
             assertEquals(providerExpected, hey.getCallerTrace());

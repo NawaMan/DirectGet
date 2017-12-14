@@ -119,7 +119,7 @@ public class RefTo<T> extends Ref<T> {
     /** {@inheritDoc} */
     @Override
     public final String toString() {
-        return "RefTo<" + this.name + ":" + this.getTargetClass().getName() + ">" + "@(" + this.caller + ")";
+        return "RefTo<" + this.name + ":" + this.getTargetClass().getName() + ">" + " at {\n" + this.caller + "\n}";
     }
     
     /** @return the retainer. */

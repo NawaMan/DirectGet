@@ -60,7 +60,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
-        this.caller        = trace(Capture.Continue, caller->caller);
+        this.caller        = trace(Capture.Pause, caller->caller);
         this.ref           = Objects.requireNonNull(ref);
         this.preferability = preferability.or(Default);
         this.supplier      = supplier.or((Supplier)()->null);

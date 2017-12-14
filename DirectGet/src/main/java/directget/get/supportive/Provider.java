@@ -22,14 +22,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import directcommon.common.Nulls;
 import directget.get.App;
 import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
 import directget.get.supportive.Caller.Capture;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * Instance of this class can provide data.
@@ -37,7 +35,6 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  * @param <T> the data type.
  **/
-@ExtensionMethod({ Nulls.class })
 public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     
     private final Ref<T> ref;
@@ -62,8 +59,8 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
 	public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
         this.caller        = trace(Capture.Pause, caller->caller);
         this.ref           = Objects.requireNonNull(ref);
-        this.preferability = preferability.or(Default);
-        this.supplier      = supplier.or((Supplier)()->null);
+        this.preferability = preferability != null ? preferability      : Default;
+        this.supplier      = supplier      != null ? (Supplier)supplier : (Supplier)()->null;
     }
 
     @Override

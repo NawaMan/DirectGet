@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import directcommon.common.Nulls;
 import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
 import directget.get.run.Named.RefSupplier;
@@ -39,7 +38,6 @@ import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import lombok.val;
-import lombok.experimental.ExtensionMethod;
 
 /***
  * Ref is a reference to an object that we want to get.
@@ -49,7 +47,6 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Nulls.class })
 public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
@@ -275,7 +272,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      **/
     private static <T, V extends T> RefTo<T> toValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
         return Caller.trace(Capture.Continue, caller->{
-            val theName    = name.or("");
+            val theName    = name == null ? "" : name;
             val theFactory = new Named.ValueSupplier<T>(defaultValue);
             return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
         });

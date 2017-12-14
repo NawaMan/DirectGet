@@ -21,13 +21,11 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import directcommon.common.Nulls;
 import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
 import directget.get.supportive.Caller.Capture;
 import lombok.val;
-import lombok.experimental.ExtensionMethod;
 
 /**
  * This reference implementation allows multiple references to a class to
@@ -36,7 +34,6 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  * @param <T>  the type of the data this ref is refering to.
  **/
-@ExtensionMethod({ Nulls.class })
 public class RefTo<T> extends Ref<T> {
     
     private final String name;
@@ -63,7 +60,7 @@ public class RefTo<T> extends Ref<T> {
         AtomicReference<Provider<T>>   theProvider      = new AtomicReference<>();
         this.caller = Caller.trace(Capture.Continue, (String caller)->{
             val prefer  = (preferability != null) ? preferability : Preferability.Default;
-            theName    .set(name.or(""));
+            theName    .set(name != null ? name : "");
             theProvider.set((factory == null) ? null : new Provider<>(RefTo.this, prefer, factory));
             return caller;
         });

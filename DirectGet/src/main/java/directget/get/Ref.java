@@ -15,6 +15,8 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.supportive.Caller.trace;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,17 +30,16 @@ import java.util.function.Supplier;
 import directcommon.common.Nulls;
 import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
+import directget.get.run.Named.RefSupplier;
+import directget.get.supportive.Caller;
+import directget.get.supportive.Caller.Capture;
 import directget.get.supportive.HasProvider;
-import directget.get.supportive.Provider;
 import directget.get.supportive.ObjectFactory;
+import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
-import directget.get.supportive.RefWithSubstitute;
 import lombok.val;
-import lombok.experimental.Delegate;
 import lombok.experimental.ExtensionMethod;
-
-// TODO - Record where Ref and its provider are created.
 
 /***
  * Ref is a reference to an object that we want to get.
@@ -59,11 +60,8 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     private final String targetClassName;
     
-    @Delegate
-    private final RefWithSubstitute<T> withSubstitute = new RefWithSubstitute<>(this, ()->Get.getProvider(this));
-    
     protected Ref(Class<T> targetClass) {
-        this.targetClass = targetClass;
+        this.targetClass     = targetClass;
         this.targetClassName = this.targetClass.getCanonicalName();
     }
     
@@ -87,6 +85,15 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     /** @return the class of the interested object. */
     public final Class<T> getTargetClass() {
         return this.targetClass;
+    }
+    
+    /**
+     * The caller trace when create this Ref.
+     * 
+     * @return the caller ref.
+     */
+    public String getCallerTrace() {
+        return "Unkown";
     }
     
     /** {@inheritDoc} */ @Override
@@ -143,7 +150,9 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return the reference that represent the target class directly.
      **/
     public static <T> RefOf<T> of(Class<T> targetClass) {
-        return new RefOf<>(targetClass);
+        return trace(Capture.Continue, caller->{
+            return new RefOf<>(targetClass);
+        });
     }
     
     // -- RefTo ---------------------------------------------------------------
@@ -155,7 +164,9 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return the ref.
      **/
     public static <T> RefTo<T> to(Class<T> targetClass) {
-        return toValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
+        return trace(Capture.Continue, caller->{
+            return toValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
+        });
     }
     
     /**
@@ -240,7 +251,9 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      **/
     @SuppressWarnings("unchecked")
     public static <T> RefTo<T> toValue(T defaultValue) {
-        return ((RefTo<T>)to(defaultValue.getClass())).defaultedTo(defaultValue);
+        return trace(Capture.Continue, caller->{
+            return ((RefTo<T>)to(defaultValue.getClass())).defaultedTo(defaultValue);
+        });
     }
     
     /**
@@ -261,9 +274,11 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * class with the default value.
      **/
     private static <T, V extends T> RefTo<T> toValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        val theName    = (String)name.whenNotNull().orElseGet(()->"#" + RefTo.getNewId());
-        val theFactory = new Named.ValueSupplier<T>(defaultValue);
-        return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
+        return Caller.trace(Capture.Continue, caller->{
+            val theName    = name.or("");
+            val theFactory = new Named.ValueSupplier<T>(defaultValue);
+            return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
+        });
     }
 
     /**
@@ -389,6 +404,260 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
             defeaultRefs.put(targetClass, refOpt);
         }
         return refOpt.orElse(null);
+    }
+
+
+    //== For substitution =============================================================================================
+    
+    //-- Preference only --
+    
+    /**
+     * Create a provider that dictate the current. 
+     * 
+     * @return a new provider pretty much like this one but dictate.
+     **/
+    public Provider<T> butDictate() {
+        return trace(Capture.Continue, caller->{
+            val currentProvider = Get.getProvider(this);
+            val currentSupplier = currentProvider.getSupplier();
+            return new Provider<>(this, Preferability.Dictate, currentSupplier);
+        });
+    }
+
+    /**
+     * Create a provider that provide the current with Normal preferability. 
+     * 
+     * @return a new provider pretty much like this one but provide.
+     **/
+    public Provider<T> butProvideNormally() {
+        return trace(Capture.Continue, caller->{
+            val currentProvider = Get.getProvider(this);
+            val currentSupplier = currentProvider.getSupplier();
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+
+    /**
+     * Create a provider that provide the current with Default preferability.
+     * 
+     * @return a new provider pretty much like this one but default.
+     **/
+    public Provider<T> butDefault() {
+        return trace(Capture.Continue, caller->{
+            val currentProvider = Get.getProvider(this);
+            val currentSupplier = currentProvider.getSupplier();
+            return new Provider<>(this, Preferability.Default, currentSupplier);
+        });
+    }
+    
+    //-- but Preference + Value --
+    
+    /**
+     * Create a provider that dictate the given value. 
+     * 
+     * @param value  the given value.
+     * @return a new provider pretty much like this one but dictate to the given value.
+     **/
+    public <V extends T> Provider<T> butDictatedTo(V value) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.ValueSupplier<T>(value);
+            return new Provider<>(this, Preferability.Dictate, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that dictate the value of the given ref. 
+     * 
+     * @param ref  the given ref.
+     * @return a new provider pretty much like this one but dictate to a value of the given ref.
+     **/
+    public <V extends T> Provider<T> butDictatedToThe(Ref<V> ref) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(ref);
+            return new Provider<>(this, Preferability.Dictate, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that dictate the value of the given target class. 
+     * 
+     * @param targetClass  the target class.
+     * @return a new provider pretty much like this one but dictate to the value of the given target class.
+     **/
+    public <V extends T> Provider<T> butDictatedToThe(Class<V> targetClass) {
+        return trace(Capture.Continue, caller->{
+            RefSupplier<V> currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
+            return new Provider<>(this, Preferability.Dictate, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that dictate the result of the given supplier. 
+     * 
+     * @param supplier  the supplier.
+     * @return a new provider pretty much like this one but dictate to the value got from the supplier.
+     **/
+    public <V extends T> Provider<T> butDictatedBy(Supplier<V> supplier) {
+        return trace(Capture.Continue, caller->{
+            return new Provider<>(this, Preferability.Dictate, supplier);
+        });
+    }
+    
+    /**
+     * Create the provider (normal preferability) the given value. 
+     * 
+     * @param value  the given value.
+     * @return a new provider pretty much like this one but provided with the given value.
+     **/
+    public <V extends T> Provider<T> butProvidedWith(V value) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.ValueSupplier<T>(value);
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (normal preferability) the value of the given ref.
+     * 
+     * @param ref  the given ref.
+     * @return  a new provider pretty much like this one but provided with the value from the given ref.
+     */
+    public <V extends T> Provider<T> butProvidedWithThe(Ref<V> ref) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(ref);
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (normal preferability) the value of the given target class.
+     * 
+     * @param targetClass  the target class.
+     * @return  a new provider pretty much like this one but provided with the value from the given target class. 
+     */
+    public <V extends T> Provider<T> butProvidedWithThe(Class<V> targetClass) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (normal preferability) the result of the given supplier.
+     * 
+     * @param supplier  the supplier.
+     * @return   a new provider pretty much like this one but provided with the value got from the supplier.
+     */
+    public <V extends T> Provider<T> butProvidedBy(Supplier<V> supplier) {
+        return trace(Capture.Continue, caller->{
+            return new Provider<>(this, Preferability.Normal, supplier);
+        });
+    }
+    
+    /**
+     * Create the provider (using the given preferability) the given value. 
+     * 
+     * @param preferability  the preferability.
+     * @param value 
+     * @return   a new provider pretty much like this one but with the given perferaability and the value.
+     **/
+    public <V extends T> Provider<T> butProvidedWith(Preferability preferability, V value) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.ValueSupplier<T>(value);
+            return new Provider<>(this, preferability, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (using the given preferability) the value of the given ref.
+     * 
+     * @param preferability  the preferability. 
+     * @param ref            the ref.
+     * @return  the provider.
+     */
+    public <V extends T> Provider<T> butProvidedWithThe(Preferability preferability, Ref<V> ref) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(ref);
+            return new Provider<>(this, preferability, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (using the given preferability) the value of the given target class.
+     * 
+     * @param preferability  the preferability. 
+     * @param targetClass    the target class.
+     * @return  the provider.
+     */
+    public <V extends T> Provider<T> butProvidedWithThe(Preferability preferability, Class<V> targetClass) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
+            return new Provider<>(this, preferability, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider (using the given preferability) the result of the given supplier.
+     * 
+     * @param preferability  the preferability. 
+     * @param supplier       the supplier.
+     * @return  the provider.
+     */
+    public <V extends T> Provider<T> butProvidedBy(Preferability preferability, Supplier<V> supplier) {
+        return trace(Capture.Continue, caller->{
+            return new Provider<>(this, preferability, supplier);
+        });
+    }
+    
+    /**
+     * Create the provider that default to the given value. 
+     * 
+     * @param value  the value.
+     * @return  the provider.
+     **/
+    public <V extends T> Provider<T> butDefaultedTo(V value) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.ValueSupplier<T>(value);
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that default to the value of the given ref. 
+     * 
+     * @param ref  the ref. 
+     * @return  the provider.
+     **/
+    public <V extends T> Provider<T> butDefaultedToThe(Ref<V> ref) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(ref);
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that default to the value of the given target class. 
+     * 
+     * @param targetClass  the target class.
+     * @return  the provider.
+     **/
+    public <V extends T> Provider<T> butDefaultedToThe(Class<V> targetClass) {
+        return trace(Capture.Continue, caller->{
+            val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
+            return new Provider<>(this, Preferability.Normal, currentSupplier);
+        });
+    }
+    
+    /**
+     * Create the provider that default to the result of the given supplier.
+     * 
+     * @param supplier  the supplier.
+     * @return the provider.
+     */
+    public <V extends T> Provider<T> butDefaultedToBy(Supplier<V> supplier) {
+        return trace(Capture.Continue, caller->{
+            return new Provider<>(this, Preferability.Normal, supplier);
+        });
     }
     
 }

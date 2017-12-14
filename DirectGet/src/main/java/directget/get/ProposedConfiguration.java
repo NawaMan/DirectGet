@@ -88,7 +88,7 @@ public class ProposedConfiguration {
             Ref.of(Float.class)    .butDefaultedTo((float)0.0),
             Ref.of(Double.class)   .butDefaultedTo(0.0),
             Ref.of(Character.class).butDefaultedTo(' '),
-            Ref.of(Boolean.class).butDefaultedTo(false),
+            Ref.of(Boolean.class)  .butDefaultedTo(false),
             
             Ref.of(String.class)      .butDefaultedTo(""),
             Ref.of(CharSequence.class).butDefaultedTo(""),

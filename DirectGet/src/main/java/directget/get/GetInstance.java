@@ -197,8 +197,7 @@ public final class GetInstance {
      * @param refsToInherit the list of Ref to inherit.
      * @param runnable      the runnable body.
      **/
-    @SuppressWarnings("rawtypes")
-    public void runAsync(List<Ref> refsToInherit, Runnable runnable) {
+    public void runAsync(@SuppressWarnings("rawtypes") List<Ref> refsToInherit, Runnable runnable) {
         runAsync(refsToInherit::contains, runnable);
     }
     

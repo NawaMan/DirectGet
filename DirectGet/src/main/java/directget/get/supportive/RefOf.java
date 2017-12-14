@@ -15,8 +15,11 @@
 //  ========================================================================
 package directget.get.supportive;
 
+import static directget.get.supportive.Caller.trace;
+
 import directget.get.Preferability;
 import directget.get.Ref;
+import directget.get.supportive.Caller.Capture;
 import lombok.val;
 
 /**
@@ -38,7 +41,10 @@ public final class RefOf<T> extends Ref<T> {
      */
     public RefOf(Class<T> targetClass) {
         super(targetClass);
-        this.provider = new Provider<>(this, Preferability.Default, () -> getValue());
+        
+        this.provider = trace(Capture.Continue, caller->{
+            return new Provider<>(this, Preferability.Default, () -> getValue());
+        });
     }
     
     /**

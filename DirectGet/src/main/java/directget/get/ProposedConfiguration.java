@@ -15,6 +15,7 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.supportive.Caller.trace;
 import static directget.get.supportive.Utilities.isLocalCall;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 import directcommon.common.Nulls;
 import directget.get.supportive.Provider;
 import directget.get.supportive.Utilities;
+import directget.get.supportive.Caller.Capture;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -128,7 +130,9 @@ public class ProposedConfiguration {
      * @return the proposed configuration.
      */
     public ProposedConfigurationWithLastProvider appMode(AppMode mode) {
-        return this.add(App.mode.butDictatedTo(mode));
+        return trace(Capture.Continue, caller->{
+            return this.add(App.mode.butDictatedTo(mode));
+        });
     }
     
     // TODO - Share the same code with the one in Configuration and print it out to log. 

@@ -44,7 +44,7 @@ public class ProviderStackMap extends TreeMap<Ref, Stack<Provider>> {
     
     @Override
     public Stack<Provider> get(Object ref) {
-        Stack<Provider> stack = super.get(ref).or(ensureValue((Ref) ref));
+        Stack<Provider> stack = super.get(ref).orGet(ensureValue((Ref) ref));
         return stack;
     }
     

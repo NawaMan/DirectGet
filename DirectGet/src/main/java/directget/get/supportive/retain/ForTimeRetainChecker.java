@@ -76,7 +76,7 @@ public class ForTimeRetainChecker<V> implements Predicate<V> {
      *          the time unit.
      */
     public ForTimeRetainChecker(Long startMilliseconds, long time, TimeUnit unit) {
-        long startTime = startMilliseconds.or(nextExpire(time, unit));
+        long startTime = startMilliseconds.orGet(nextExpire(time, unit));
         
         this.expiredValue = new AtomicLong(startTime);
         this.time = time;

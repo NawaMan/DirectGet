@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compile     'directcommon:common:1.4.0'
+    compile     'directcommon:common:1.4.5'
     
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'

@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import directget.get.Ref;
 import directget.get.Run;
+import directget.get.run.exceptions.FailableException;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;
 import directget.get.supportive.RefTo;
@@ -139,6 +140,35 @@ public class RunTest {
         .ignoreException()
         .run(()->{
             throw new IOException();
+        });
+    }
+    
+    @Test(expected=FailableException.class)
+    public void testFailGracefully() {
+        Run
+        .failGracefully()
+        .run(()->{
+            throw new IOException();
+        });
+    }
+    
+    @Test(expected=NullPointerException.class)
+    public void testFailGracefully_runtimeException() {
+        Run
+        .failGracefully()
+        .run(()->{
+            throw new NullPointerException();
+        });
+    }
+    
+    @Test
+    public void testFailGracefully_noException() {
+        // With no exception thrown in the body, no exception is expected by the compiler
+        //   to be thrown through the outside too.
+        Run
+        .failGracefully()
+        .run(()->{
+            
         });
     }
     

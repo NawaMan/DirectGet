@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import directget.get.run.Failable;
 import directget.get.run.Wrapper;
 import directget.get.run.session.AsyncSessionBuilder;
-import directget.get.run.session.SyncHandleProblemSessionBuilder;
+import directget.get.run.session.SyncNoCheckExceptionSessionBuilder;
 import directget.get.run.session.SyncSessionBuilder;
 import lombok.val;
 
@@ -121,7 +121,7 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder HandleProblem() {
+    public static SyncNoCheckExceptionSessionBuilder HandleProblem() {
         return handleProblem();
     }
     
@@ -130,8 +130,8 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder handleProblem() {
-        val sessionBuilder = new SyncHandleProblemSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder handleProblem() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleProblem();
         return sessionBuilder;
     }
@@ -141,7 +141,7 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder HandleThenIgnoreProblem() {
+    public static SyncNoCheckExceptionSessionBuilder HandleThenIgnoreProblem() {
         return handleThenIgnoreProblem();
     }
     
@@ -150,8 +150,8 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder handleThenIgnoreProblem() {
-        val sessionBuilder = new SyncHandleProblemSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.handleThenIgnoreProblem();
         return sessionBuilder;
     }
@@ -170,7 +170,7 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder IgnoreException() {
+    public static SyncNoCheckExceptionSessionBuilder IgnoreException() {
         return ignoreException();
     }
     
@@ -190,9 +190,31 @@ public class Run {
      * 
      * @return a session builder.
      **/
-    public static SyncHandleProblemSessionBuilder ignoreException() {
-        val sessionBuilder = new SyncHandleProblemSessionBuilder();
+    public static SyncNoCheckExceptionSessionBuilder ignoreException() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
         sessionBuilder.ignoreException();
+        return sessionBuilder;
+    }
+    
+    /**
+     * Mark that this run should change any check exception thrown as a FailException.
+     * 
+     * @return a session builder.
+     **/
+    public static SyncNoCheckExceptionSessionBuilder FailGracefully() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
+        sessionBuilder.failGracefully();
+        return sessionBuilder;
+    }
+    
+    /**
+     * Mark that this run should change any check exception thrown as a FailException.
+     * 
+     * @return a session builder.
+     **/
+    public static SyncNoCheckExceptionSessionBuilder failGracefully() {
+        val sessionBuilder = new SyncNoCheckExceptionSessionBuilder();
+        sessionBuilder.failGracefully();
         return sessionBuilder;
     }
     

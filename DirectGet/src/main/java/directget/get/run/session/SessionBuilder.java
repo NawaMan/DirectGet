@@ -27,6 +27,7 @@ import directget.get.GetInstance;
 import directget.get.Scope;
 import directget.get.run.Failable;
 import directget.get.run.Wrapper;
+import directget.get.run.exceptions.FailableException;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.supportive.Provider;
 import lombok.val;
@@ -99,28 +100,28 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
         return (SB) this;
     }
     
-    private SyncHandleProblemSessionBuilder toSynchronouslyNoCheckExceptionSessionBuilder() {
-        val builder = new SyncHandleProblemSessionBuilder();
+    private SyncNoCheckExceptionSessionBuilder toSynchronouslyNoCheckExceptionSessionBuilder() {
+        val builder = new SyncNoCheckExceptionSessionBuilder();
         builder.failHandler = this.failHandler;
         builder.wrappers    = new ArrayList<>(this.wrappers);
         return builder;
     }
     
     /** Mark that this run should handle the exception. */
-    public SyncHandleProblemSessionBuilder handleProblem() {
+    public SyncNoCheckExceptionSessionBuilder handleProblem() {
         val builder
-                = (this instanceof SyncHandleProblemSessionBuilder)
-                ? (SyncHandleProblemSessionBuilder)this
+                = (this instanceof SyncNoCheckExceptionSessionBuilder)
+                ? (SyncNoCheckExceptionSessionBuilder)this
                 : toSynchronouslyNoCheckExceptionSessionBuilder();
         builder.failHandler = Failable.Runnable::handledly;
         return builder;
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public SyncHandleProblemSessionBuilder handleThenIgnoreProblem() {
+    public SyncNoCheckExceptionSessionBuilder handleThenIgnoreProblem() {
         val builder
-                = (this instanceof SyncHandleProblemSessionBuilder)
-                ? (SyncHandleProblemSessionBuilder)this
+                = (this instanceof SyncNoCheckExceptionSessionBuilder)
+                ? (SyncNoCheckExceptionSessionBuilder)this
                 : toSynchronouslyNoCheckExceptionSessionBuilder();
         
         builder.failHandler = runnable->((Failable.Runnable<Throwable>)()->{
@@ -145,12 +146,33 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
     }
     
     /** Mark that this run should ignore thrown exception. */
-    public SyncHandleProblemSessionBuilder ignoreException() {
+    public SyncNoCheckExceptionSessionBuilder ignoreException() {
         val builder
-                = (this instanceof SyncHandleProblemSessionBuilder)
-                ? (SyncHandleProblemSessionBuilder)this
+                = (this instanceof SyncNoCheckExceptionSessionBuilder)
+                ? (SyncNoCheckExceptionSessionBuilder)this
                 : toSynchronouslyNoCheckExceptionSessionBuilder();
         builder.failHandler = Failable.Runnable::carelessly;
+        return builder;
+    }
+    
+    /** Mark that this run should change any check exception thrown as a FailException. */
+    public SyncNoCheckExceptionSessionBuilder failGracefully() {
+        val builder
+                = (this instanceof SyncNoCheckExceptionSessionBuilder)
+                ? (SyncNoCheckExceptionSessionBuilder)this
+                : toSynchronouslyNoCheckExceptionSessionBuilder();
+        builder.failHandler = r->{
+            return ()->{
+                try {
+                    r.run();
+                } catch (RuntimeException t) {
+                    throw t;
+                } catch (Throwable t) {
+                    // Double wrap here: so that SyncWrapperContext will not throw the inner.
+                    throw new FailableException(new FailableException(t));
+                }
+            };
+        };
         return builder;
     }
     

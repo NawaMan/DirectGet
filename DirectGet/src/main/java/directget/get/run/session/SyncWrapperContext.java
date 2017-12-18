@@ -57,8 +57,14 @@ public class SyncWrapperContext extends WrapperContext {
         try {
             current.run();
         } catch (FailableException e) {
+            // NOTE: If there is a need to change this ... see SessionBuilder#failGracefully
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException) {
+                if (cause instanceof FailableException) {
+                    val causeOfCause = ((FailableException)cause).getCause();
+                    if (causeOfCause instanceof RuntimeException)
+                        throw (RuntimeException)causeOfCause;
+                }
                 throw (RuntimeException)cause;
             }
             

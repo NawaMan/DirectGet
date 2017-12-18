@@ -22,7 +22,7 @@ import directget.get.run.Failable;
  * 
  * @author NawaMan
  */
-public class SyncHandleProblemSessionBuilder
+public class SyncNoCheckExceptionSessionBuilder
         extends SessionBuilder<SyncSessionBuilder>
         implements SynchronousRunSessionBuilder {
     

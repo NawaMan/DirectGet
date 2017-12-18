@@ -43,7 +43,7 @@ public final class RefOf<T> extends Ref<T> {
         super(targetClass);
         
         this.provider = trace(Capture.Continue, caller->{
-            return new Provider<>(this, Preferability.Default, () -> getValue());
+            return new Provider<>(this, Preferability.Default, () -> getDefaultValue());
         });
     }
     

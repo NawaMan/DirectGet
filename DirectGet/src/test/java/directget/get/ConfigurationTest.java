@@ -14,8 +14,8 @@ public class ConfigurationTest {
         val ref1 = Ref.to(String.class).defaultedTo("Ref1");
         val ref2 = Ref.to(String.class).defaultedTo("Ref2");
         
-        assertEquals("Ref1", ref1.getValue());
-        assertEquals("Ref2", ref2.getValue());
+        assertEquals("Ref1", ref1.getDefaultValue());
+        assertEquals("Ref2", ref2.getDefaultValue());
         
         val configuration = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -30,7 +30,7 @@ public class ConfigurationTest {
     public void testConfiguration_withDuplicateRef() throws AppScopeAlreadyInitializedException {
         val ref1 = Ref.to(String.class).defaultedTo("Ref1");
         
-        assertEquals("Ref1", ref1.getValue());
+        assertEquals("Ref1", ref1.getDefaultValue());
         
         val configuration = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -46,9 +46,9 @@ public class ConfigurationTest {
         val ref2 = Ref.to(String.class).defaultedTo("Ref2");
         val ref3 = Ref.to(String.class).defaultedTo("Ref3");
         
-        assertEquals("Ref1", ref1.getValue());
-        assertEquals("Ref2", ref2.getValue());
-        assertEquals("Ref3", ref3.getValue());
+        assertEquals("Ref1", ref1.getDefaultValue());
+        assertEquals("Ref2", ref2.getDefaultValue());
+        assertEquals("Ref3", ref3.getDefaultValue());
         
         val configuration1 = new Configuration(
                 ref1.getProvider().butWith("Str1"),
@@ -70,9 +70,9 @@ public class ConfigurationTest {
         val ref2 = Ref.to(String.class).defaultedTo("Ref2");
         val ref3 = Ref.to(String.class).defaultedTo("Ref3");
         
-        assertEquals("Ref1", ref1.getValue());
-        assertEquals("Ref2", ref2.getValue());
-        assertEquals("Ref3", ref3.getValue());
+        assertEquals("Ref1", ref1.getDefaultValue());
+        assertEquals("Ref2", ref2.getDefaultValue());
+        assertEquals("Ref3", ref3.getDefaultValue());
         
         val configuration1 = new Configuration(
                 ref1.getProvider().butWith("Str1"),

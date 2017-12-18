@@ -15,7 +15,9 @@
 //  ========================================================================
 package directget.get;
 
+import static directget.get.Get.the;
 import static directget.get.supportive.Caller.trace;
+import static java.util.Optional.ofNullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -109,13 +111,23 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     }
     
     /** @return the default object. */
-    public T getValue() {
-        return Get.the(objectFactory).make(this);
+    public T getDefaultValue() {
+        return the(objectFactory).make(this);
     }
     
     /** @return the optional default object. */
+    public Optional<T> _getDefaultValue() {
+        return ofNullable(getDefaultValue());
+    }
+
+    /** @return the current value for this ref. */
+    public T getValue() {
+        return the(this);
+    }
+
+    /** @return the optional v. */
     public Optional<T> _getValue() {
-        return Optional.ofNullable(getValue());
+        return ofNullable(getValue());
     }
     
     /** @return the providers for the default value */

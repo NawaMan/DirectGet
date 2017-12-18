@@ -54,21 +54,21 @@ public class RefTest {
     public void testRef_toClassWithDefault() {
         List theList = new ArrayList();
         RefTo<List> ref = Ref.to(List.class).defaultedTo(theList);
-        assertTrue(ref._getValue().isPresent());
-        assertTrue(ref._getValue().filter(list -> list == theList).isPresent());
+        assertTrue(ref._getDefaultValue().isPresent());
+        assertTrue(ref._getDefaultValue().filter(list -> list == theList).isPresent());
     }
     
     @Test
     public void testRef_toClassWithGenericDefault() {
         RefTo<List<String>> ref = Ref.to(List.class, ()->new ArrayList<String>());
         
-        assertTrue(ref.getValue().isEmpty());
+        assertTrue(ref.getDefaultValue().isEmpty());
         
-        val list = ref.getValue();
+        val list = ref.getDefaultValue();
         list.add("Hey");
         assertFalse(list.isEmpty());
         
-        assertTrue(ref.getValue().isEmpty());
+        assertTrue(ref.getDefaultValue().isEmpty());
 
         RefTo<String> strRef = Ref.toValue("Hello");
         assertEquals("Hello", Get.the(strRef));

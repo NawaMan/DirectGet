@@ -137,6 +137,54 @@ public final class Get {
         return value;
     }
     
+    //-- value --
+    
+    /**
+     * The optional value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the optional value associated with theGivenRef.
+     **/
+    public static <T> Optional<T> _value(Ref<T> theGivenRef) {
+        val optValue = App.scope.get()._the(theGivenRef);
+        return optValue;
+    }
+    
+    /**
+     * The value associated with theGivenRef.
+     * 
+     * @param theGivenRef 
+     * @return the value associated with theGivenRef.
+     **/
+    public static <T> T value(Ref<T> theGivenRef) {
+        val optValue = App.scope.get()._the(theGivenRef);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
+    /**
+     * Return the optional value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the optional value associated with the given targetClass.
+     **/
+    public static <T> Optional<T> _value(Class<T> targetClass) {
+        val optValue = App.scope.get()._the(Ref.defaultOf(targetClass));
+        return optValue;
+    }
+    
+    /**
+     * Return the value associated with the given targetClass.
+     * 
+     * @param targetClass 
+     * @return the value associated with the given targetClass.
+     **/
+    public static <T> T value(Class<T> targetClass) {
+        val optValue = App.scope.get()._the(targetClass);
+        val value = optValue.orElse(null);
+        return value;
+    }
+    
     //-- From --
 
     /**

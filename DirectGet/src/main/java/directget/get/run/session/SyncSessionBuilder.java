@@ -30,79 +30,9 @@ public class SyncSessionBuilder
         extends SessionBuilder<SyncSessionBuilder>
         implements SynchronousRunSessionBuilder {
     
-    // TODO - Do this for now.
-    private static enum FailureHandler {
-        Gracefully, Carefully, Handledly
-    }
-    
-    public static class RunNoException {
-        
-        private final SyncWrapperContext context;
-        private final FailureHandler     handler;
-        
-        
-        private RunNoException(SyncWrapperContext context, FailureHandler handler) {
-            this.context = context;
-            this.handler = handler;
-        }
-        
-        /**
-         * Run the given supplier and return a value.
-         */
-        public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) {
-            try {
-                return context.run(supplier);
-            } catch (RuntimeException t) {
-                if (handler == FailureHandler.Gracefully)
-                    throw t;
-                if (handler == FailureHandler.Handledly)
-                    Get.the(ProblemHandler.problemHandler).handle(t);
-            } catch (Throwable e) {
-                if (handler == FailureHandler.Gracefully)
-                    throw new FailableException(e);
-                if (handler == FailureHandler.Handledly)
-                    Get.the(ProblemHandler.problemHandler).handle(e);
-            }
-            return null;
-        }
-        
-        /** Run the session now. */
-        public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
-            try {
-                context.run(runnable);
-            } catch (RuntimeException t) {
-                if (handler == FailureHandler.Gracefully)
-                    throw t;
-                if (handler == FailureHandler.Handledly)
-                    Get.the(ProblemHandler.problemHandler).handle(t);
-            } catch (Throwable e) {
-                if (handler == FailureHandler.Gracefully)
-                    throw new FailableException(e);
-                if (handler == FailureHandler.Handledly)
-                    Get.the(ProblemHandler.problemHandler).handle(e);
-            }
-        }
-        
-    }
-    
     /** Build the session for later use. */
     public SyncWrapperContext build() {
         return new SyncWrapperContext(failHandler, wrappers);
-    }
-    
-    public RunNoException gracefully() {
-        val context = build();
-        return new RunNoException(context, FailureHandler.Gracefully);
-    }
-    
-    public RunNoException carelessly() {
-        val context = build();
-        return new RunNoException(context, FailureHandler.Carefully);
-    }
-    
-    public RunNoException handledly() {
-        val context = build();
-        return new RunNoException(context, FailureHandler.Handledly);
     }
     
     /**

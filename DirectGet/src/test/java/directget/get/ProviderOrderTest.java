@@ -102,7 +102,7 @@ public class ProviderOrderTest {
                 theScope.get().runAsync(list, () -> {
                     try {
                         theScope.get().substitute(Stream.of(_stack), () -> {
-                            String actual = theScope.get()._the(ref).orElse(null);
+                            String actual = theScope.get().the(ref);
                             try {
                                 assertEquals(expected, actual);
                             } catch (AssertionError e) {

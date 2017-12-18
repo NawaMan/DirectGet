@@ -19,7 +19,6 @@ import static directget.get.Get.DefaultExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -71,17 +70,6 @@ public final class GetInstance {
     }
 
     //-- the --
-
-    /**
-     * The optional value associated with theGivenRef.
-     * 
-     * @param theGivenRef 
-     * @return the optional value associated with theGivenRef.
-     **/
-    public <T> Optional<T> _the(Ref<T> theGivenRef) {
-        val optValue = scope.doGetThe(theGivenRef);
-        return optValue;
-    }
     
     /**
      * The value associated with theGivenRef.
@@ -93,18 +81,6 @@ public final class GetInstance {
         val optValue = scope.doGetThe(theGivenRef);
         val value    = optValue.orElse(null);
         return value;
-    }
-    
-    /**
-     * Return the optional value associated with the given targetClass.
-     * 
-     * @param targetClass 
-     * @return the optional value associated with the given targetClass.
-     **/
-    public <T> Optional<T> _the(Class<T> targetClass) {
-        val ref      = Ref.defaultOf(targetClass);
-        val optValue = scope.doGetThe(ref);
-        return optValue;
     }
     
     /**

@@ -15,10 +15,10 @@
 //  ========================================================================
 package directget.get;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
+import directcommon.common.Nulls;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.run.Named;
 import directget.get.run.Named.Predicate;
@@ -27,12 +27,14 @@ import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
 /**
  * This class provide access to the application scope.
  * 
  * @author NawaMan
  */
+@ExtensionMethod({ Nulls.class })
 public final class Get {
     
     /** This predicate specifies that all of the references are to be inherited */
@@ -92,37 +94,14 @@ public final class Get {
     //-- the --
     
     /**
-     * The optional value associated with theGivenRef.
-     * 
-     * @param theGivenRef 
-     * @return the optional value associated with theGivenRef.
-     **/
-    public static <T> Optional<T> _the(Ref<T> theGivenRef) {
-        val optValue = App.scope.get()._the(theGivenRef);
-        return optValue;
-    }
-    
-    /**
      * The value associated with theGivenRef.
      * 
      * @param theGivenRef 
      * @return the value associated with theGivenRef.
      **/
     public static <T> T the(Ref<T> theGivenRef) {
-        val optValue = App.scope.get()._the(theGivenRef);
-        val value = optValue.orElse(null);
+        val value = App.scope.get().the(theGivenRef);
         return value;
-    }
-    
-    /**
-     * Return the optional value associated with the given targetClass.
-     * 
-     * @param targetClass 
-     * @return the optional value associated with the given targetClass.
-     **/
-    public static <T> Optional<T> _the(Class<T> targetClass) {
-        val optValue = App.scope.get()._the(Ref.defaultOf(targetClass));
-        return optValue;
     }
     
     /**
@@ -132,23 +111,11 @@ public final class Get {
      * @return the value associated with the given targetClass.
      **/
     public static <T> T the(Class<T> targetClass) {
-        val optValue = App.scope.get()._the(targetClass);
-        val value = optValue.orElse(null);
+        val value = App.scope.get().the(targetClass);
         return value;
     }
     
     //-- value --
-    
-    /**
-     * The optional value associated with theGivenRef.
-     * 
-     * @param theGivenRef 
-     * @return the optional value associated with theGivenRef.
-     **/
-    public static <T> Optional<T> _value(Ref<T> theGivenRef) {
-        val optValue = App.scope.get()._the(theGivenRef);
-        return optValue;
-    }
     
     /**
      * The value associated with theGivenRef.
@@ -156,21 +123,9 @@ public final class Get {
      * @param theGivenRef 
      * @return the value associated with theGivenRef.
      **/
-    public static <T> T value(Ref<T> theGivenRef) {
-        val optValue = App.scope.get()._the(theGivenRef);
-        val value = optValue.orElse(null);
+    public static <T> T valueOf(Ref<T> theGivenRef) {
+        val value = App.scope.get().the(theGivenRef);
         return value;
-    }
-    
-    /**
-     * Return the optional value associated with the given targetClass.
-     * 
-     * @param targetClass 
-     * @return the optional value associated with the given targetClass.
-     **/
-    public static <T> Optional<T> _value(Class<T> targetClass) {
-        val optValue = App.scope.get()._the(Ref.defaultOf(targetClass));
-        return optValue;
     }
     
     /**
@@ -179,9 +134,8 @@ public final class Get {
      * @param targetClass 
      * @return the value associated with the given targetClass.
      **/
-    public static <T> T value(Class<T> targetClass) {
-        val optValue = App.scope.get()._the(targetClass);
-        val value = optValue.orElse(null);
+    public static <T> T valueOf(Class<T> targetClass) {
+        val value = App.scope.get().the(targetClass);
         return value;
     }
     
@@ -190,36 +144,14 @@ public final class Get {
     /**
      * Return the optional value of object create from the factory.
      * 
-     * @param factoryRef 
+     * @param factoryClass 
      * @return the optional value of object create from the factory.
      **/
-    public static <T, F extends Factory<T>> Optional<T> _from(Class<F> factoryRef) {
-        val optValue = App.scope.get()._the(factoryRef);
-        return optValue.map(Factory::make);
+    public static <T, F extends Factory<T>> T from(Class<F> factoryClass) {
+        val value = App.scope.get().the(factoryClass).whenNotNull().map(Factory::make).orElse(null);
+        return value;
     }
-
-    /**
-     * Return the optional value of object create from the factory.
-     * 
-     * @param factoryRef 
-     * @return the optional value of object create from the factory.
-     **/
-    public static <T, F extends Factory<T>> T from(Class<F> factoryRef) {
-        val optValue = App.scope.get()._the(factoryRef);
-        return optValue.map(Factory::make).orElse(null);
-    }
-
-    /**
-     * Return the optional value of object create from the factory.
-     * 
-     * @param factoryRef 
-     * @return the optional value of object create from the factory.
-     **/
-    public static <T, F extends Factory<T>> Optional<T> _from(Ref<F> factoryRef) {
-        val optValue = App.scope.get()._the(factoryRef);
-        return optValue.map(Factory::make);
-    }
-
+    
     /**
      * Return the optional value of object create from the factory.
      * 
@@ -227,8 +159,8 @@ public final class Get {
      * @return the optional value of object create from the factory.
      **/
     public static <T, F extends Factory<T>> T from(Ref<F> factoryRef) {
-        val optValue = App.scope.get()._the(factoryRef);
-        return optValue.map(Factory::make).orElse(null);
+        val value = App.scope.get().the(factoryRef).whenNotNull().map(Factory::make).orElse(null);
+        return value;
     }
     
 }

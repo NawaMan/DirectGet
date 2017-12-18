@@ -15,40 +15,30 @@
 //  ========================================================================
 package directget.get;
 
-import static org.junit.Assert.*;
+import static directget.get.Preferability.Dictate;
+import static directget.get.Run.With;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static directget.get.Get._the;
-import static directget.get.Preferability.Dictate;
-import static directget.get.Run.*;
-import static java.lang.Thread.*;
 
 import org.junit.Test;
 
-import directget.get.App;
-import directget.get.Get;
-import directget.get.Preferability;
-import directget.get.Ref;
+import directcommon.common.Nulls;
 import directget.get.run.Fork;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod({ Nulls.class })
 public class GetInstanceTest implements Named.User {
     
     private CountDownLatch latch = new CountDownLatch(1);
@@ -63,7 +53,7 @@ public class GetInstanceTest implements Named.User {
     
     @Test
     public void testBasic() {
-    	StringBuffer buffer = Get._the(StringBuffer.class).orElse(null);
+    	StringBuffer buffer = Get.the(StringBuffer.class);
         assertNotNull(buffer);
     }
     
@@ -71,7 +61,7 @@ public class GetInstanceTest implements Named.User {
     public void testRef() {
     	StringBuffer theBuffer = new StringBuffer();
     	RefTo<StringBuffer> aBuffer = Ref.to("aList", StringBuffer.class).defaultedTo(theBuffer);
-        assertTrue(App.Get()._the(aBuffer).filter(buffer -> buffer == theBuffer).isPresent());
+        assertTrue(App.Get().the(aBuffer).whenNotNull().filter(buffer -> buffer == theBuffer).isPresent());
     }
     
     private void join() {

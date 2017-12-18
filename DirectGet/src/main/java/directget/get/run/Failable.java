@@ -54,6 +54,8 @@ public class Failable {
          **/
         public void run() throws T;
         
+        // TODO - All these can be made extension method.
+        
         /**
          * Change to regular runnable.
          *  

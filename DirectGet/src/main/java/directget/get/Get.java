@@ -159,7 +159,7 @@ public final class Get {
      * @return the optional value of object create from the factory.
      **/
     public static <T, F extends Factory<T>> T from(Ref<F> factoryRef) {
-        val value = App.scope.get().the(factoryRef).whenNotNull().map(Factory::make).orElse(null);
+        T value = App.scope.get().the(factoryRef).whenNotNull().map(Factory::make).orElse(null);
         return value;
     }
     

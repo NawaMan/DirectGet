@@ -27,10 +27,13 @@ import java.util.function.Supplier;
 
 import org.junit.Test;
 
+import directcommon.common.Nulls;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod({ Nulls.class })
 public class RefTest {
     
     @Test
@@ -54,8 +57,8 @@ public class RefTest {
     public void testRef_toClassWithDefault() {
         List theList = new ArrayList();
         RefTo<List> ref = Ref.to(List.class).defaultedTo(theList);
-        assertTrue(ref._getDefaultValue().isPresent());
-        assertTrue(ref._getDefaultValue().filter(list -> list == theList).isPresent());
+        assertTrue(ref.getDefaultValue().isNotNull());
+        assertTrue(ref.getDefaultValue().whenNotNull().filter(list -> list == theList).isPresent());
     }
     
     @Test

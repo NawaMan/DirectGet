@@ -17,7 +17,6 @@ package directget.get.supportive;
 
 import static directget.get.supportive.Caller.trace;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -81,12 +80,6 @@ public class RefTo<T> extends Ref<T> {
         } else {
             return provider.get();
         }
-    }
-    
-    /** @return the optional default object. */
-    @Override
-    public final Optional<T> _getDefaultValue() {
-        return Optional.ofNullable(getDefaultValue());
     }
     
     @Override

@@ -67,8 +67,13 @@ public class Caller {
         }
         public String lineNumberString() {
             process();
-            return traceString.substring(fileNameEnded, traceString.length() - 1);
+            return traceString.substring(fileNameEnded + 1, traceString.length() - 1);
         }
+        /**
+         * Returns the line number.
+         * 
+         * @return the line number.
+         **/
         public int lineNumber() {
             return Integer.parseInt(lineNumberString());
         }

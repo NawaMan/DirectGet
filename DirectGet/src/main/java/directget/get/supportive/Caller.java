@@ -23,6 +23,57 @@ public class Caller {
         /** Continue */ Continue;
     }
     
+    public static class Trace {
+        private final String traceString;
+        private int   classNameEnded  = -1;
+        private int   methodNameEnded = -1;
+        private int   fileNameEnded   = -1;
+        public Trace(String traceString) {
+            this.traceString = traceString;
+        }
+        // directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)
+        //                                    ^        ^               ^
+        //                                    |        |               +-- FileNameEnded
+        //                                    |        +------------------ MethodEnded
+        //                                    +--------------------------- ClassEnded
+        private void process() {
+            if (classNameEnded != -1)
+                return;
+            synchronized (this) {
+                if (classNameEnded != -1)
+                    return;
+                methodNameEnded = traceString.indexOf('(');
+                classNameEnded  = traceString.lastIndexOf('.', methodNameEnded);
+                fileNameEnded   = traceString.lastIndexOf(':');
+            }
+        }
+        public String className() {
+            process();
+            return traceString.substring(0, classNameEnded);
+        }
+        public String methodName() {
+            process();
+            return traceString.substring(classNameEnded + 1, methodNameEnded);
+        }
+        public boolean isClassInit() {
+            return methodName().equals("<clinit>");
+        }
+        public boolean isInstanceInit() {
+            return methodName().equals("<init>");
+        }
+        public String fileName() {
+            process();
+            return traceString.substring(methodNameEnded + 1, fileNameEnded);
+        }
+        public String lineNumberString() {
+            process();
+            return traceString.substring(fileNameEnded, traceString.length() - 1);
+        }
+        public int lineNumber() {
+            return Integer.parseInt(lineNumberString());
+        }
+    }
+    
     
     private static ThreadLocal<List<String>> callerTrace = ThreadLocal.withInitial(()->new ArrayList<>(10));
     static {

@@ -3,6 +3,7 @@ package directget.get.supportive;
 import static directget.get.supportive.Caller.trace;
 import static org.junit.Assert.*;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import directget.get.Ref;
@@ -105,6 +106,20 @@ public class CallerTest {
             assertEquals(refExpected,      hey.getRef().getCallerTrace());
             assertEquals(providerExpected, hey.getCallerTrace());
         });
+    }
+    
+    private Ref<String> instanceRef = Ref.toValue("Instance");
+
+    @Test
+    public void testTrace_instanceField() {
+        val hey = instanceRef;
+        val refExpected      = "directget.get.supportive.CallerTest.<clinit>(CallerTest.java:45)";
+        val trace = new Caller.Trace(instanceRef.getCallerTrace());
+        assertEquals(CallerTest.class.getCanonicalName(), trace.className());
+        assertEquals("<init>", trace.methodName());
+        assertTrue(trace.isInstanceInit());
+        assertEquals("CallerTest.java", trace.fileName());
+        assertEquals(111, trace.lineNumber());
     }
     
 }

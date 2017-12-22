@@ -91,4 +91,11 @@ public class RefTest {
         });
     }
     
+    @Test
+    public void testProvidedUsing() {
+        RefTo<String>  theString = Ref.toValue("Hello");
+        RefTo<Integer> theLength = Ref.to(Integer.class).defaultedUsing(theString, String::length);
+        
+        assertEquals(5, theLength.value().intValue());
+    }
 }

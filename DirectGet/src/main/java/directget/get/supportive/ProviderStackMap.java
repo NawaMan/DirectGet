@@ -66,6 +66,8 @@ public class ProviderStackMap extends TreeMap<Ref, Stack<Provider>> {
         return stack.peek();
     }
     
+    // TODO - Make this stacktrace friendly.
+    
     /**
      * Returns the X-Ray status of the stack.
      * 

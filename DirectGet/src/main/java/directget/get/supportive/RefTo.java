@@ -15,9 +15,11 @@
 //  ========================================================================
 package directget.get.supportive;
 
+import static directget.get.Get.the;
 import static directget.get.supportive.Caller.trace;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import directget.get.Preferability;
@@ -123,7 +125,7 @@ public class RefTo<T> extends Ref<T> {
     //== Modifier =====================================================================================================
     
     /**
-     * Create a provider that dictate the given value. 
+     * Create a ref with a dictating provide that dictate the given value. 
      * 
      * @param value  the value to be dictated as.
      * @return  the RefTo.
@@ -135,7 +137,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider that dictate the value of the given ref. 
+     * Create a ref with a dictating provide the value of the given ref. 
      * 
      * @param ref  the reference.
      * @return  the RefTo.
@@ -147,7 +149,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider that dictate the result of the given supplier. 
+     * Create a ref with a dictating provide the result of the given supplier. 
      * 
      * @param supplier  the supplier.
      * @return  the RefTo.
@@ -159,7 +161,22 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (normal preferability) the given value. 
+     * Create a ref with a dictating provide that use the orgRef and the mapper.
+     * 
+     * @param orgRef  the original Ref.
+     * @param mapper  the mapper to get the value.
+     * @return  a new ref with the dictated provider.
+     */
+    public <F, V extends T> RefTo<T> dictatedUsing(Ref<F> orgRef, Function<F, V> mapper) {
+        return this.dictatedBy(()->{
+            F value = the(orgRef);
+            V mapped = mapper.apply(value);
+            return mapped;
+        });
+    }
+    
+    /**
+     * Create the ref (normal preferability) the given value. 
      * 
      * @param value  the value.
      * @return  the RefTo.
@@ -171,7 +188,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (normal preferability) the value of the given ref.
+     * Create the ref with the provider (normal preferability) that the value of the given ref.
      * 
      * @param ref  the ref.
      * @return  the RefTo.
@@ -183,7 +200,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (normal preferability) the result of the given supplier.
+     * Create the ref with the provider (normal preferability) that the result of the given supplier.
      * 
      * @param supplier  the supplier.
      * @return  the RefTo.
@@ -195,7 +212,22 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (using the given preferability) the given value. 
+     * Create a ref with a provide that use the orgRef and the mapper.
+     * 
+     * @param orgRef  the original Ref.
+     * @param mapper  the mapper to get the value.
+     * @return  a new ref with the dictated provider.
+     */
+    public <F, V extends T> RefTo<T> providedUsing(Ref<F> orgRef, Function<F, V> mapper) {
+        return this.providedBy(()->{
+            F value = the(orgRef);
+            V mapped = mapper.apply(value);
+            return mapped;
+        });
+    }
+    
+    /**
+     * Create the ref with the provider (using the given preferability) of the given value. 
      * 
      * @param preferability  the preferability.
      * @param value          the value.
@@ -208,7 +240,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (using the given preferability) the value of the given ref.
+     * Create the ref with the provider (using the given preferability) that the value of the given ref.
      * 
      * @param preferability  the preferability.
      * @param ref            the ref.
@@ -221,7 +253,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider (using the given preferability) the result of the given supplier.
+     * Create the ref with the provider (using the given preferability) the result of the given supplier.
      * 
      * @param preferability  the preferability.
      * @param supplier       the supplier.
@@ -236,7 +268,23 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider that default to the given value. 
+     * Create a ref with a provide that use the orgRef and the mapper.
+     * 
+     * @param preferability  the preferability. 
+     * @param orgRef         the original Ref.
+     * @param mapper         the mapper to get the value.
+     * @return  a new ref with the dictated provider.
+     */
+    public <F, V extends T> RefTo<T> providedUsing(Preferability preferability, Ref<F> orgRef, Function<F, V> mapper) {
+        return this.providedBy(preferability, ()->{
+            F value = the(orgRef);
+            V mapped = mapper.apply(value);
+            return mapped;
+        });
+    }
+    
+    /**
+     * Create the ref with the provider that default to the given value. 
      * 
      * @param value  the value.
      * @return  the RefTo.
@@ -248,7 +296,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider that default to the value of the given ref. 
+     * Create the ref with the provider that default to the value of the given ref. 
      * 
      * @param ref  the ref.
      * @return  the RefTo.
@@ -260,7 +308,7 @@ public class RefTo<T> extends Ref<T> {
     }
     
     /**
-     * Create the provider that default to the result of the given supplier.
+     * Create the ref with the provider that default to the result of the given supplier.
      * 
      * @param supplier  the supplier.
      * @return  the RefTo.
@@ -268,6 +316,21 @@ public class RefTo<T> extends Ref<T> {
     public <V extends T> RefTo<T> defaultedToBy(Supplier<V> supplier) {
         return trace(Capture.Continue, caller->{
             return providedBy(Preferability.Normal, supplier);
+        });
+    }
+    
+    /**
+     * Create a ref with a default provide that use the orgRef and the mapper.
+     * 
+     * @param orgRef  the original Ref.
+     * @param mapper  the mapper to get the value.
+     * @return  a new ref with the dictated provider.
+     */
+    public <F> RefTo<T> defaultedUsing(Ref<F> orgRef, Function<F, T> mapper) {
+        return this.defaultedToBy(()->{
+            F value = the(orgRef);
+            T mapped = mapper.apply(value);
+            return mapped;
         });
     }
 

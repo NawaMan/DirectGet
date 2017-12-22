@@ -26,6 +26,8 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Nulls.class })
 public class ObjectCreator {
     
+    // TODO - Should create interface with all default method.
+    
     @SuppressWarnings("rawtypes")
     private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
     

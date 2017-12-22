@@ -22,18 +22,21 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
+import directcommon.common.Nulls;
 import directget.get.ProposedConfiguration.ProposedConfigurationWithLastProvider;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.supportive.Caller.Capture;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
 /**
  * This is the application scope.
  * 
  * @author NawaMan
  */
+@ExtensionMethod({ Nulls.class })
 public final class App {
     
     /** Application mode - Default to TEST its the only one without main. */
@@ -98,6 +101,27 @@ public final class App {
     public static boolean initializeIfAbsent(Configuration configuration) {
         val isAbsent = scope.initIfAbsent(configuration);
         return isAbsent;
+    }
+    
+    /**
+     * Initialize the application scope if it has yet to be initialized.
+     * 
+     * @param configuration  the configuration.
+     * @param exitStatus     the exit status.
+     */
+    public static void initializeOrSystemHalt(Configuration configuration, int exitStatus) {
+        val isAbsent = scope.initIfAbsent(configuration);
+        if (isAbsent)
+            return;
+
+        System.err.println("Application is already initialized!");
+        System.err.println("Initialized at: ");
+        System.err.println(scope.getInitialzedStackTrace());
+        System.err.println();
+        System.err.println("Second attempt to initialize at: ");
+        new NullPointerException().printStackTrace(System.err);
+        System.err.println();
+        System.exit(exitStatus);
     }
     
     /** @return {@code true} if the application scope has been initialized */

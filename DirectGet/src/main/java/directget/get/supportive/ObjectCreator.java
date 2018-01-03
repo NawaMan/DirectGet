@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import directcommon.common.Nulls;
+import dssb.utils.common.Nulls;
 import directget.get.Get;
 import directget.get.InjectedConstructor;
 import directget.get.exceptions.AbstractClassCreationException;

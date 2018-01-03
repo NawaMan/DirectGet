@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 
-import directcommon.common.Nulls;
+import dssb.utils.common.Nulls;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;

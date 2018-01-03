@@ -22,7 +22,7 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
-import directcommon.common.Nulls;
+import dssb.utils.common.Nulls;
 import directget.get.ProposedConfiguration.ProposedConfigurationWithLastProvider;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.supportive.Caller.Capture;

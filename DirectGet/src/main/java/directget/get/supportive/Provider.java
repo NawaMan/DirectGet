@@ -15,8 +15,8 @@
 //  ========================================================================
 package directget.get.supportive;
 
+
 import static directget.get.Preferability.Default;
-import static directget.get.supportive.Caller.trace;
 import static java.lang.String.format;
 
 import java.util.Objects;
@@ -28,7 +28,7 @@ import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
 import directget.get.run.Wrapper;
-import directget.get.supportive.Caller.Capture;
+import dssb.callerid.impl.CallerId;
 import lombok.val;
 
 /**
@@ -58,13 +58,13 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      *            the supplier to get the value.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
-        this.caller        = trace(Capture.Pause, caller->caller);
+    public Provider(Ref<T> ref, Preferability preferability, Supplier<? extends T> supplier) {
+        this.caller        = CallerId.instance.caller().toString();
         this.ref           = Objects.requireNonNull(ref);
         this.preferability = preferability != null ? preferability      : Default;
         this.supplier      = supplier      != null ? (Supplier)supplier : (Supplier)()->null;
     }
-
+    
     @Override
     public Provider<T> getProvider() {
         return this;
@@ -127,14 +127,14 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
     
     /** @return the retainer. */
     public final ProviderWithRetainer<T> retained() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new ProviderWithRetainer<T>(ref, preferability, supplier);
         });
     }
     
     /** @return the singleton retainer. */
     public final ProviderWithRetainer<T> singleton() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return retained().globally().forAlways();
         });
     }
@@ -145,7 +145,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except the preferability of dictate.
      **/
     public Provider<T> butDictate() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, Preferability.Dictate, supplier);
         });
     }
@@ -154,7 +154,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except the preferability of normal.
      **/
     public Provider<T> butNormal() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, Preferability.Normal, supplier);
         });
     }
@@ -163,7 +163,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except the preferability of default.
      **/
     public Provider<T> butDefault() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, Preferability.Default, supplier);
         });
     }
@@ -175,7 +175,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except with the value.
      **/
     public Provider<T> butWith(T value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, preferability, new Named.ValueSupplier<T>(value));
         });
     }
@@ -187,7 +187,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except with the value.
      **/
     public Provider<T> butWithThe(Ref<T> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, preferability, new Named.RefSupplier<T>(ref));
         });
     }
@@ -199,7 +199,7 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
      * @return the new provider similar to this one except the supplied by the given supplier.
      **/
     public Provider<T> butBy(Supplier<T> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(ref, preferability, supplier);
         });
     }

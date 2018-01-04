@@ -16,8 +16,6 @@
 package directget.get;
 
 import static directget.get.Get.the;
-import static directget.get.supportive.Caller.trace;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,13 +29,12 @@ import java.util.function.Supplier;
 import directget.get.exceptions.DefaultRefException;
 import directget.get.run.Named;
 import directget.get.run.Named.RefSupplier;
-import directget.get.supportive.Caller;
-import directget.get.supportive.Caller.Capture;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.ObjectFactory;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
+import dssb.callerid.impl.CallerId;
 import lombok.val;
 
 /***
@@ -148,7 +145,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return the reference that represent the target class directly.
      **/
     public static <T> RefOf<T> of(Class<T> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new RefOf<>(targetClass);
         });
     }
@@ -162,7 +159,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return the ref.
      **/
     public static <T> RefTo<T> to(Class<T> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return toValue(null, targetClass, Preferability.Default, null).defaultedToBy(null);
         });
     }
@@ -249,7 +246,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      **/
     @SuppressWarnings("unchecked")
     public static <T> RefTo<T> toValue(T defaultValue) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return ((RefTo<T>)to(defaultValue.getClass())).defaultedTo(defaultValue);
         });
     }
@@ -272,7 +269,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * class with the default value.
      **/
     private static <T, V extends T> RefTo<T> toValue(String name, Class<T> targetClass, Preferability preferability, V defaultValue) {
-        return Caller.trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val theName    = name == null ? "" : name;
             val theFactory = new Named.ValueSupplier<T>(defaultValue);
             return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
@@ -415,7 +412,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but dictate.
      **/
     public Provider<T> butDictate() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentProvider = Get.getProvider(this);
             val currentSupplier = currentProvider.getSupplier();
             return new Provider<>(this, Preferability.Dictate, currentSupplier);
@@ -428,7 +425,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but provide.
      **/
     public Provider<T> butProvideNormally() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentProvider = Get.getProvider(this);
             val currentSupplier = currentProvider.getSupplier();
             return new Provider<>(this, Preferability.Normal, currentSupplier);
@@ -441,7 +438,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but default.
      **/
     public Provider<T> butDefault() {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentProvider = Get.getProvider(this);
             val currentSupplier = currentProvider.getSupplier();
             return new Provider<>(this, Preferability.Default, currentSupplier);
@@ -457,7 +454,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but dictate to the given value.
      **/
     public <V extends T> Provider<T> butDictatedTo(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.ValueSupplier<T>(value);
             return new Provider<>(this, Preferability.Dictate, currentSupplier);
         });
@@ -470,7 +467,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but dictate to a value of the given ref.
      **/
     public <V extends T> Provider<T> butDictatedToThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(ref);
             return new Provider<>(this, Preferability.Dictate, currentSupplier);
         });
@@ -483,7 +480,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but dictate to the value of the given target class.
      **/
     public <V extends T> Provider<T> butDictatedToThe(Class<V> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             RefSupplier<V> currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
             return new Provider<>(this, Preferability.Dictate, currentSupplier);
         });
@@ -496,7 +493,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but dictate to the value got from the supplier.
      **/
     public <V extends T> Provider<T> butDictatedBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(this, Preferability.Dictate, supplier);
         });
     }
@@ -508,7 +505,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return a new provider pretty much like this one but provided with the given value.
      **/
     public <V extends T> Provider<T> butProvidedWith(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.ValueSupplier<T>(value);
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -521,7 +518,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  a new provider pretty much like this one but provided with the value from the given ref.
      */
     public <V extends T> Provider<T> butProvidedWithThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(ref);
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -534,7 +531,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  a new provider pretty much like this one but provided with the value from the given target class. 
      */
     public <V extends T> Provider<T> butProvidedWithThe(Class<V> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -547,7 +544,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return   a new provider pretty much like this one but provided with the value got from the supplier.
      */
     public <V extends T> Provider<T> butProvidedBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(this, Preferability.Normal, supplier);
         });
     }
@@ -560,7 +557,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return   a new provider pretty much like this one but with the given perferaability and the value.
      **/
     public <V extends T> Provider<T> butProvidedWith(Preferability preferability, V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.ValueSupplier<T>(value);
             return new Provider<>(this, preferability, currentSupplier);
         });
@@ -574,7 +571,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      */
     public <V extends T> Provider<T> butProvidedWithThe(Preferability preferability, Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(ref);
             return new Provider<>(this, preferability, currentSupplier);
         });
@@ -588,7 +585,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      */
     public <V extends T> Provider<T> butProvidedWithThe(Preferability preferability, Class<V> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
             return new Provider<>(this, preferability, currentSupplier);
         });
@@ -602,7 +599,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      */
     public <V extends T> Provider<T> butProvidedBy(Preferability preferability, Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(this, preferability, supplier);
         });
     }
@@ -614,7 +611,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      **/
     public <V extends T> Provider<T> butDefaultedTo(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.ValueSupplier<T>(value);
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -627,7 +624,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      **/
     public <V extends T> Provider<T> butDefaultedToThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(ref);
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -640,7 +637,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return  the provider.
      **/
     public <V extends T> Provider<T> butDefaultedToThe(Class<V> targetClass) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val currentSupplier = new Named.RefSupplier<V>(Ref.of(targetClass));
             return new Provider<>(this, Preferability.Normal, currentSupplier);
         });
@@ -653,7 +650,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @return the provider.
      */
     public <V extends T> Provider<T> butDefaultedToBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return new Provider<>(this, Preferability.Normal, supplier);
         });
     }

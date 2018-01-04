@@ -16,7 +16,6 @@
 package directget.get.supportive;
 
 import static directget.get.Get.the;
-import static directget.get.supportive.Caller.trace;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -25,7 +24,7 @@ import java.util.function.Supplier;
 import directget.get.Preferability;
 import directget.get.Ref;
 import directget.get.run.Named;
-import directget.get.supportive.Caller.Capture;
+import dssb.callerid.impl.CallerId;
 import lombok.val;
 
 /**
@@ -59,11 +58,11 @@ public class RefTo<T> extends Ref<T> {
         super(targetClass);
         AtomicReference<String>        theName          = new AtomicReference<>();
         AtomicReference<Provider<T>>   theProvider      = new AtomicReference<>();
-        this.caller = Caller.trace(Capture.Continue, (String caller)->{
+        this.caller = CallerId.instance.trace((StackTraceElement caller)->{
             val prefer  = (preferability != null) ? preferability : Preferability.Default;
             theName    .set(name != null ? name : "");
             theProvider.set((factory == null) ? null : new Provider<>(RefTo.this, prefer, factory));
-            return caller;
+            return caller.toString();
         });
         this.name     = theName.get();
         this.provider = theProvider.get();
@@ -131,7 +130,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> dictatedTo(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Dictate, new Named.ValueSupplier<T>(value));
         });
     }
@@ -143,7 +142,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> dictatedToThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Dictate, new Named.RefSupplier<V>(ref));
         });
     }
@@ -155,7 +154,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> dictatedBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Dictate, supplier);
         });
     }
@@ -182,7 +181,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> providedWith(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
         });
     }
@@ -194,7 +193,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      */
     public <V extends T> RefTo<T> providedWithThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
         });
     }
@@ -206,7 +205,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      */
     public <V extends T> RefTo<T> providedBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, supplier);
         });
     }
@@ -234,7 +233,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> providedWith(Preferability preferability, V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(preferability, new Named.ValueSupplier<T>(value));
         });
     }
@@ -247,7 +246,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      */
     public <V extends T> RefTo<T> providedWithThe(Preferability preferability, Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(preferability, new Named.RefSupplier<V>(ref));
         });
     }
@@ -260,7 +259,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      */
     public <V extends T> RefTo<T> providedBy(Preferability preferability, Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             val name        = this.getName();
             val targetClass = this.getTargetClass();
             return new RefTo<>(name, targetClass, preferability, supplier);
@@ -290,7 +289,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> defaultedTo(V value) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, new Named.ValueSupplier<T>(value));
         });
     }
@@ -302,7 +301,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      **/
     public <V extends T> RefTo<T> defaultedToThe(Ref<V> ref) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, new Named.RefSupplier<V>(ref));
         });
     }
@@ -314,7 +313,7 @@ public class RefTo<T> extends Ref<T> {
      * @return  the RefTo.
      */
     public <V extends T> RefTo<T> defaultedToBy(Supplier<V> supplier) {
-        return trace(Capture.Continue, caller->{
+        return CallerId.instance.trace(caller->{
             return providedBy(Preferability.Normal, supplier);
         });
     }

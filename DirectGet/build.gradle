@@ -19,10 +19,15 @@ targetCompatibility = 1.8
 repositories {
     mavenLocal()
     jcenter()
+    maven {
+        url 'https://raw.githubusercontent.com/dssb/maven-repository/master/'
+    }
 }
 
 dependencies {
-    compile     'dssb-utils:utils-common:1.0.0'
+    compile 'dssb-callerid:dssb-callerid-impl:1.1.0'
+    compile 'dssb-failable:dssb-failable-api:1.0.0'
+    compile 'dssb-utils:dssb-utils-common:1.0.0'
     
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'

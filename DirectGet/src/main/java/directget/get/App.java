@@ -16,18 +16,17 @@
 package directget.get;
 
 import static directget.get.Get.the;
-import static directget.get.supportive.Caller.trace;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
-import dssb.utils.common.Nulls;
 import directget.get.ProposedConfiguration.ProposedConfigurationWithLastProvider;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
-import directget.get.supportive.Caller.Capture;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
+import dssb.callerid.impl.CallerId;
+import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -137,7 +136,7 @@ public final class App {
      * @param appMode the application mode.
      */
     public static void ensureMode(AppMode appMode) {
-        trace(Capture.Continue, caller->{
+        CallerId.instance.trace(caller->{
             ProposedConfiguration.instance
                 .appMode(appMode)
                 .orSystemHalt();

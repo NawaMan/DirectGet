@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import directget.get.run.Failable;
-import directget.get.run.exceptions.FailableException;
+import directget.get.run.HandledFailable;
+import dssb.failable.Failable;
+import dssb.failable.FailableException;
 import lombok.val;
 
 /**
@@ -31,20 +32,20 @@ import lombok.val;
 public class AsyncWrapperContext extends WrapperContext {
     
     @SuppressWarnings("rawtypes")
-    AsyncWrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+    AsyncWrapperContext(Function<HandledFailable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
         super(failHandler, functions);
     }
     
     /** Run the given supplier and return a value. */
-    public <R, T extends Throwable> CompletableFuture<R> start(Failable.Supplier<R, T> supplier) {
+    public <R, T extends Throwable> CompletableFuture<R> start(HandledFailable.Supplier<R, T> supplier) {
         return run(supplier);
     }
     
     /** Run the given supplier and return a value. */
     @SuppressWarnings("unchecked")
-    public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
+    public <R, T extends Throwable> CompletableFuture<R> run(HandledFailable.Supplier<R, T> supplier) {
         CompletableFuture<R> future = new CompletableFuture<R>();
-        val runnable = (Failable.Runnable<T>) () -> {
+        val runnable = (HandledFailable.Runnable<T>) () -> {
             try {
                 val theResult = supplier.get();
                 future.complete(theResult);

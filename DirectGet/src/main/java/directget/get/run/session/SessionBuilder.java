@@ -25,11 +25,12 @@ import java.util.stream.Stream;
 import directget.get.App;
 import directget.get.GetInstance;
 import directget.get.Scope;
-import directget.get.run.Failable;
+import directget.get.run.HandledFailable;
 import directget.get.run.Wrapper;
-import directget.get.run.exceptions.FailableException;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.supportive.Provider;
+import dssb.failable.Failable;
+import dssb.failable.FailableException;
 import lombok.val;
 
 /**
@@ -40,7 +41,7 @@ import lombok.val;
 public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
     
     @SuppressWarnings("rawtypes")
-    Function<Failable.Runnable, Runnable> failHandler = runnable->runnable.gracefully();
+    Function<HandledFailable.Runnable, Runnable> failHandler = runnable->runnable.gracefully();
     List<Function<Runnable, Runnable>>    wrappers    = new ArrayList<>();
     
     private Scope scope = App.scope;
@@ -113,7 +114,7 @@ public abstract class SessionBuilder<SB extends SessionBuilder<SB>> {
                 = (this instanceof SyncNoCheckExceptionSessionBuilder)
                 ? (SyncNoCheckExceptionSessionBuilder)this
                 : toSynchronouslyNoCheckExceptionSessionBuilder();
-        builder.failHandler = Failable.Runnable::handledly;
+        builder.failHandler = HandledFailable.Runnable::handledly;
         return builder;
     }
     

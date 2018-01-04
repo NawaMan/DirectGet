@@ -21,8 +21,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import directget.get.Ref;
-import directget.get.run.Failable;
 import directget.get.run.Fork;
+import directget.get.run.HandledFailable;
+import dssb.failable.Failable;
 
 /**
  * The wrapper for a new thread run.
@@ -97,7 +98,7 @@ public class AsyncSessionBuilder extends SessionBuilder<AsyncSessionBuilder> {
     }
     
     /** Run the given supplier and return a value. */
-    public <R, T extends Throwable> CompletableFuture<R> run(Failable.Supplier<R, T> supplier) {
+    public <R, T extends Throwable> CompletableFuture<R> run(HandledFailable.Supplier<R, T> supplier) {
         return build().run(supplier);
     }
     

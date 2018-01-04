@@ -32,10 +32,10 @@ import org.junit.Test;
 
 import directget.get.Ref;
 import directget.get.Run;
-import directget.get.run.exceptions.FailableException;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;
 import directget.get.supportive.RefTo;
+import dssb.failable.FailableException;
 import lombok.val;
 
 public class RunTest {
@@ -59,7 +59,7 @@ public class RunTest {
     @Test(expected = IOException.class)
     public void testSameThreadSupplier_withReturnAndException() throws Throwable {
         val toThrow = new AtomicBoolean();
-        val theRunnable = Failable.Runnable.of(()->{
+        val theRunnable = HandledFailable.Runnable.of(()->{
             if (toThrow.get()) {
                 throw new IOException();
             }
@@ -174,7 +174,7 @@ public class RunTest {
     
     @Test
     public void testIgnoreHandledProblem() throws IOException {
-        Failable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
+        HandledFailable.Runnable<IOException> runnable = ()->{ throw new IOException(); };
         
         IgnoreHandledProblem()
         .run(()->{

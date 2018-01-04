@@ -21,7 +21,7 @@ import static directget.get.run.session.utils._toUnmodifiableNonNullList;
 import java.util.List;
 import java.util.function.Function;
 
-import directget.get.run.Failable;
+import directget.get.run.HandledFailable;
 
 /**
  * The contains the wrappers so that we can run something within them.
@@ -31,11 +31,11 @@ import directget.get.run.Failable;
 public class WrapperContext {
     
     @SuppressWarnings("rawtypes")
-    final Function<Failable.Runnable, Runnable> failHandler;
+    final Function<HandledFailable.Runnable, Runnable> failHandler;
     final List<Function<Runnable, Runnable>> wrappers;
     
     @SuppressWarnings("rawtypes") 
-    WrapperContext(Function<Failable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
+    WrapperContext(Function<HandledFailable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
         this.failHandler = _or(failHandler, ()->runnable->runnable.gracefully());
         this.wrappers    = _toUnmodifiableNonNullList(functions);
     }

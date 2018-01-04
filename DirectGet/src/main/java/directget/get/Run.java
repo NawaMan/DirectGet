@@ -18,7 +18,7 @@ package directget.get;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import directget.get.run.Failable;
+import directget.get.run.HandledFailable;
 import directget.get.run.Wrapper;
 import directget.get.run.session.AsyncSessionBuilder;
 import directget.get.run.session.SyncNoCheckExceptionSessionBuilder;
@@ -242,7 +242,7 @@ public class Run {
      * @param runnable 
      * @throws T -- the throwable.
      **/
-    public static <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+    public static <T extends Throwable> void run(HandledFailable.Runnable<T> runnable) throws T {
         SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         sessionBuilder.run(runnable);
     }
@@ -254,7 +254,7 @@ public class Run {
      * @return the result from the supplier.
      * @throws T -- the throwable.
      */
-    public static <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+    public static <R, T extends Throwable> R run(HandledFailable.Supplier<R, T> supplier) throws T {
         SyncSessionBuilder sessionBuilder = new SyncSessionBuilder();
         return sessionBuilder.run(supplier);
     }

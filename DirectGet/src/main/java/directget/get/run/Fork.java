@@ -18,6 +18,7 @@ package directget.get.run;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
+import dssb.failable.Failable;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

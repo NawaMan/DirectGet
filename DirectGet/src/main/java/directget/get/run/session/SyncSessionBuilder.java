@@ -15,11 +15,7 @@
 //  ========================================================================
 package directget.get.run.session;
 
-import directget.get.Get;
-import directget.get.run.Failable;
-import directget.get.run.exceptions.FailableException;
-import directget.get.run.exceptions.ProblemHandler;
-import lombok.val;
+import directget.get.run.HandledFailable;
 
 /**
  * This class make building a run a bit easier.
@@ -40,12 +36,12 @@ public class SyncSessionBuilder
      * 
      * @throws T
      */
-    public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+    public <R, T extends Throwable> R run(HandledFailable.Supplier<R, T> supplier) throws T {
         return build().run(supplier);
     }
     
     /** Run the session now. */
-    public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+    public <T extends Throwable> void run(HandledFailable.Runnable<T> runnable) throws T {
         build().run(runnable);
     }
     

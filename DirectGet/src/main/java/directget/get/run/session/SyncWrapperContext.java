@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import directget.get.run.Failable;
-import directget.get.run.exceptions.FailableException;
+import directget.get.run.HandledFailable;
+import dssb.failable.FailableException;
 import lombok.val;
 
 
@@ -33,19 +33,19 @@ public class SyncWrapperContext extends WrapperContext {
     
     @SuppressWarnings("rawtypes")
     SyncWrapperContext(
-            Function<Failable.Runnable, Runnable> failHandler,
+            Function<HandledFailable.Runnable, Runnable> failHandler,
             List<Function<Runnable, Runnable>> functions) {
         super(failHandler, functions);
     }
     
     /** Run something within this context. */
-    public <T extends Throwable> void start(Failable.Runnable<T> runnable) throws T {
+    public <T extends Throwable> void start(HandledFailable.Runnable<T> runnable) throws T {
         run(runnable);
     }
     
     /** Run something within this context. */
     @SuppressWarnings("unchecked")
-    public <T extends Throwable> void run(Failable.Runnable<T> runnable) throws T {
+    public <T extends Throwable> void run(HandledFailable.Runnable<T> runnable) throws T {
         Runnable current = failHandler.apply(runnable);
         for (int i = wrappers.size(); i-- > 0;) {
             val wrapper = wrappers.get(i);
@@ -73,14 +73,14 @@ public class SyncWrapperContext extends WrapperContext {
     }
     
     /** Run the given supplier and return a value. */
-    public <R, T extends Throwable> R start(Failable.Supplier<R, T> supplier) throws T {
+    public <R, T extends Throwable> R start(HandledFailable.Supplier<R, T> supplier) throws T {
         return run(supplier);
     }
     
     /** Run the given supplier and return a value. */
-    public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) throws T {
+    public <R, T extends Throwable> R run(HandledFailable.Supplier<R, T> supplier) throws T {
         val result = new AtomicReference<R>();
-        val runnable = (Failable.Runnable<T>) () -> {
+        val runnable = (HandledFailable.Runnable<T>) () -> {
             val theResult = supplier.get();
             result.set(theResult);
         };

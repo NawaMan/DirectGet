@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get.run.session;
 
-import directget.get.run.Failable;
+import directget.get.run.HandledFailable;
 
 /**
  * This class make building a run a bit easier.
@@ -32,7 +32,7 @@ public class SyncNoCheckExceptionSessionBuilder
     }
     
     /** Run the given supplier and return a value. */
-    public <R, T extends Throwable> R run(Failable.Supplier<R, T> supplier) {
+    public <R, T extends Throwable> R run(HandledFailable.Supplier<R, T> supplier) {
         try {
             return build().run(supplier);
         } catch (RuntimeException e) {
@@ -46,7 +46,7 @@ public class SyncNoCheckExceptionSessionBuilder
     }
     
     /** Run the session now. */
-    public <T extends Throwable> void run(Failable.Runnable<T> runnable) {
+    public <T extends Throwable> void run(HandledFailable.Runnable<T> runnable) {
         try {
             build().run(runnable);
         } catch (RuntimeException e) {

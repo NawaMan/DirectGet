@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.supportive.Utilities.isLocalCall;
+import static directget.get.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 

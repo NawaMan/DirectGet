@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import dssb.utils.common.Nulls;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
-import directget.get.supportive.Utilities;
+import directget.get.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

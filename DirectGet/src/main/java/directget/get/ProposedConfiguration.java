@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.supportive.Utilities.isLocalCall;
+import static directget.get.Utilities.isLocalCall;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import directget.get.supportive.Provider;
-import directget.get.supportive.Utilities;
+import directget.get.Utilities;
 import dssb.callerid.impl.CallerId;
 import dssb.utils.common.Nulls;
 import lombok.val;

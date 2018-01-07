@@ -29,7 +29,7 @@ import dssb.utils.common.Nulls;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
-import directget.get.supportive.Utilities;
+import directget.get.Utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

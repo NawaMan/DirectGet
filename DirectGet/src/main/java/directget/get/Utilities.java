@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive;
+package directget.get;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;

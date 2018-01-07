@@ -19,6 +19,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import dssb.failable.Failable;
+import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -27,7 +28,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  **/
-@ExtensionMethod({ utils.class })
+@ExtensionMethod({ Nulls.class })
 public class Fork {
     
     private static final Failable.Consumer<Session, Throwable> joinSession = Session::join;
@@ -61,7 +62,7 @@ public class Fork {
      * @throws Throwable
      **/
     public void join() throws Throwable {
-        this.forkSession.get()._do(joinSession.gracefully());
+        this.forkSession.get().useAs(joinSession.gracefully());
     }
     
     /** Fork session. */

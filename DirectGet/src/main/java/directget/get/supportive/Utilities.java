@@ -18,14 +18,10 @@ package directget.get.supportive;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -47,32 +43,10 @@ public class Utilities {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final Function<Map, Map> newTreeMap = (Function<Map, Map>) TreeMap::new;
     
-    /** Returns mapped result using the mapperFunction if the given object is not null. **/
-    public static <F, T> T _changeFrom(F theGivenObject, Function<F, T> mapperFunction) {
-        return (theGivenObject == null) ? null : mapperFunction.apply(theGivenObject);
-    }
-    
-    /** Returns mapped result using the mapperFunction if the given object is not null. **/
-    public static <F, T> T _changeBy(F theGivenObject, Function<F, T> mapperFunction) {
-        return (theGivenObject == null) ? null : mapperFunction.apply(theGivenObject);
-    }
-    
-    /** Returns mapped result using the mapperFunction if the given object is not null. **/
-    public static <F, T> T _changeTo(F theGivenObject, Function<F, T> mapperFunction) {
-        return (theGivenObject == null) ? null : mapperFunction.apply(theGivenObject);
-    }
-    
-    /** Proceed to perform the action if theGivenObject is not null. Returns theGivenObject. **/
-    public static <V> V _do(V theGivenObject, Consumer<V> theAction) {
-        if (theGivenObject != null)
-            theAction.accept(theGivenObject);
-        return theGivenObject;
-    }
-    
     /** Returns the unmodifiedable sorted map from the given map. **/
     public static <K, V> Map<K, V> _toUnmodifiableSortedMap(Map<K, V> theGivenMap) {
         @SuppressWarnings("unchecked")
-        Map<K, V> newProviderMap = Nulls.or(_changeBy(theGivenMap, newTreeMap), emptyMap());
+        Map<K, V> newProviderMap = Nulls.or(Nulls.mapTo(theGivenMap, newTreeMap), emptyMap());
         return unmodifiableMap(newProviderMap);
     }
     
@@ -94,22 +68,6 @@ public class Utilities {
     /** Collect the given stream into a list. */
     public static <T> List<T> _toList(Stream<T> theGivenStream) {
         return theGivenStream.collect(Collectors.toList());
-    }
-    
-    /** Collects the non-null elements of the given collection into a list. **/
-    public static <T> List<T> _toUnmodifiableNonNullList(Collection<T> collection) {
-        if (collection == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(collection.stream().filter(Objects::nonNull).collect(Collectors.toList()));
-    }
-    
-    /** Collects the non-null elements of the given stream into a list. **/
-    public static <T> List<T> _toUnmodifiableNonNullList(Stream<T> stream) {
-        if (stream == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(stream.filter(Objects::nonNull).collect(Collectors.toList()));
     }
     
     /** Convert the given runnable to a supplier and in case of exception, assigned it in the exceptionHolder. */

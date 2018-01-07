@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
 import directget.get.supportive.RefTo;
-import directget.get.supportive.Utilities;
+import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -40,7 +40,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class })
+@ExtensionMethod({ Nulls.class })
 public enum Preferability {
     
     /** Only use when no other is preferred. */
@@ -208,13 +208,13 @@ public enum Preferability {
     
     private static <T> Supplier<String> getXRayString(Ref<T> ref, Scope parentScope, Scope currentScope,
             ProviderStackMap stacks) {
-        String parentXRayString  = parentScope ._changeFrom(scopeToXRay);
-        String currentXRayString = currentScope._changeFrom(scopeToXRay);
-        String stackXRayString   = stacks      ._changeFrom(stackToXRay);
+        String parentXRayString  = parentScope .mapFrom(scopeToXRay);
+        String currentXRayString = currentScope.mapFrom(scopeToXRay);
+        String stackXRayString   = stacks      .mapFrom(stackToXRay);
         return () -> {
-        	String parentXRay  = parentXRayString ._changeBy(addingTabIndentation);
-            String currentXRay = currentXRayString._changeBy(addingTabIndentation);
-            String stackXRay   = stackXRayString  ._changeBy(addingTabIndentation);
+        	String parentXRay  = parentXRayString .mapBy(addingTabIndentation);
+            String currentXRay = currentXRayString.mapBy(addingTabIndentation);
+            String stackXRay   = stackXRayString  .mapBy(addingTabIndentation);
             return "{" + "\n\tParent:" + parentXRay + "\n\tConfig:" + currentXRay + "\n\tStack :" + stackXRay + "\n}";
         };
     }

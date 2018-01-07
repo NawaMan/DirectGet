@@ -15,10 +15,14 @@
 //  ========================================================================
 package directget.get.run.session;
 
-import static directget.get.run.session.utils._or;
-import static directget.get.run.session.utils._toUnmodifiableNonNullList;
+import static dssb.utils.common.Nulls.orGet;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import directget.get.run.HandledFailable;
@@ -36,8 +40,17 @@ public class WrapperContext {
     
     @SuppressWarnings("rawtypes") 
     WrapperContext(Function<HandledFailable.Runnable, Runnable> failHandler, List<Function<Runnable, Runnable>> functions) {
-        this.failHandler = _or(failHandler, ()->runnable->runnable.gracefully());
-        this.wrappers    = _toUnmodifiableNonNullList(functions);
+        this.failHandler = orGet(failHandler, ()->runnable->runnable.gracefully());
+        this.wrappers    = toUnmodifiableNonNullList(functions);
+    }
+    
+    private static <T> List<T> toUnmodifiableNonNullList(Collection<T> collection) {
+        if (collection == null) {
+            return emptyList();
+        }
+        return unmodifiableList(collection.stream()
+                .filter(Objects::nonNull)
+                .collect(toList()));
     }
     
 }

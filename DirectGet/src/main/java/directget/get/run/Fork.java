@@ -62,7 +62,7 @@ public class Fork {
      * @throws Throwable
      **/
     public void join() throws Throwable {
-        this.forkSession.get().useAs(joinSession.gracefully());
+        this.forkSession.get().whenNotNull(joinSession.gracefully());
     }
     
     /** Fork session. */

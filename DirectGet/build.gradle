@@ -1,6 +1,6 @@
 def thisGroup    = 'directget'
 def thisArtifact = 'get'
-def thisVersion  = '0.15.3'
+def thisVersion  = '0.15.4'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -25,9 +25,9 @@ repositories {
 }
 
 dependencies {
-    compile 'dssb-callerid:dssb-callerid-impl:1.1.0'
+    compile 'dssb-callerid:dssb-callerid-impl:1.2.0'
     compile 'dssb-failable:dssb-failable-api:1.0.0'
-    compile 'dssb-utils:dssb-utils-common:1.0.2'
+    compile 'dssb-utils:dssb-utils-common:1.0.3'
     
     compile     'org.projectlombok:lombok:1.16.16'
     testCompile 'junit:junit:4.12'

@@ -18,14 +18,13 @@ package directget.get;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
-import dssb.utils.common.Nulls;
-import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.run.Named;
 import directget.get.run.Named.Predicate;
 import directget.get.supportive.CounterThreadFactory;
 import directget.get.supportive.GetThreadFactoryExecutor;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefTo;
+import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -56,36 +55,6 @@ public final class Get {
     private Get() {
         
     }
-    
-    /**
-     * Initialize the App scope.
-     * 
-     * @return {@code true} if the initialization actually happen with this call.
-     **/
-    public static boolean initialize() {
-        return App.initializeIfAbsent(new Configuration());
-    }
-    
-    /**
-     * Initialize the App scope with the given configuration.
-     * 
-     * @param theGivenConfiguration
-     * @throws AppScopeAlreadyInitializedException
-     */
-    public static void initialize(Configuration theGivenConfiguration) throws AppScopeAlreadyInitializedException {
-        App.initialize(theGivenConfiguration);
-    }
-
-    /**
-     * Initialize the App scope with the given configuration if it has not yet been initialized.
-     * 
-     * @param theGivenConfiguration
-     * @return {@code true} if the initialization actually happen with this call.
-     */
-    public static boolean initializeIfAbsent(Configuration theGivenConfiguration) {
-        return App.initializeIfAbsent(theGivenConfiguration);
-    }
-    
     
     static <T> Provider<T> getProvider(Ref<T> ref) {
         return App.Get().getProvider(ref);

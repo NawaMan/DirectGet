@@ -15,7 +15,6 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.Utilities.isLocalCall;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -27,6 +26,7 @@ import java.util.stream.Stream;
 
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
 import directget.get.supportive.Provider;
+import dssb.callerid.impl.CallerId;
 import lombok.val;
 
 /***
@@ -81,7 +81,7 @@ public class Scope {
     /** Reset application scope configuration. */
     void reset() {
         if (parentScope == null) {
-            if (!isLocalCall())
+            if (!CallerId.instance.isLocalCall())
                 return;
             
             config = DEFAULT_CONFIG;

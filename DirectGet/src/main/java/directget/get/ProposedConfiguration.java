@@ -15,8 +15,6 @@
 //  ========================================================================
 package directget.get;
 
-import static directget.get.Utilities.isLocalCall;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -103,7 +101,7 @@ public class ProposedConfiguration {
 
     /** Reset proposed configuration. */
     void reset() {
-        if (!isLocalCall())
+        if (!CallerId.instance.isLocalCall())
             return;
         
         providers.clear();

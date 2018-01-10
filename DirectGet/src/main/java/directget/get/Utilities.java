@@ -88,18 +88,4 @@ class Utilities {
         });
     }
     
-    /** @return {@code true} if the call to the method that call this method is a local call. **/
-    public static boolean isLocalCall() {
-        try {
-            val stackTrace  = Thread.currentThread().getStackTrace();
-            val clientName  = stackTrace[2].getClassName();
-            val clientClass = Class.forName(clientName);
-            val packageName = clientClass.getPackage().getName();
-            val isLocalCall = stackTrace[3].getClassName().startsWith(packageName + ".");
-            return isLocalCall;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-    
 }

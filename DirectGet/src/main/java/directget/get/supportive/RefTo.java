@@ -116,11 +116,6 @@ public class RefTo<T> extends Ref<T> {
         return "RefTo<" + this.name + ":" + this.getTargetClass().getName() + ">" + " at {\n" + this.caller + "\n}";
     }
     
-    /** @return the retainer. */
-    public RefToWithRetainer<T> retained() {
-        return new RefToWithRetainer<>(name, getTargetClass(), getPreferability(), provider.getSupplier());
-    }
-    
     //== Modifier =====================================================================================================
     
     /**

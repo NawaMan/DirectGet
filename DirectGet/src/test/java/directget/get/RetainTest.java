@@ -29,8 +29,11 @@ import org.junit.Test;
 
 import directget.get.run.Fork;
 import directget.get.supportive.RefTo;
+import directget.get.supportive.retain.Retainers;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod({ Retainers.class })
 public class RetainTest {
     
     private static class StringList extends ArrayList<String> {

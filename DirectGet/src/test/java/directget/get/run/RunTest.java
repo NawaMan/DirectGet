@@ -35,9 +35,12 @@ import directget.get.Run;
 import directget.get.run.exceptions.ProblemHandledException;
 import directget.get.run.exceptions.ProblemHandler;
 import directget.get.supportive.RefTo;
+import directget.get.supportive.retain.Retainers;
 import dssb.failable.FailableException;
 import lombok.val;
+import lombok.experimental.ExtensionMethod;
 
+@ExtensionMethod({ Retainers.class })
 public class RunTest {
     
     private static RefTo<Integer> num = Ref.toValue(1);

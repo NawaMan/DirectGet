@@ -13,15 +13,13 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive;
+package directget.get.supportive.retain;
 
 import java.util.function.Supplier;
 
 import directget.get.Preferability;
 import directget.get.Ref;
-import directget.get.supportive.retain.Retainer;
-import directget.get.supportive.retain.RetainerBuilder;
-import directget.get.supportive.retain.WithRetainer;
+import directget.get.supportive.Provider;
 import lombok.val;
 
 /**

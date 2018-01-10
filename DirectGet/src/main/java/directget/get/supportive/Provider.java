@@ -125,20 +125,6 @@ public class Provider<T> implements HasProvider<T>, Supplier<T>, Wrapper {
         };
     }
     
-    /** @return the retainer. */
-    public final ProviderWithRetainer<T> retained() {
-        return CallerId.instance.trace(caller->{
-            return new ProviderWithRetainer<T>(ref, preferability, supplier);
-        });
-    }
-    
-    /** @return the singleton retainer. */
-    public final ProviderWithRetainer<T> singleton() {
-        return CallerId.instance.trace(caller->{
-            return retained().globally().forAlways();
-        });
-    }
-    
     //== Wither =======================================================================================================
     
     /**

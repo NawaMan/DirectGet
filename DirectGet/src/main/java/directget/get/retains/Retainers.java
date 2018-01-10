@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive.retain;
+package directget.get.retains;
 
 import directget.get.Ref;
 import directget.get.supportive.Provider;

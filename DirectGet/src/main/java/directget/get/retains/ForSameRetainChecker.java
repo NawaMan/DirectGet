@@ -13,11 +13,10 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive.retain;
+package directget.get.retains;
 
 import static directget.get.Get.the;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -25,15 +24,16 @@ import directget.get.Ref;
 import directget.get.supportive.RefTo;
 import lombok.val;
 
+
 /**
- * Retain checker that check another if the current value equals to the previous.
+ * Retain checker that check another if the current value same to the previous.
  * 
  * @author NawaMan
  *
  * @param <T> the type to watch for.
  * @param <V> the type that is retained.
  */
-public class ForEquivalentRetainChecker<T, V> implements Predicate<V> {
+public class ForSameRetainChecker<T, V> implements Predicate<V> {
     
     private final RefTo<T> ref;
     
@@ -44,11 +44,11 @@ public class ForEquivalentRetainChecker<T, V> implements Predicate<V> {
      * 
      * @param ref the reference ref.
      */
-    public ForEquivalentRetainChecker(RefTo<T> ref) {
+    public ForSameRetainChecker(RefTo<T> ref) {
         this.ref = ref;
         refValue = new AtomicReference<T>(the(ref));
     }
-    
+
     /** @return the reference ref.  **/
     public Ref<T> getRef() {
         return ref;
@@ -57,11 +57,11 @@ public class ForEquivalentRetainChecker<T, V> implements Predicate<V> {
     @Override
     public boolean test(V value) {
         val newValue = the(ref);
-        val isEquivalent = Objects.equals(newValue, refValue.get());
-        if (!isEquivalent) {
+        val isSame = newValue == refValue.get();
+        if (!isSame) {
             refValue.set(newValue);
         }
-        return isEquivalent;
+        return isSame;
     }
-}
     
+}

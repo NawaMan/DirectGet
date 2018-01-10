@@ -13,33 +13,33 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.supportive.retain;
+package directget.get.retains;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import java.util.function.Predicate;
 import lombok.val;
 
 /**
- * The local (thread) retainer.
+ * The global retainer.
  * 
  * @author NawaMan
  * @param <V>  the data type.
  **/
-public class LocalRetainer<V> extends Retainer<V> {
+public class GlobalRetainer<V> extends Retainer<V> {
     
-    private final ThreadLocal<Optional<V>> cache = ThreadLocal.withInitial(()->null);
+    private final AtomicReference<Optional<V>> cache = new AtomicReference<Optional<V>>(null);
     
     /**
-     * Constructs a global retainer.
+     * Constructs a global retainer. 
      * 
-     * @param supplier      the supplier.
-     * @param shouldRetain  the predicate to determine if the value should be retained.
+     * @param supplier 
+     * @param shouldRetain
      **/
-    public LocalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
+    public GlobalRetainer(Supplier<V> supplier, Predicate<V> shouldRetain) {
         super(supplier, shouldRetain);
     }
     
@@ -51,7 +51,7 @@ public class LocalRetainer<V> extends Retainer<V> {
     /** Get the value. */
     @Override
     public V get() {
-        if (cache.get() == null) {
+        if (cache.compareAndSet(null, Optional.empty())) {
             // First time
             val newValue = supplier.get();
             cache.set(Optional.ofNullable(newValue));
@@ -70,15 +70,8 @@ public class LocalRetainer<V> extends Retainer<V> {
     
     public BiFunction<Supplier<V>, Predicate<V>, Retainer<V>> getCloner() {
         return (supplier, showRetain)->{
-            return new LocalRetainer<V>(supplier, showRetain);
+            return new GlobalRetainer<V>(supplier, showRetain);
         };
-    }
-    
-    Retainer<V> newRetainer(Predicate<Predicate<V>> sameShouldRetain, Function<Predicate<V>, Predicate<V>> newShouldRetain) {
-        if (sameShouldRetain.test(this.shouldRetain)) {
-            return this;
-        }
-        return getCloner().apply(supplier, newShouldRetain.apply(this.shouldRetain));
     }
     
 }

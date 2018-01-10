@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.retain;
 
 import static directget.get.Get.the;
 import static directget.get.Run.Asynchronously;
@@ -27,9 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
+import directget.get.Get;
+import directget.get.Ref;
+import directget.get.Run;
+import directget.get.retains.Retainers;
 import directget.get.run.Fork;
 import directget.get.supportive.RefTo;
-import directget.get.supportive.retain.Retainers;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 

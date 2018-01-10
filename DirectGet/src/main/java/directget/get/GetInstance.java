@@ -29,7 +29,7 @@ import dssb.utils.common.Nulls;
 import directget.get.exceptions.RunWithSubstitutionException;
 import directget.get.supportive.Provider;
 import directget.get.supportive.ProviderStackMap;
-import directget.get.Utilities;
+import directget.get.utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -38,7 +38,7 @@ import lombok.experimental.ExtensionMethod;
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Utilities.class, Nulls.class })
+@ExtensionMethod({ utilities.class, Nulls.class })
 public final class GetInstance {
     
     private final Scope scope;

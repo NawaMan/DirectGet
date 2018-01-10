@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import dssb.utils.common.Nulls;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.Provider;
-import directget.get.Utilities;
+import directget.get.utilities;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -41,7 +41,7 @@ import lombok.experimental.ExtensionMethod;
                                                // the alternative to have it on
                                                // every method is
                                                // just as bad if not worse.
-@ExtensionMethod({ Utilities.class, Nulls.class })
+@ExtensionMethod({ utilities.class, Nulls.class })
 public final class Configuration {
     
     private final Map<Ref, Provider> providers;

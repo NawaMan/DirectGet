@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import directget.get.supportive.Provider;
-import directget.get.Utilities;
+import directget.get.utilities;
 import dssb.callerid.impl.CallerId;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -42,7 +42,7 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  */
 @SuppressWarnings("rawtypes")
-@ExtensionMethod({ Utilities.class, Nulls.class })
+@ExtensionMethod({ utilities.class, Nulls.class })
 public class ProposedConfiguration {
     
     /** The instance of the proposed configuration. */

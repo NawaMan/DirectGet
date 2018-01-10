@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.val;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 class utilities {
     
     private static Function<Map.Entry<?, ?>, String> pairToString = each -> {
@@ -29,11 +31,11 @@ class utilities {
         return toString;
     };
     
-    public static Stream<String> _toPairStrings(Map<?, ?> theGivenMap) {
+    public Stream<String> _toPairStrings(Map<?, ?> theGivenMap) {
         return theGivenMap.entrySet().stream().map(pairToString);
     }
     
-    public static String _toIndentLines(Stream<String> eachLines) {
+    public String _toIndentLines(Stream<String> eachLines) {
         return eachLines.collect(Collectors.joining(",\n\t"));
     }
     

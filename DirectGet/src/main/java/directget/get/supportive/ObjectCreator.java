@@ -1,5 +1,8 @@
 package directget.get.supportive;
 
+import static java.util.Arrays.stream;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -7,9 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import directget.get.Get;
-import directget.get.InjectedConstructor;
 import directget.get.exceptions.AbstractClassCreationException;
 import directget.get.exceptions.CreationException;
 import dssb.failable.Failable.Supplier;
@@ -17,24 +20,40 @@ import dssb.utils.common.Nulls;
 import lombok.NonNull;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
+import lombok.experimental.UtilityClass;
 
 /**
  * This utility class can create an object using Get.
  * 
  * @author NawaMan
  */
-@ExtensionMethod({ Nulls.class })
+@ExtensionMethod({ Nulls.class, ObjectCreator.extensions.class })
 public class ObjectCreator {
     
     // TODO - Should create interface with all default method.
     
+    /**
+     * Check if the an annotation is has the simple name as the one given 
+     * @param name  the name expected.
+     * @return  the predicate to check if annotation is with the given name.
+     **/
+    public static Predicate<? super Annotation> named(String name) {
+        return annotation->{
+            val toString = annotation.toString();
+            return toString.matches("^@.*(\\.|\\$)" + name + "\\(.*$");
+        };
+    }
+    
+    /** Check if the an annotation is an Nullable annotation */
+    public static Predicate<? super Annotation> anNullableAnnotation
+            = annotation->{
+                val toString = annotation.toString();
+                return toString.matches("^@.*\\.Nullal\\(.*$");
+            };
+    
     @SuppressWarnings("rawtypes")
     private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
     
-    @SuppressWarnings("rawtypes")
-    private static final Class injectClass = findClass("javax.inject.Inject");
-    @SuppressWarnings("rawtypes")
-    private static final Class nullableClass = findClass("javax.annotations.Nullable");
     
     /**
      * Find the {@code java.inject.Inject} class by name.
@@ -47,7 +66,7 @@ public class ObjectCreator {
             return null;
         }
     }
-
+    
     /**
      * Create an instance of the given class.
      * 
@@ -66,26 +85,29 @@ public class ObjectCreator {
                 supplier = NewSupplierFor(theGivenClass);
                 suppliers.put(theGivenClass, supplier);
             }
-
+            
             val instance = supplier.get();
             return theGivenClass.cast(instance);
         } catch (Throwable e) {
             throw new CreationException(theGivenClass, e);
         }
     }
-
-    @SuppressWarnings("rawtypes")
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier NewSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
         val constructor = findConstructor(theGivenClass);
-        Supplier supplier = ()->{
-            val params   = getParameters(constructor);
-            val instance = constructor.newInstance(params);
-            return theGivenClass.cast(instance);
-        };
-        return supplier;
+        if (constructor.isNotNull()) {
+            val supplier = (Supplier)(()->{
+                val params   = getParameters(constructor);
+                val instance = constructor.newInstance(params);
+                return theGivenClass.cast(instance);
+            });
+            return supplier;
+        }
+        return null;
     }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    
+    @SuppressWarnings({ "rawtypes" })
     private static Object[] getParameters(Constructor constructor) {
         val params = new Object[constructor.getParameterCount()];
         val paramsArray = constructor.getParameters();
@@ -93,7 +115,7 @@ public class ObjectCreator {
             val param             = paramsArray[i];
             val paramType         = param.getType();
             val parameterizedType = param.getParameterizedType();
-            val isNullable         = (nullableClass != null) ? (param.getAnnotation(nullableClass) != null): false;
+            val isNullable        = param.getAnnotations().hasAnnotation("Nullable");
             val paramValue        = getParameterValue(paramType, parameterizedType, isNullable);
             params[i] = paramValue;
         }
@@ -122,7 +144,7 @@ public class ObjectCreator {
         val paramValue = Get.the(paramType);
         return paramValue;
     }
-
+    
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Object getOptionalValueOrNullWhenFailAndNullable(boolean isNullable, Class actualType) {
         try {
@@ -132,7 +154,7 @@ public class ObjectCreator {
             return isNullable ? null : Optional.empty();
         }
     }
-
+    
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Object getValueOrNullWhenFail(Class paramType) {
         try {
@@ -141,20 +163,16 @@ public class ObjectCreator {
             return null;
         }
     }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    
+    @SuppressWarnings({ "rawtypes" })
     private static <T> Constructor findConstructor(final java.lang.Class<T> clzz) throws NoSuchMethodException {
         Constructor foundConstructor = null;
-        for(Constructor c : clzz.getConstructors()) {
-            if (!Modifier.isPublic(c.getModifiers()))
+        for(Constructor constructor : clzz.getConstructors()) {
+            if (!Modifier.isPublic(constructor.getModifiers()))
                 continue;
             
-            if (c.getAnnotation(InjectedConstructor.class) != null) {
-                foundConstructor = c;
-                break;
-            }
-            if (injectClass.whenNotNull().map(c::getAnnotation).isPresent()) {
-                foundConstructor = c;
+            if (constructor.getAnnotations().hasAnnotation("Inject")) {
+                foundConstructor = constructor;
                 break;
             }
         }
@@ -164,8 +182,17 @@ public class ObjectCreator {
             else foundConstructor = clzz.getConstructor();
         }
         
-        foundConstructor.setAccessible(true);
         return foundConstructor;
+    }
+    
+    @UtilityClass
+    static class extensions {
+    
+        public static <T> boolean hasAnnotation(Annotation[] annotations, String name) {
+            return stream(annotations)
+                    .anyMatch(named(name));
+        }
+        
     }
     
 }

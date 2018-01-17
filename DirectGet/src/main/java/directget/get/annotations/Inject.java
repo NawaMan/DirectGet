@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get;
+package directget.get.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,12 +21,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to select the contructor to us used in RefFactory.
+ * A ready to use annotation to mask that a constructor is the be used to create the object.
  * 
  * @author NawaMan
  */
 @Target(value=ElementType.CONSTRUCTOR)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface InjectedConstructor {
+public @interface Inject {
     
 }

@@ -6,20 +6,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.math.BigDecimal;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Supplier;
-
-import javax.annotations.Nullable;
-import javax.inject.Inject;
 
 import org.junit.Test;
 
-import dssb.utils.common.Nulls;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
+import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
@@ -41,7 +38,7 @@ public class DefaultRefTest {
     public void testThat_useDefaultConstructorToProvideTheValue() {
         assertEquals("FLASH!", Get.the(Car.class).zoom());
     }
-
+    
     public static class Driver {
         private Car car;
         public Driver(Car car) {
@@ -51,9 +48,9 @@ public class DefaultRefTest {
             return car.zoom();
         }
     }
-
+    
     @Test
-    public void testOnlyConstructor() {
+    public void testOnlyConstructorIsTheDefaultConstructor() {
         assertEquals("FLASH!", Get.the(Driver.class).zoom());
     }
     
@@ -64,7 +61,7 @@ public class DefaultRefTest {
     }
     
     @Test
-    public void test_substitute() {
+    public void test_substituteOverideTheDefault() {
         RefOf<Car> carRef = Ref.of(Car.class);
         assertEquals("SUPER FLASH!!!!", 
                 With(carRef.butProvidedWithThe(SuperCar.class))
@@ -73,7 +70,7 @@ public class DefaultRefTest {
                 )
         );
     }
-
+    
     public static class Person {
         private Car car;
         public Person() {
@@ -91,7 +88,12 @@ public class DefaultRefTest {
     public void testDefaultConstructor() {
         assertEquals("Meh", Get.the(Person.class).zoom());
     }
-
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Inject {
+        
+    }
+    
     public static class AnotherPerson {
         private Car car;
         public AnotherPerson() {
@@ -105,29 +107,10 @@ public class DefaultRefTest {
             return (car != null) ? car.zoom() : "Meh";
         }
     }
-
+    
     @Test
     public void testInjectConstructor() {
         assertEquals("FLASH!", Get.the(AnotherPerson.class).zoom());
-    }
-
-    public static class OneAnotherPerson {
-        private Car car;
-        public OneAnotherPerson() {
-            this(null);
-        }
-        @InjectedConstructor
-        public OneAnotherPerson(Car car) {
-            this.car = car;
-        }
-        public String zoom() {
-            return (car != null) ? car.zoom() : "Meh";
-        }
-    }
-
-    @Test
-    public void testInjectConstructorConstructor() {
-        assertEquals("FLASH!", Get.the(OneAnotherPerson.class).zoom());
     }
     
     @Test
@@ -204,7 +187,7 @@ public class DefaultRefTest {
         assertNull(Get.the(GreetingWithRefNoValue.class));
         assertNull(Get.the(GreetingWithRefNoValue.instance));
     }
-
+    
     public static class GreetingWithRefWithValueFromClass {
         @Ref.Default
         public static final RefTo<GreetingWithRefWithValueFromClass> instance = Ref.toValueOf(GreetingWithRefWithValueFromClass.class);
@@ -228,7 +211,7 @@ public class DefaultRefTest {
     public static interface Department {
         public String name();
     }
-
+    
     @ExtensionMethod({ Nulls.class })
     public static class Employee {
         private Department department;
@@ -249,7 +232,12 @@ public class DefaultRefTest {
         val mainDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Main");
         assertEquals("Main", With(mainDepartment).run(()->Get.the(Employee.class).departmentName()));
     }
-
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Nullable {
+        
+    }
+    
     @ExtensionMethod({ Nulls.class })
     public static class Manager {
         private Department department;
@@ -270,7 +258,6 @@ public class DefaultRefTest {
         val specialDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Special");
         assertEquals("Special", With(specialDepartment).run(()->Get.the(Manager.class).departmentName()));
     }
-
     
     @ExtensionMethod({ Nulls.class })
     public static class Executive {
@@ -297,7 +284,6 @@ public class DefaultRefTest {
         assertEquals("Secret", With(secretDepartment).run(()->Get.the(Manager.class).departmentName()));
     }
     
-
     @ExtensionMethod({ Nulls.class })
     public static class Company {
         private Supplier<Integer> revenueSupplier;
@@ -314,7 +300,7 @@ public class DefaultRefTest {
         val company = Get.the(Company.class);
         
         assertEquals(0, company.revenue());
-
+        
         // Notice that company is created once but the revenue returns different value as it is substitue.
         val revenueCalculator = Ref.of(Integer.class).butDefaultedTo(10000);
         assertEquals(10000, With(revenueCalculator).run(()->company.revenue()).intValue());

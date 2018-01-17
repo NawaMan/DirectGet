@@ -22,6 +22,7 @@ import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
 // This test involve the default value got when no substitution or configuration is made.
+@ExtensionMethod({ Nulls.class })
 public class DefaultRefTest {
     
     public static class Car {
@@ -214,28 +215,95 @@ public class DefaultRefTest {
         Get.the(Cyclic2.class);
     }
     
-    public static interface SuperInterface {
+    public static interface TheInterface1 {
         
         @Ref.DefaultRef
-        public static final RefTo<SuperInterface> instance
-                = Ref.toValueOf(ImplementedClass.class);
+        public static final RefTo<TheInterface1> instance
+                = Ref.toValueOf(TheClass1.class);
     }
     
-    public static class ImplementedClass
-            implements SuperInterface {
+    public static class TheClass1
+            implements TheInterface1 {
         
     }
     
     public void testThat_whenAskForSuperClassWithDefaultRef_getTheValueOfTheDefaultRef() {
-        assertTrue(Get.the(SuperInterface.class) instanceof ImplementedClass);
+        assertTrue(Get.the(TheInterface1.class) instanceof TheClass1);
     }
+    
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DefaultImplementation {
+        
+        public String value();
+        
+    }
+    
+    
+    @DefaultImplementation("directget.get.TheClass2")
+    public static interface TheInterface2 {
+        
+        public String getText();
+        
+    }
+    
+    public static class TheInterface2User {
+        
+        private TheInterface2 i2;
+        
+        public TheInterface2User(TheInterface2 i2) {
+            this.i2 = i2;
+        }
+        
+        public String getText() {
+            return this.i2.whenNotNull().map(TheInterface2::getText).orElse("I am TheInterface2User.");
+        }
+        
+    }
+    
+    @Test
+    public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis() {
+        assertTrue(Get.the(TheInterface2.class) instanceof TheClass2);
+        assertEquals(TheClass2.TEXT, Get.the(TheInterface2User.class).getText());
+    }
+    
+    
+    @DefaultImplementation("directget.get.TheClass3")
+    public static interface TheInterface3 {
+        
+        public String getText();
+        
+    }
+    
+    public static class TheInterface3User {
+        
+        public static final String TEXT = "I am TheInterface3User.";
+        
+        private TheInterface3 i3;
+        
+        public TheInterface3User(TheInterface3 i3) {
+            this.i3 = i3;
+        }
+        
+        public String getText() {
+            return this.i3.whenNotNull().map(TheInterface3::getText).orElse(TEXT);
+        }
+        
+    }
+    
+    @Test
+    public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis_nullWhenNotExist() {
+        assertNull(Get.the(TheInterface3.class));
+        assertEquals(TheInterface3User.TEXT, Get.the(TheInterface3User.class).getText());
+    }
+    
     
     
     public static class SuperClass {
         
         @Ref.DefaultRef
-        public static final RefTo<SuperInterface> instance
-                = Ref.toValueOf(ImplementedClass.class);
+        public static final RefTo<TheInterface1> instance
+                = Ref.toValueOf(TheClass1.class);
         
         @Inject
         public SuperClass() {

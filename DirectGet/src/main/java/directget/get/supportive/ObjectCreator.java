@@ -118,6 +118,18 @@ public class ObjectCreator {
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier newSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
+        if (theGivenClass.getAnnotations().hasAnnotation("DefaultImplementation")) {
+            val defaultImplementation = stream(theGivenClass.getAnnotations())
+                .map(Object::toString)
+                .map(toString->toString.replaceAll("^(.*\\(value=)(.*)(\\))$", "$2"))
+                .map(ObjectCreator::findClass)
+                .filter(Objects::nonNull)
+                .map(Get::the)
+                .findAny()
+                .orElse(null);
+            return ()->defaultImplementation;
+        }
+        
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultToNull"))
             return ()->null;
         

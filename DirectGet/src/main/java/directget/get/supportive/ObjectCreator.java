@@ -1,5 +1,7 @@
 package directget.get.supportive;
 
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.stream;
 
 import java.lang.annotation.Annotation;
@@ -9,6 +11,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,11 +130,45 @@ public class ObjectCreator {
         if (defaultRef.isNotNull())
             return defaultRef;
         
+        val fieldValue = (Supplier)stream(theGivenClass.getDeclaredFields())
+                .filter(field->isStatic(field.getModifiers()))
+                .filter(field->isPublic(field.getModifiers()))
+                .filter(field->field.getAnnotations().hasAnnotation("Default"))
+                .map(field->{
+                    val type = field.getType();
+                    if (theGivenClass.isAssignableFrom(type))
+                        return (Supplier)(()->field.get(theGivenClass));
+                    
+                    if (Optional.class.isAssignableFrom(type)) {
+                        val parameterizedType = (ParameterizedType)field.getGenericType();
+                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+                        
+                        if (theGivenClass.isAssignableFrom(actualType))
+                            return (Supplier)(()->((Optional)field.get(theGivenClass)).orElse(null));
+                    }
+                    
+                    if (java.util.function.Supplier.class.isAssignableFrom(type)) {
+                        val parameterizedType = (ParameterizedType)field.getGenericType();
+                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+                        
+                        if (theGivenClass.isAssignableFrom(actualType))
+                            return (Supplier)()->((java.util.function.Supplier)field.get(theGivenClass)).get();
+                    }
+                    
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(null);
+        if (fieldValue.isNotNull())
+            return fieldValue;
+        
         val constructor = findConstructor(theGivenClass);
         if (constructor.isNotNull()) {
             val supplier = (Supplier)(()->{
                 val params   = getParameters(constructor);
                 val instance = constructor.newInstance(params);
+                // TODO - Change to use method handle later.
                 return theGivenClass.cast(instance);
             });
             return supplier;

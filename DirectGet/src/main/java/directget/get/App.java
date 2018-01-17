@@ -38,13 +38,13 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Nulls.class })
 public final class App {
     
+    // TODO - Detect JUnit .... then TEST
     /** Application mode - Default to TEST its the only one without main. */
     public static final RefTo<AppMode> mode = Ref.toValue(AppMode.TEST);
     
 
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */
     public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
-            Ref.objectFactory,
             App.mode
     ));
     

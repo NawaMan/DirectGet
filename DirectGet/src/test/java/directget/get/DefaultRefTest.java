@@ -289,6 +289,86 @@ public class DefaultRefTest {
     }
     
     
+    public static class BasicSingleton {
+        @Default
+        public static final BasicSingleton instance = new BasicSingleton("instance");
+        
+        private String string;
+        
+        private BasicSingleton(String string) {
+            this.string = string;
+        }
+        
+        @Default
+        public static BasicSingleton newInstance() {
+            return new BasicSingleton("factory");
+        }
+    }
+    
+    @Test
+    public void testThat_singletonClassWithDefaultAnnotationHasTheInstanceAsTheValue_withFieldMorePreferThanFactory() {
+        assertEquals(BasicSingleton.instance, Get.the(BasicSingleton.class));
+        assertEquals("instance", Get.the(BasicSingleton.class).string);
+    }
+    
+    
+    public static class OptionalSingleton {
+        @Default
+        public static final Optional<OptionalSingleton> instance = Optional.of(new OptionalSingleton());
+        
+        private OptionalSingleton() {}
+    }
+    
+    @Test
+    public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue() {
+        try {
+            OptionalSingleton value = Get.the(OptionalSingleton.class);
+            assertEquals(OptionalSingleton.instance.get(), value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public static class EmptyOptionalSingleton {
+        @Default
+        public static final Optional<EmptyOptionalSingleton> instance = Optional.empty();
+        
+        private EmptyOptionalSingleton() {}
+    }
+    
+    @Test
+    public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue_empty() {
+        try {
+            EmptyOptionalSingleton value = Get.the(EmptyOptionalSingleton.class);
+            assertEquals(EmptyOptionalSingleton.instance.get(), value);
+            assertNull(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public static class SupplierSingleton {
+        
+        private static final SupplierSingleton secretInstance = new SupplierSingleton();
+        
+        @Default
+        public static final Supplier<SupplierSingleton> instance = ()->secretInstance;
+        
+        private SupplierSingleton() {}
+    }
+    
+    @Test
+    public void testThat_supplierSingletonClassWithDefaultAnnotationHasResultOfThatInstanceAsValue() {
+        try {
+            assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
     public static interface Department {
         public String name();
     }

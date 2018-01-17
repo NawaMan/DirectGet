@@ -16,6 +16,7 @@
 package directget.get;
 
 import static directget.get.Get.the;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,11 +27,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import directget.get.exceptions.CreationException;
 import directget.get.exceptions.DefaultRefException;
+import directget.get.exceptions.GetException;
 import directget.get.run.Named;
 import directget.get.run.Named.RefSupplier;
 import directget.get.supportive.HasProvider;
-import directget.get.supportive.ObjectFactory;
+import directget.get.supportive.ObjectCreator;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
@@ -46,9 +49,6 @@ import lombok.val;
  * @author NawaMan
  */
 public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supplier<T, RuntimeException>, HasProvider<T>, Comparable<Ref<T>> {
-    
-    /** The default factory. */
-    public static final RefTo<ObjectFactory> objectFactory = Ref.toValue(ObjectFactory.instance);
     
     
     private final Class<T> targetClass;
@@ -108,7 +108,11 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
     
     /** @return the default object. */
     public T getDefaultValue() {
-        return the(objectFactory).make(this);
+        try {
+            return ObjectCreator.createNew(targetClass);
+        } catch (CreationException cause) {
+            throw new GetException(this, cause);
+        }
     }
     
     /** @return the current value for this ref. */

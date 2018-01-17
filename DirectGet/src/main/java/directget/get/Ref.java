@@ -366,7 +366,7 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
      */
     @Target(value=ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    public static @interface Default {
+    public static @interface DefaultRef {
     }
     
     /**

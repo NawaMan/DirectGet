@@ -114,6 +114,15 @@ public class ObjectCreator {
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier newSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
+        if (theGivenClass.getAnnotations().hasAnnotation("DefaultToNull"))
+            return ()->null;
+        
+        if (theGivenClass.isEnum()) {
+            T[] enumConstants = theGivenClass.getEnumConstants();
+            val enumValue = findDefaultEnumValue(theGivenClass, enumConstants);
+            return ()->enumValue;
+        }
+        
         val defaultRef = Ref.declaredDefaultOf(theGivenClass);
         if (defaultRef.isNotNull())
             return defaultRef;
@@ -132,6 +141,23 @@ public class ObjectCreator {
             throw new AbstractClassCreationException(theGivenClass);
         
         return null;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static <T> T findDefaultEnumValue(Class<T> theGivenClass, T[] enumConstants) {
+        return enumConstants.length == 0
+                ? null
+                : stream(enumConstants)
+                    .filter(value->{
+                        val name = ((Enum)value).name();
+                        try {
+                            return theGivenClass.getField(name).getAnnotations().hasAnnotation("Default");
+                        } catch (NoSuchFieldException | SecurityException e) {
+                            throw new CreationException(theGivenClass, e);
+                        }
+                    })
+                    .findAny()
+                    .orElse(enumConstants[0]);
     }
     
     @SuppressWarnings({ "rawtypes" })

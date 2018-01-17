@@ -150,7 +150,7 @@ public class DefaultRefTest {
     }
     
     public static class GreetingWithRefWithValue {
-        @Ref.Default
+        @Ref.DefaultRef
         public static final RefTo<GreetingWithRefWithValue> instance = RefTo.toValue(new GreetingWithRefWithValue("Hello"));
         private final String greeting;
         public GreetingWithRefWithValue(String greeting) {
@@ -172,7 +172,7 @@ public class DefaultRefTest {
     
     
     public static class GreetingWithRefNoValue {
-        @Ref.Default
+        @Ref.DefaultRef
         public static final RefTo<GreetingWithRefNoValue> instance = Ref.to(GreetingWithRefNoValue.class);
         private final String greeting;
         public GreetingWithRefNoValue(String greeting) {
@@ -202,7 +202,7 @@ public class DefaultRefTest {
     
     public static class Cyclic2 {
         
-        @Ref.Default
+        @Ref.DefaultRef
         public static final RefTo<Cyclic2> instance = Ref.toValueOf(Cyclic2.class);
         
         public Cyclic2() {
@@ -216,7 +216,7 @@ public class DefaultRefTest {
     
     public static interface SuperInterface {
         
-        @Ref.Default
+        @Ref.DefaultRef
         public static final RefTo<SuperInterface> instance
                 = Ref.toValueOf(ImplementedClass.class);
     }
@@ -233,7 +233,7 @@ public class DefaultRefTest {
     
     public static class SuperClass {
         
-        @Ref.Default
+        @Ref.DefaultRef
         public static final RefTo<SuperInterface> instance
                 = Ref.toValueOf(ImplementedClass.class);
         
@@ -249,6 +249,43 @@ public class DefaultRefTest {
     
     public void testThat_defaultRef_isMorePreferableThanIbjectedConstructor() {
         assertTrue(Get.the(SuperClass.class) instanceof SubClass);
+    }
+    
+    
+    public static enum MyEnum1 { Value1, Value2; }
+    
+    @Test
+    public void testThat_enumValue_isTheFirstValue() {
+        assertEquals(MyEnum1.Value1, Get.the(MyEnum1.class));
+    }
+    
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Default {
+        
+    }
+    
+    public static enum MyEnum2 { Value1, @Default Value2; }
+    
+    @Test
+    public void testThat_enumValueWithDefaultAnnotation() {
+        assertEquals(MyEnum2.Value2, Get.the(MyEnum2.class));
+    }
+    
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DefaultToNull {
+        
+    }
+    
+    @DefaultToNull
+    public static class NullValue {
+        
+    }
+    
+    @Test
+    public void testThat_classAnnotatedWithDefaultToNull_hasDefaultValueOfNull() {
+        assertNull(Get.the(NullValue.class));
     }
     
     

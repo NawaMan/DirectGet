@@ -7,14 +7,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import directget.get.Get;
+import directget.get.Ref;
 import directget.get.exceptions.AbstractClassCreationException;
 import directget.get.exceptions.CreationException;
+import directget.get.exceptions.CyclicDependencyDetectedException;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.NonNull;
@@ -31,6 +35,7 @@ import lombok.experimental.UtilityClass;
 public class ObjectCreator {
     
     // TODO - Should create interface with all default method.
+    // TODO - Should check for @NotNull
     
     /**
      * Check if the an annotation is has the simple name as the one given 
@@ -52,7 +57,9 @@ public class ObjectCreator {
             };
     
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
+    private static final Map<Class, Supplier>    suppliers     = new ConcurrentHashMap<>();
+    @SuppressWarnings("rawtypes")
+    private static final ThreadLocal<Set<Class>> beingCreateds = ThreadLocal.withInitial(()->new HashSet<>());
     
     
     /**
@@ -73,28 +80,44 @@ public class ObjectCreator {
      * @param theGivenClass
      * @return the created value.
      * @throws CreationException when there is a problem creating the object.
+     * @throws CyclicDependencyDetectedException when cyclic dependency is detected.
      */
     @SuppressWarnings("rawtypes")
-    public static <T> T createNew(@NonNull Class<T> theGivenClass) throws CreationException {
-        if (Modifier.isAbstract(theGivenClass.getModifiers()))
-            throw new AbstractClassCreationException(theGivenClass);
+    public static <T> T createNew(@NonNull Class<T> theGivenClass)
+            throws CreationException, CyclicDependencyDetectedException {
+        val set = beingCreateds.get();
+        if (set.contains(theGivenClass))
+            throw new CyclicDependencyDetectedException(theGivenClass);
         
         try {
-            Supplier supplier = suppliers.get(theGivenClass);
-            if (supplier == null) {
-                supplier = NewSupplierFor(theGivenClass);
-                suppliers.put(theGivenClass, supplier);
+            set.add(theGivenClass);
+                
+            try {
+                Supplier supplier = suppliers.get(theGivenClass);
+                if (supplier.isNull()) {
+                    supplier = newSupplierFor(theGivenClass);
+                    if (supplier.isNotNull())
+                        suppliers.put(theGivenClass, supplier);
+                }
+                
+                val instance = supplier.get();
+                return theGivenClass.cast(instance);
+            } catch (CyclicDependencyDetectedException e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new CreationException(theGivenClass, e);
             }
-            
-            val instance = supplier.get();
-            return theGivenClass.cast(instance);
-        } catch (Throwable e) {
-            throw new CreationException(theGivenClass, e);
+        } finally {
+            set.remove(theGivenClass);
         }
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static <T> Supplier NewSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
+    private static <T> Supplier newSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
+        val defaultRef = Ref.declaredDefaultOf(theGivenClass);
+        if (defaultRef.isNotNull())
+            return defaultRef;
+        
         val constructor = findConstructor(theGivenClass);
         if (constructor.isNotNull()) {
             val supplier = (Supplier)(()->{
@@ -104,6 +127,10 @@ public class ObjectCreator {
             });
             return supplier;
         }
+        
+        if (Modifier.isAbstract(theGivenClass.getModifiers()))
+            throw new AbstractClassCreationException(theGivenClass);
+        
         return null;
     }
     
@@ -165,7 +192,7 @@ public class ObjectCreator {
     }
     
     @SuppressWarnings({ "rawtypes" })
-    private static <T> Constructor findConstructor(final java.lang.Class<T> clzz) throws NoSuchMethodException {
+    private static <T> Constructor findConstructor(Class<T> clzz) throws NoSuchMethodException {
         Constructor foundConstructor = findConstructorWithInject(clzz);
         if (foundConstructor.isNull()) {
             if (clzz.hasOnlyOneConsructor())
@@ -179,7 +206,7 @@ public class ObjectCreator {
             }
         }
         
-        if (foundConstructor.isNull() || !foundConstructor.isAccessible())
+        if (foundConstructor.isNull() || !Modifier.isPublic(foundConstructor.getModifiers()))
             return null;
         
         return foundConstructor;

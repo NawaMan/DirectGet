@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import org.junit.Test;
 
+import directget.get.exceptions.CyclicDependencyDetectedException;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
@@ -188,25 +189,68 @@ public class DefaultRefTest {
         assertNull(Get.the(GreetingWithRefNoValue.instance));
     }
     
-    public static class GreetingWithRefWithValueFromClass {
-        @Ref.Default
-        public static final RefTo<GreetingWithRefWithValueFromClass> instance = Ref.toValueOf(GreetingWithRefWithValueFromClass.class);
-        private final String greeting;
-        public GreetingWithRefWithValueFromClass() {
-            this("Hey!");
-        }
-        public GreetingWithRefWithValueFromClass(String greeting) {
-            this.greeting = greeting;
-        }
-        public String getGreeting() {
-            return greeting;
+    public static class Cyclic1 {
+        
+        public Cyclic1(Cyclic1 another) {
         }
     }
     
-    @Test
-    public void testThat_whenDefaultRefGivenWithValueFromClass_theValueIsFromObjectFactory() {
-        assertEquals("Hey!", Get.the(GreetingWithRefWithValueFromClass.class).getGreeting());
+    @Test(expected=CyclicDependencyDetectedException.class)
+    public void testThat_whenDefaultConstructorAskForItself_expectCyclicDependencyDetectedException() {
+        Get.the(Cyclic1.class);
     }
+    
+    public static class Cyclic2 {
+        
+        @Ref.Default
+        public static final RefTo<Cyclic2> instance = Ref.toValueOf(Cyclic2.class);
+        
+        public Cyclic2() {
+        }
+    }
+    
+    @Test(expected=CyclicDependencyDetectedException.class)
+    public void testThat_whenDefaultRefGetValueFromTheClassItSelf_expectCyclicDependencyDetectedException() {
+        Get.the(Cyclic2.class);
+    }
+    
+    public static interface SuperInterface {
+        
+        @Ref.Default
+        public static final RefTo<SuperInterface> instance
+                = Ref.toValueOf(ImplementedClass.class);
+    }
+    
+    public static class ImplementedClass
+            implements SuperInterface {
+        
+    }
+    
+    public void testThat_whenAskForSuperClassWithDefaultRef_getTheValueOfTheDefaultRef() {
+        assertTrue(Get.the(SuperInterface.class) instanceof ImplementedClass);
+    }
+    
+    
+    public static class SuperClass {
+        
+        @Ref.Default
+        public static final RefTo<SuperInterface> instance
+                = Ref.toValueOf(ImplementedClass.class);
+        
+        @Inject
+        public SuperClass() {
+            
+        }
+    }
+    
+    public static class SubClass extends SuperClass {
+        
+    }
+    
+    public void testThat_defaultRef_isMorePreferableThanIbjectedConstructor() {
+        assertTrue(Get.the(SuperClass.class) instanceof SubClass);
+    }
+    
     
     public static interface Department {
         public String name();

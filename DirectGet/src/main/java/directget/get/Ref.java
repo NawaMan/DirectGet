@@ -45,7 +45,7 @@ import lombok.val;
  * 
  * @author NawaMan
  */
-public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
+public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supplier<T, RuntimeException>, HasProvider<T>, Comparable<Ref<T>> {
     
     /** The default factory. */
     public static final RefTo<ObjectFactory> objectFactory = Ref.toValue(ObjectFactory.instance);
@@ -64,7 +64,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     public final Ref<T> getRef() {
         return this;
     }
-
+    
     /**
      * The name of the reference.
      * 
@@ -76,7 +76,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     public String getName() {
         return this.targetClassName;
     }
-
+    
     /** @return the class of the interested object. */
     public final Class<T> getTargetClass() {
         return this.targetClass;
@@ -110,10 +110,15 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     public T getDefaultValue() {
         return the(objectFactory).make(this);
     }
-
+    
     /** @return the current value for this ref. */
-    public T value() {
+    public final T value() {
         return the(this);
+    }
+    
+    /** @return the current value for this ref. */
+    public final T get() {
+        return value();
     }
     
     /** @return the providers for the default value */
@@ -275,15 +280,16 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
             return new RefTo<>(theName, targetClass, Preferability.Default, theFactory);
         });
     }
-
+    
     /**
      * Create and return a reference to a target class with default factory.
      * 
      * @param targetClass 
      * @return a reference to the given class.
      **/
-    public static <T> RefTo<T> toValueOf(Class<T> targetClass) {
-        return to(targetClass).defaultedToThe(Ref.of(targetClass));
+    @SuppressWarnings("unchecked")
+    public static <T, V extends T> RefTo<T> toValueOf(Class<V> targetClass) {
+        return (RefTo<T>)to(targetClass).defaultedToThe(Ref.of(targetClass));
     }
     
     //-- factory --
@@ -351,7 +357,7 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     
     @SuppressWarnings({ "rawtypes" })
     private static final ConcurrentHashMap<Class, Optional<RefTo>> defeaultRefs = new ConcurrentHashMap<>();
-
+    
     // NOTE: Put it here to use 'Ref' as a namespace.
     
     /**
@@ -362,7 +368,6 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Default {
     }
-
     
     /**
      * Returns the default reference of the given class.
@@ -370,35 +375,46 @@ public abstract class Ref<T> implements HasProvider<T>, Comparable<Ref<T>> {
      * @param targetClass the target class.
      * @return the default reference or {@code null} if non exist.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> RefTo<T> defaultOf(Class<T> targetClass) {
-        @SuppressWarnings("rawtypes")
         Optional<RefTo> refOpt = defeaultRefs.get(targetClass);
         if (refOpt == null) {
-            for (val field : targetClass.getDeclaredFields()) {
-                if (!Modifier.isFinal(field.getModifiers()))
-                    continue;
-                if (!Modifier.isPublic(field.getModifiers()))
-                    continue;
-                if (!Modifier.isStatic(field.getModifiers()))
-                    continue;
-                if (!Ref.class.isAssignableFrom(field.getType()))
-                    continue;
-                
-                val actualType = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
-                if(!actualType.equals(targetClass))
-                    continue;
-                
-                try {
-                    refOpt = Optional.of((RefTo<T>)field.get(targetClass));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw new DefaultRefException(e);
-                }
-            }
-            refOpt = (refOpt != null) ? refOpt : Optional.of(Ref.to(targetClass).defaultedToThe(Ref.of(targetClass)));
+            val ref = declaredDefaultOf(targetClass);
+            refOpt = Optional.of((ref != null) ? ref : Ref.to(targetClass).defaultedToThe(Ref.of(targetClass)));
             defeaultRefs.put(targetClass, refOpt);
         }
         return refOpt.orElse(null);
+    }
+    
+    /**
+     * Returns the default Ref that was explicitly declared on the class.
+     * 
+     * @param targetClass  the target class.
+     * @return  the default Ref that was declared.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> RefTo<T> declaredDefaultOf(Class<T> targetClass) {
+        for (val field : targetClass.getDeclaredFields()) {
+            if (!Modifier.isFinal(field.getModifiers()))
+                continue;
+            if (!Modifier.isPublic(field.getModifiers()))
+                continue;
+            if (!Modifier.isStatic(field.getModifiers()))
+                continue;
+            if (!Ref.class.isAssignableFrom(field.getType()))
+                continue;
+            
+            val actualType = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+            if(!actualType.equals(targetClass))
+                continue;
+            
+            try {
+                return (RefTo<T>)field.get(targetClass);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new DefaultRefException(e);
+            }
+        }
+        return null;
     }
 
 

@@ -20,9 +20,9 @@ package directget.get.exceptions;
  * 
  * @author NawaMan
  */
-public class CreationException extends DirectGetRuntimeException {
+public class CyclicDependencyDetectedException extends DirectGetRuntimeException {
     
-    private static final long serialVersionUID = 5414890542605369904L;
+    private static final long serialVersionUID = -7821227248195126756L;
     
     private final Class<?> clazz;
     
@@ -31,7 +31,7 @@ public class CreationException extends DirectGetRuntimeException {
      * 
      * @param clazz  the class that this fail creation is attempted too.
      **/
-    public CreationException(Class<?> clazz) {
+    public CyclicDependencyDetectedException(Class<?> clazz) {
         this(clazz, null);
     }
     
@@ -41,7 +41,7 @@ public class CreationException extends DirectGetRuntimeException {
      * @param clazz 
      * @param cause
      **/
-    public CreationException(Class<?> clazz, Throwable cause) {
+    public CyclicDependencyDetectedException(Class<?> clazz, Throwable cause) {
         super(clazz.getCanonicalName(), cause);
         this.clazz = clazz;
     }

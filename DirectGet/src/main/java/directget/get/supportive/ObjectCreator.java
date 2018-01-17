@@ -166,23 +166,44 @@ public class ObjectCreator {
     
     @SuppressWarnings({ "rawtypes" })
     private static <T> Constructor findConstructor(final java.lang.Class<T> clzz) throws NoSuchMethodException {
-        Constructor foundConstructor = null;
-        for(Constructor constructor : clzz.getConstructors()) {
+        Constructor foundConstructor = findConstructorWithInject(clzz);
+        if (foundConstructor.isNull()) {
+            if (clzz.hasOnlyOneConsructor())
+                 foundConstructor = getOnlyConstructorOf(clzz);
+            else {
+                try {
+                    foundConstructor = getNoArgConstructorOf(clzz);
+                } catch (NoSuchMethodException e) {
+                    // Do nothing .. let it fall back.
+                }
+            }
+        }
+        
+        if (foundConstructor.isNull() || !foundConstructor.isAccessible())
+            return null;
+        
+        return foundConstructor;
+    }
+    
+    private static <T> Constructor<T> getNoArgConstructorOf(Class<T> clzz)
+            throws NoSuchMethodException {
+        return clzz.getConstructor();
+    }
+    
+    private static <T> Constructor<?> getOnlyConstructorOf(Class<T> clzz) {
+        return clzz.getConstructors()[0];
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> Constructor<T> findConstructorWithInject(Class<T> clzz) {
+        for(Constructor<?> constructor : clzz.getConstructors()) {
             if (!Modifier.isPublic(constructor.getModifiers()))
                 continue;
             
-            if (constructor.getAnnotations().hasAnnotation("Inject")) {
-                foundConstructor = constructor;
-                break;
-            }
+            if (constructor.getAnnotations().hasAnnotation("Inject"))
+                return (Constructor<T>)constructor;
         }
-        if (foundConstructor == null) {
-            if (clzz.getConstructors().length == 1)
-                 foundConstructor = clzz.getConstructors()[0];
-            else foundConstructor = clzz.getConstructor();
-        }
-        
-        return foundConstructor;
+        return null;
     }
     
     @UtilityClass
@@ -191,6 +212,10 @@ public class ObjectCreator {
         public static <T> boolean hasAnnotation(Annotation[] annotations, String name) {
             return stream(annotations)
                     .anyMatch(named(name));
+        }
+        
+        public static <T> boolean hasOnlyOneConsructor(final java.lang.Class<T> clzz) {
+            return clzz.getConstructors().length == 1;
         }
         
     }

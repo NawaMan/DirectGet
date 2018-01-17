@@ -6,6 +6,7 @@ import static java.util.Arrays.stream;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -130,7 +131,34 @@ public class ObjectCreator {
         if (defaultRef.isNotNull())
             return defaultRef;
         
-        val fieldValue = (Supplier)stream(theGivenClass.getDeclaredFields())
+        val fieldValue = findValueFromSingletonField(theGivenClass);
+        if (fieldValue.isNotNull())
+            return fieldValue;
+        
+        val methodValue = findValueFromFactoryMethod(theGivenClass);
+        if (methodValue.isNotNull())
+            return methodValue;
+        
+        val constructor = findConstructor(theGivenClass);
+        if (constructor.isNotNull()) {
+            val supplier = (Supplier)(()->{
+                val params   = getParameters(constructor);
+                val instance = constructor.newInstance(params);
+                // TODO - Change to use method handle later.
+                return theGivenClass.cast(instance);
+            });
+            return supplier;
+        }
+        
+        if (Modifier.isAbstract(theGivenClass.getModifiers()))
+            throw new AbstractClassCreationException(theGivenClass);
+        
+        return null;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static <T> Supplier findValueFromSingletonField(Class<T> theGivenClass) {
+        return (Supplier)stream(theGivenClass.getDeclaredFields())
                 .filter(field->isStatic(field.getModifiers()))
                 .filter(field->isPublic(field.getModifiers()))
                 .filter(field->field.getAnnotations().hasAnnotation("Default"))
@@ -160,24 +188,51 @@ public class ObjectCreator {
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElse(null);
-        if (fieldValue.isNotNull())
-            return fieldValue;
-        
-        val constructor = findConstructor(theGivenClass);
-        if (constructor.isNotNull()) {
-            val supplier = (Supplier)(()->{
-                val params   = getParameters(constructor);
-                val instance = constructor.newInstance(params);
-                // TODO - Change to use method handle later.
-                return theGivenClass.cast(instance);
-            });
-            return supplier;
-        }
-        
-        if (Modifier.isAbstract(theGivenClass.getModifiers()))
-            throw new AbstractClassCreationException(theGivenClass);
-        
-        return null;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static <T> Supplier findValueFromFactoryMethod(Class<T> theGivenClass) {
+        return (Supplier)stream(theGivenClass.getDeclaredMethods())
+                .filter(method->isStatic(method.getModifiers()))
+                .filter(method->isPublic(method.getModifiers()))
+                .filter(method->method.getAnnotations().hasAnnotation("Default"))
+                .map(method->{
+                    val type = method.getReturnType();
+                    if (theGivenClass.isAssignableFrom(type))
+                        return (Supplier)(()->{
+                            val params = getParameters(method);
+                            return method.invoke(theGivenClass, params);
+                        });
+                    
+                    if (Optional.class.isAssignableFrom(type)) {
+                        val parameterizedType = (ParameterizedType)method.getGenericReturnType();
+                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+                        
+                        if (theGivenClass.isAssignableFrom(actualType))
+                            return (Supplier)(()->{
+                                val params        = getParameters(method);
+                                val optionalValue = method.invoke(theGivenClass, params);
+                                return optionalValue.isNull() ? null : ((Optional)optionalValue).get();
+                            });
+                    }
+                    
+                    if (java.util.function.Supplier.class.isAssignableFrom(type)) {
+                        val parameterizedType = (ParameterizedType)method.getGenericReturnType();
+                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+                        
+                        if (theGivenClass.isAssignableFrom(actualType))
+                            return (Supplier)()->{
+                                val params = getParameters(method);
+                                val optionalValue = method.invoke(theGivenClass, params);
+                                return optionalValue.isNull() ? null : ((java.util.function.Supplier)optionalValue).get();
+                            };
+                    }
+                    
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(null);
     }
     
     @SuppressWarnings("rawtypes")
@@ -199,8 +254,23 @@ public class ObjectCreator {
     
     @SuppressWarnings({ "rawtypes" })
     private static Object[] getParameters(Constructor constructor) {
-        val params = new Object[constructor.getParameterCount()];
         val paramsArray = constructor.getParameters();
+        val params = new Object[paramsArray.length];
+        for (int i = 0; i < paramsArray.length; i++) {
+            val param             = paramsArray[i];
+            val paramType         = param.getType();
+            val parameterizedType = param.getParameterizedType();
+            val isNullable        = param.getAnnotations().hasAnnotation("Nullable");
+            val paramValue        = getParameterValue(paramType, parameterizedType, isNullable);
+            params[i] = paramValue;
+        }
+        return params;
+    }
+    
+    @SuppressWarnings({ "rawtypes" })
+    private static Object[] getParameters(Method method) {
+        val paramsArray = method.getParameters();
+        val params = new Object[paramsArray.length];
         for (int i = 0; i < paramsArray.length; i++) {
             val param             = paramsArray[i];
             val paramType         = param.getType();

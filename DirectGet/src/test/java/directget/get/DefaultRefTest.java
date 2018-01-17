@@ -369,6 +369,63 @@ public class DefaultRefTest {
     }
     
     
+    public static class BasicFactoryMethod {
+        public static final BasicFactoryMethod instance = new BasicFactoryMethod("instance");
+        
+        private String string;
+        
+        private BasicFactoryMethod(String string) {
+            this.string = string;
+        }
+        
+        @Default
+        public static BasicFactoryMethod newInstance() {
+            return new BasicFactoryMethod("factory");
+        }
+    }
+    
+    @Test
+    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheInstanceAsTheValue() {
+        assertEquals("factory", Get.the(BasicFactoryMethod.class).string);
+    }
+    
+    public static class OptionalFactoryMethodFactoryMethod {
+        private String string;
+        
+        private OptionalFactoryMethodFactoryMethod(String string) {
+            this.string = string;
+        }
+        
+        @Default
+        public static Optional<OptionalFactoryMethodFactoryMethod> newInstance() {
+            return Optional.of(new OptionalFactoryMethodFactoryMethod("factory"));
+        }
+    }
+    
+    @Test
+    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_optonal() {
+        assertEquals("factory", Get.the(OptionalFactoryMethodFactoryMethod.class).string);
+    }
+    
+    public static class SupplierFactoryMethodFactoryMethod {
+        private String string;
+        
+        private SupplierFactoryMethodFactoryMethod(String string) {
+            this.string = string;
+        }
+        
+        @Default
+        public static Optional<SupplierFactoryMethodFactoryMethod> newInstance() {
+            return Optional.of(new SupplierFactoryMethodFactoryMethod("factory"));
+        }
+    }
+    
+    @Test
+    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_supplier() {
+        assertEquals("factory", Get.the(SupplierFactoryMethodFactoryMethod.class).string);
+    }
+    
+    
     public static interface Department {
         public String name();
     }

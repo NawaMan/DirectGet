@@ -411,21 +411,35 @@ public class DefaultRefTest {
     
     public static class SupplierSingleton {
         
+        private static int counter = 0;
+        
         private static final SupplierSingleton secretInstance = new SupplierSingleton();
         
         @Default
-        public static final Supplier<SupplierSingleton> instance = ()->secretInstance;
+        public static final Supplier<SupplierSingleton> instance = ()->{
+            counter++;
+            return secretInstance;
+        };
         
         private SupplierSingleton() {}
     }
     
     @Test
     public void testThat_supplierSingletonClassWithDefaultAnnotationHasResultOfThatInstanceAsValue() {
+        int prevCounter = SupplierSingleton.counter;
+        
         assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
+        assertEquals(prevCounter + 1, SupplierSingleton.counter);
+        
+        assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
+        assertEquals(prevCounter + 2, SupplierSingleton.counter);
     }
     
     
     public static class BasicFactoryMethod {
+        
+        private static int counter = 0;
+        
         public static final BasicFactoryMethod instance = new BasicFactoryMethod("instance");
         
         private String string;
@@ -436,16 +450,25 @@ public class DefaultRefTest {
         
         @Default
         public static BasicFactoryMethod newInstance() {
+            counter++;
             return new BasicFactoryMethod("factory");
         }
     }
     
     @Test
     public void testThat_classWithFactoryMethodDefaultAnnotationHasTheInstanceAsTheValue() {
+        int prevCounter = BasicFactoryMethod.counter;
+        
         assertEquals("factory", Get.the(BasicFactoryMethod.class).string);
+        assertEquals(prevCounter + 1, BasicFactoryMethod.counter);
+        
+        assertEquals("factory", Get.the(BasicFactoryMethod.class).string);
+        assertEquals(prevCounter + 2, BasicFactoryMethod.counter);
     }
     
     public static class OptionalFactoryMethodFactoryMethod {
+        
+        private static int counter = 0;
         private String string;
         
         private OptionalFactoryMethodFactoryMethod(String string) {
@@ -454,16 +477,25 @@ public class DefaultRefTest {
         
         @Default
         public static Optional<OptionalFactoryMethodFactoryMethod> newInstance() {
+            counter++;
             return Optional.of(new OptionalFactoryMethodFactoryMethod("factory"));
         }
     }
     
     @Test
     public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_optonal() {
+        int prevCounter = OptionalFactoryMethodFactoryMethod.counter;
+        
         assertEquals("factory", Get.the(OptionalFactoryMethodFactoryMethod.class).string);
+        assertEquals(prevCounter + 1, OptionalFactoryMethodFactoryMethod.counter);
+        
+        assertEquals("factory", Get.the(OptionalFactoryMethodFactoryMethod.class).string);
+        assertEquals(prevCounter + 2, OptionalFactoryMethodFactoryMethod.counter);
     }
     
     public static class SupplierFactoryMethodFactoryMethod {
+        
+        private static int counter = 0;
         private String string;
         
         private SupplierFactoryMethodFactoryMethod(String string) {
@@ -473,6 +505,7 @@ public class DefaultRefTest {
         @Default
         public static Supplier<SupplierFactoryMethodFactoryMethod> newInstance() {
             return ()->{
+                counter++;
                 return new SupplierFactoryMethodFactoryMethod("factory");
             };
         }
@@ -480,7 +513,13 @@ public class DefaultRefTest {
     
     @Test
     public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_supplier() {
+        int prevCounter = SupplierFactoryMethodFactoryMethod.counter;
+        
         assertEquals("factory", Get.the(SupplierFactoryMethodFactoryMethod.class).string);
+        assertEquals(prevCounter + 1, SupplierFactoryMethodFactoryMethod.counter);
+        
+        assertEquals("factory", Get.the(SupplierFactoryMethodFactoryMethod.class).string);
+        assertEquals(prevCounter + 2, SupplierFactoryMethodFactoryMethod.counter);
     }
     
     

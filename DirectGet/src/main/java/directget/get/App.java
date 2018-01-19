@@ -40,9 +40,12 @@ public final class App {
     
     // TODO - Detect JUnit .... then TEST
     /** Application mode - Default to TEST its the only one without main. */
-    public static final RefTo<AppMode> mode = Ref.toValue(AppMode.TEST);
+    public static final RefTo<Boolean> isUnderJUnit = Ref.toValue(CallerId.instance.isUnderJUnit());
     
-
+    /** Application mode - Default to TEST its the only one without main. */
+    public static final RefTo<AppMode> mode = Ref.to(AppMode.class).defaultedUsing(isUnderJUnit, isUnderJUnit
+            -> isUnderJUnit ? AppMode.TEST : AppMode.PROD);
+    
     /** List of Refs that will be protected (force 'Dictate' at initialize time) */
     public static final List<Ref<?>> PROTECTED_REFS = unmodifiableList(asList(
             App.mode

@@ -18,12 +18,14 @@ package directget.get;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import directget.get.App;
 import directget.get.exceptions.AppScopeAlreadyInitializedException;
+import dssb.callerid.impl.CallerId;
 import lombok.val;
 
 // VERY IMPORTANT NOTE!!!
@@ -121,6 +123,12 @@ public class AppTest {
                 .getProvider(App.mode)
                 .getPreferability()
                 .is(Preferability.Dictate));
+    }
+    
+    @Test
+    public void testUnderJUnit() {
+        val isInJUnit = CallerId.instance.isUnderJUnit();
+        assertTrue(isInJUnit);
     }
     
 }

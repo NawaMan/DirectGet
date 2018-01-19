@@ -11,6 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import directget.get.exceptions.CyclicDependencyDetectedException;
@@ -268,7 +269,7 @@ public class DefaultRefTest {
     }
     
     
-    @DefaultImplementation("directget.get.TheClass3")
+    @DefaultImplementation("directget.get.TheClassThatDoesNotExist")
     public static interface TheInterface3 {
         
         public String getText();
@@ -293,7 +294,6 @@ public class DefaultRefTest {
     
     @Test
     public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis_nullWhenNotExist() {
-        assertNull(Get.the(TheInterface3.class));
         assertEquals(TheInterface3User.TEXT, Get.the(TheInterface3User.class).getText());
     }
     
@@ -389,12 +389,8 @@ public class DefaultRefTest {
     
     @Test
     public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue() {
-        try {
-            OptionalSingleton value = Get.the(OptionalSingleton.class);
-            assertEquals(OptionalSingleton.instance.get(), value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        OptionalSingleton value = Get.the(OptionalSingleton.class);
+        assertEquals(OptionalSingleton.instance.get(), value);
     }
     
     
@@ -407,13 +403,9 @@ public class DefaultRefTest {
     
     @Test
     public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue_empty() {
-        try {
-            EmptyOptionalSingleton value = Get.the(EmptyOptionalSingleton.class);
-            assertEquals(EmptyOptionalSingleton.instance.get(), value);
-            assertNull(value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        EmptyOptionalSingleton value = Get.the(EmptyOptionalSingleton.class);
+        assertEquals(EmptyOptionalSingleton.instance.orElse(null), value);
+        assertNull(value);
     }
     
     
@@ -429,11 +421,7 @@ public class DefaultRefTest {
     
     @Test
     public void testThat_supplierSingletonClassWithDefaultAnnotationHasResultOfThatInstanceAsValue() {
-        try {
-            assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
     }
     
     
@@ -483,8 +471,10 @@ public class DefaultRefTest {
         }
         
         @Default
-        public static Optional<SupplierFactoryMethodFactoryMethod> newInstance() {
-            return Optional.of(new SupplierFactoryMethodFactoryMethod("factory"));
+        public static Supplier<SupplierFactoryMethodFactoryMethod> newInstance() {
+            return ()->{
+                return new SupplierFactoryMethodFactoryMethod("factory");
+            };
         }
     }
     

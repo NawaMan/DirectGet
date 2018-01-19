@@ -383,7 +383,7 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
     public static <T> RefTo<T> defaultOf(Class<T> targetClass) {
         Optional<RefTo> refOpt = defeaultRefs.get(targetClass);
         if (refOpt == null) {
-            val ref = declaredDefaultOf(targetClass);
+            val ref = findDefaultRefOf(targetClass);
             refOpt = Optional.of((ref != null) ? ref : Ref.to(targetClass).defaultedToThe(Ref.of(targetClass)));
             defeaultRefs.put(targetClass, refOpt);
         }
@@ -397,7 +397,7 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
      * @return  the default Ref that was declared.
      */
     @SuppressWarnings("unchecked")
-    public static <T> RefTo<T> declaredDefaultOf(Class<T> targetClass) {
+    public static <T> RefTo<T> findDefaultRefOf(Class<T> targetClass) {
         for (val field : targetClass.getDeclaredFields()) {
             if (!Modifier.isFinal(field.getModifiers()))
                 continue;
@@ -406,6 +406,8 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
             if (!Modifier.isStatic(field.getModifiers()))
                 continue;
             if (!Ref.class.isAssignableFrom(field.getType()))
+                continue;
+            if (field.getAnnotation(DefaultRef.class) == null)
                 continue;
             
             val actualType = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];

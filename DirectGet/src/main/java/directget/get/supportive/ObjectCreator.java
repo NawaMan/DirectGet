@@ -119,15 +119,16 @@ public class ObjectCreator {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier newSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultImplementation")) {
-            val defaultImplementation = stream(theGivenClass.getAnnotations())
-                .map(Object::toString)
-                .map(toString->toString.replaceAll("^(.*\\(value=)(.*)(\\))$", "$2"))
-                .map(ObjectCreator::findClass)
-                .filter(Objects::nonNull)
-                .map(Get::the)
-                .findAny()
-                .orElse(null);
-            return ()->defaultImplementation;
+            val defaultImplementationClass = findDefaultImplementation(theGivenClass);
+            if (defaultImplementationClass.isNotNull())
+                return ()->Get.the(defaultImplementationClass);
+            return ()->null;
+        }
+        
+        if (theGivenClass.isInterface()
+         && theGivenClass.getAnnotations().hasAnnotation("DefaultInterface")) {
+            // TODO Implement this.
+            return ()->null;
         }
         
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultToNull"))
@@ -139,7 +140,7 @@ public class ObjectCreator {
             return ()->enumValue;
         }
         
-        val defaultRef = Ref.declaredDefaultOf(theGivenClass);
+        val defaultRef = Ref.findDefaultRefOf(theGivenClass);
         if (defaultRef.isNotNull())
             return defaultRef;
         
@@ -167,8 +168,19 @@ public class ObjectCreator {
         
         return null;
     }
-    
+
     @SuppressWarnings("rawtypes")
+    private static <T> Class findDefaultImplementation(Class<T> theGivenClass) {
+        return stream(theGivenClass.getAnnotations())
+            .map(Object::toString)
+            .map(toString->toString.replaceAll("^(.*\\(value=)(.*)(\\))$", "$2"))
+            .map(ObjectCreator::findClass)
+            .filter(Objects::nonNull)
+            .findAny()
+            .orElse(null);
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier findValueFromSingletonField(Class<T> theGivenClass) {
         return (Supplier)stream(theGivenClass.getDeclaredFields())
                 .filter(field->isStatic(field.getModifiers()))
@@ -202,7 +214,7 @@ public class ObjectCreator {
                 .orElse(null);
     }
     
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier findValueFromFactoryMethod(Class<T> theGivenClass) {
         return (Supplier)stream(theGivenClass.getDeclaredMethods())
                 .filter(method->isStatic(method.getModifiers()))
@@ -210,41 +222,56 @@ public class ObjectCreator {
                 .filter(method->method.getAnnotations().hasAnnotation("Default"))
                 .map(method->{
                     val type = method.getReturnType();
-                    if (theGivenClass.isAssignableFrom(type))
+                    if (theGivenClass.isAssignableFrom(type)) {
                         return (Supplier)(()->{
                             val params = getParameters(method);
-                            return method.invoke(theGivenClass, params);
+                            val value = method.invoke(theGivenClass, params);
+                            return value;
                         });
+                    }
                     
                     if (Optional.class.isAssignableFrom(type)) {
                         val parameterizedType = (ParameterizedType)method.getGenericReturnType();
                         val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
                         
-                        if (theGivenClass.isAssignableFrom(actualType))
+                        if (theGivenClass.isAssignableFrom(actualType)) {
                             return (Supplier)(()->{
-                                val params        = getParameters(method);
-                                val optionalValue = method.invoke(theGivenClass, params);
-                                return optionalValue.isNull() ? null : ((Optional)optionalValue).get();
+                                val params = getParameters(method);
+                                val value = method.invoke(theGivenClass, params);
+                                return ((Optional)value).orElse(null);
                             });
+                        }
                     }
                     
                     if (java.util.function.Supplier.class.isAssignableFrom(type)) {
                         val parameterizedType = (ParameterizedType)method.getGenericReturnType();
                         val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+                        val getMethod         = getGetMethod();
                         
-                        if (theGivenClass.isAssignableFrom(actualType))
+                        if (theGivenClass.isAssignableFrom(actualType)) {
                             return (Supplier)()->{
-                                val params = getParameters(method);
-                                val optionalValue = method.invoke(theGivenClass, params);
-                                return optionalValue.isNull() ? null : ((java.util.function.Supplier)optionalValue).get();
+                                val params   = getParameters(method);
+                                val result   = method.invoke(theGivenClass, params);
+                                val value    = getMethod.invoke(result);
+                                return value;
                             };
+                        }
                     }
                     
                     return null;
                 })
-                .filter(Objects::nonNull)
                 .findAny()
                 .orElse(null);
+    }
+
+    private static Method getGetMethod() {
+        try {
+            // TODO - Change to use MethodHandler.
+            return java.util.function.Supplier.class.getMethod("get", new Class[0]);
+        } catch (NoSuchMethodException | SecurityException e) {
+            // I am sure it is there.
+            throw new RuntimeException(e);
+        }
     }
     
     @SuppressWarnings("rawtypes")
@@ -279,7 +306,6 @@ public class ObjectCreator {
         return params;
     }
     
-    @SuppressWarnings({ "rawtypes" })
     private static Object[] getParameters(Method method) {
         val paramsArray = method.getParameters();
         val params = new Object[paramsArray.length];

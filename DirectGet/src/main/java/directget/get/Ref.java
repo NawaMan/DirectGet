@@ -33,6 +33,7 @@ import directget.get.exceptions.GetException;
 import directget.get.run.Named;
 import directget.get.run.Named.RefSupplier;
 import directget.get.supportive.HasProvider;
+import directget.get.supportive.ICanBeSupplier;
 import directget.get.supportive.ObjectCreator;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
@@ -48,7 +49,7 @@ import lombok.val;
  * 
  * @author NawaMan
  */
-public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supplier<T, RuntimeException>, HasProvider<T>, Comparable<Ref<T>> {
+public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Comparable<Ref<T>> {
     
     
     private final Class<T> targetClass;
@@ -121,8 +122,8 @@ public abstract class Ref<T> implements Supplier<T>, dssb.failable.Failable.Supp
     }
     
     /** @return the current value for this ref. */
-    public final T get() {
-        return value();
+    public final Supplier<T> asSupplier() {
+        return ()->value();
     }
     
     /** @return the providers for the default value */

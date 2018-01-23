@@ -296,7 +296,7 @@ public class DefaultRefTest {
     public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis_nullWhenNotExist() {
         assertEquals(TheInterface3User.TEXT, Get.the(TheInterface3User.class).getText());
     }
-    
+    // TODO - multiple proposals ... cmbine to map or list
     
     
     public static class SuperClass {

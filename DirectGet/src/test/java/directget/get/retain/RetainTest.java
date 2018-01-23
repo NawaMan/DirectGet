@@ -236,8 +236,8 @@ public class RetainTest {
     
     @Test
     public void testRetain_but() {
-        val counter = Ref.to(AtomicInteger.class).defaultedToBy(()->new AtomicInteger()).retained().globally().forAlways();
-        val ref     = Ref.to(String.class).defaultedToBy(()->"Value#" + the(counter).getAndIncrement());
+        Ref<AtomicInteger> counter = Ref.to(AtomicInteger.class).defaultedToBy(()->new AtomicInteger()).retained().globally().forAlways();
+        Ref<String>        ref     = Ref.to(String.class).defaultedToBy(()->"Value#" + the(counter).getAndIncrement());
         assertEquals("Value#0", the(ref).toString());
         assertEquals("Value#1", the(ref).toString());
         

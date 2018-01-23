@@ -1,7 +1,5 @@
 package directget.get.supportive;
 
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.stream;
 
 import java.lang.annotation.Annotation;
@@ -41,9 +39,6 @@ public class ObjectCreator {
     
     // TODO - Should create interface with all default method.
     // TODO - Should check for @NotNull
-    
-    private static Predicate<? super Field> isFieldStatic = field->Modifier.isStatic(field.getModifiers());
-    private static Predicate<? super Field> isFieldPublic = field->isPublic(field.getModifiers());
     
     /**
      * Check if the an annotation is has the simple name as the one given 
@@ -187,8 +182,8 @@ public class ObjectCreator {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T> Supplier findValueFromSingletonField(Class<T> theGivenClass) {
         return (Supplier)stream(theGivenClass.getDeclaredFields())
-                .filter(isFieldStatic)
-                .filter(isFieldPublic)
+                .filter(field->Modifier.isStatic(field.getModifiers()))
+                .filter(field->Modifier.isPublic(field.getModifiers()))
                 .filter(field->ObjectCreator.extensions.hasAnnotation(field.getAnnotations(), "Default"))
                 .map(field->{
                     val type = field.getType();

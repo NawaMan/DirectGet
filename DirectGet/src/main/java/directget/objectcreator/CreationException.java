@@ -13,14 +13,14 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.exceptions;
+package directget.objectcreator;
 
 /**
  * This exception is thrown when creating an object fail.
  * 
  * @author NawaMan
  */
-public class CreationException extends DirectGetRuntimeException {
+public class CreationException extends RuntimeException {
     
     private static final long serialVersionUID = 5414890542605369904L;
     

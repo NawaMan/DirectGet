@@ -1,10 +1,10 @@
-package directget.get.supportive;
+package directget.objectcreator;
 
 import static java.util.Arrays.stream;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -19,15 +19,14 @@ import java.util.function.Predicate;
 
 import directget.get.Get;
 import directget.get.Ref;
+import directget.get.annotations.Inject;
 import directget.get.exceptions.AbstractClassCreationException;
-import directget.get.exceptions.CreationException;
 import directget.get.exceptions.CyclicDependencyDetectedException;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.NonNull;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
-import lombok.experimental.UtilityClass;
 
 /**
  * This utility class can create an object using Get.
@@ -37,9 +36,18 @@ import lombok.experimental.UtilityClass;
 @ExtensionMethod({ Nulls.class, ObjectCreator.extensions.class })
 public class ObjectCreator {
     
+    // Stepping stone
+    public static final ObjectCreator instance = new ObjectCreator();
+    
+    
     // TODO - Should create interface with all default method.
     // TODO - Should check for @NotNull
     
+    private static final String INJECT = Inject.class.getSimpleName();
+
+    private static final Supplier NullSupplier = ()->null;
+
+
     /**
      * Check if the an annotation is has the simple name as the one given 
      * @param name  the name expected.
@@ -86,7 +94,7 @@ public class ObjectCreator {
      * @throws CyclicDependencyDetectedException when cyclic dependency is detected.
      */
     @SuppressWarnings("rawtypes")
-    public static <T> T createNew(@NonNull Class<T> theGivenClass)
+    public <T> T createNew(@NonNull Class<T> theGivenClass)
             throws CreationException, CyclicDependencyDetectedException {
         val set = beingCreateds.get();
         if (set.contains(theGivenClass))
@@ -96,16 +104,12 @@ public class ObjectCreator {
             set.add(theGivenClass);
             
             try {
-                Supplier supplier = suppliers.get(theGivenClass);
-                if (supplier.isNull()) {
-                    supplier = newSupplierFor(theGivenClass);
-                    if (supplier.isNotNull())
-                        suppliers.put(theGivenClass, supplier);
-                }
-                
+                val supplier = getSupplierFor(theGivenClass);
                 val instance = supplier.get();
                 return theGivenClass.cast(instance);
             } catch (CyclicDependencyDetectedException e) {
+                throw e;
+            } catch (CreationException e) {
                 throw e;
             } catch (Throwable e) {
                 throw new CreationException(theGivenClass, e);
@@ -116,22 +120,40 @@ public class ObjectCreator {
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static <T> Supplier newSupplierFor(Class<T> theGivenClass) throws NoSuchMethodException {
+    <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> getSupplierFor(
+            Class<TYPE> theGivenClass) {
+        Supplier supplier = suppliers.get(theGivenClass);
+        if (supplier.isNull()) {
+            supplier = newSupplierFor(theGivenClass);
+            supplier = supplier.or(NullSupplier);
+            suppliers.put(theGivenClass, supplier);
+        }
+        return supplier;
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private <T> Supplier newSupplierFor(Class<T> theGivenClass) {
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultImplementation")) {
             val defaultImplementationClass = findDefaultImplementation(theGivenClass);
-            if (defaultImplementationClass.isNotNull())
-                return ()->Get.the(defaultImplementationClass);
-            return ()->null;
+            if (defaultImplementationClass.isNotNull()) {
+                return new Supplier() {
+                    @Override
+                    public Object get() throws Throwable {
+                        return getValueOf(defaultImplementationClass);
+                    }
+                };
+            }
+            return NullSupplier;
         }
         
         if (theGivenClass.isInterface()
          && theGivenClass.getAnnotations().hasAnnotation("DefaultInterface")) {
             // TODO Implement this.
-            return ()->null;
+            return NullSupplier;
         }
         
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultToNull"))
-            return ()->null;
+            return NullSupplier;
         
         if (theGivenClass.isEnum()) {
             val enumValue = findDefaultEnumValue(theGivenClass);
@@ -152,12 +174,11 @@ public class ObjectCreator {
         
         val constructor = findConstructor(theGivenClass);
         if (constructor.isNotNull()) {
-            val supplier = (Supplier)(()->{
-                val params   = getParameters(constructor);
-                val instance = constructor.newInstance(params);
-                // TODO - Change to use method handle later.
-                return theGivenClass.cast(instance);
-            });
+            val supplier = new Supplier() {
+                public Object get() throws Throwable {
+                    return callConstructor(theGivenClass, constructor);
+                }
+            };
             return supplier;
         }
         
@@ -165,6 +186,15 @@ public class ObjectCreator {
             throw new AbstractClassCreationException(theGivenClass);
         
         return null;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private <T> Object callConstructor(Class<T> theGivenClass, Constructor constructor)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        val params   = getParameters(constructor);
+        val instance = constructor.newInstance(params);
+        // TODO - Change to use method handle later.
+        return theGivenClass.cast(instance);
     }
     
     @SuppressWarnings("rawtypes")
@@ -213,54 +243,67 @@ public class ObjectCreator {
                 .orElse(null);
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static <T> Supplier findValueFromFactoryMethod(Class<T> theGivenClass) {
+    @SuppressWarnings({ "rawtypes"})
+    private <T> Supplier findValueFromFactoryMethod(Class<T> theGivenClass) {
         return (Supplier)stream(theGivenClass.getDeclaredMethods())
                 .filter(method->Modifier.isStatic(method.getModifiers()))
                 .filter(method->Modifier.isPublic(method.getModifiers()))
                 .filter(method->ObjectCreator.extensions.hasAnnotation(method.getAnnotations(), "Default"))
-                .map(method->{
-                    val type = method.getReturnType();
-                    if (theGivenClass.isAssignableFrom(type)) {
-                        return (Supplier)(()->{
-                            val params = ObjectCreator.getMethodParameters(method);
-                            val value = method.invoke(theGivenClass, params);
-                            return value;
-                        });
-                    }
-                    
-                    if (Optional.class.isAssignableFrom(type)) {
-                        val parameterizedType = (ParameterizedType)method.getGenericReturnType();
-                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
-                        
-                        if (theGivenClass.isAssignableFrom(actualType)) {
-                            return (Supplier)(()->{
-                                val params = ObjectCreator.getMethodParameters(method);
-                                val value = method.invoke(theGivenClass, params);
-                                return ((Optional)value).orElse(null);
-                            });
-                        }
-                    }
-                    
-                    if (java.util.function.Supplier.class.isAssignableFrom(type)) {
-                        val parameterizedType = (ParameterizedType)method.getGenericReturnType();
-                        val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
-                        val getMethod         = ObjectCreator.getGetMethod();
-                        
-                        if (theGivenClass.isAssignableFrom(actualType)) {
-                            return (Supplier)()->{
-                                val params   = ObjectCreator.getMethodParameters(method);
-                                val result   = method.invoke(theGivenClass, params);
-                                val value    = getMethod.invoke(result);
-                                return value;
-                            };
-                        }
-                    }
-                    
-                    return null;
-                })
+                .map(method->ObjectCreator.this.getFactoryMethodValue(theGivenClass, method))
                 .findAny()
                 .orElse(null);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private <T> Supplier getFactoryMethodValue(Class<T> theGivenClass, Method method) {
+        val type = method.getReturnType();
+        if (theGivenClass.isAssignableFrom(type))
+            return (Supplier)(()->basicFactoryMethodCall(theGivenClass, method));
+        
+        if (Optional.class.isAssignableFrom(type)) {
+            val parameterizedType = (ParameterizedType)method.getGenericReturnType();
+            val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+            
+            if (theGivenClass.isAssignableFrom(actualType))
+                return (Supplier)(()->optionalFactoryMethodCall(theGivenClass, method));
+        }
+        
+        if (java.util.function.Supplier.class.isAssignableFrom(type)) {
+            val parameterizedType = (ParameterizedType)method.getGenericReturnType();
+            val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
+            val getMethod         = getGetMethod();
+            
+            if (theGivenClass.isAssignableFrom(actualType))
+                return (Supplier)()->supplierFactoryMethodCall(theGivenClass, method, getMethod);
+        }
+        
+        return null;
+    }
+    
+    private <T> Object supplierFactoryMethodCall(
+            Class<T> theGivenClass,
+            Method method,
+            Method getMethod) 
+                    throws IllegalAccessException, InvocationTargetException {
+        val params   = getMethodParameters(method);
+        val result   = method.invoke(theGivenClass, params);
+        val value    = getMethod.invoke(result);
+        return value;
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private <T> Object optionalFactoryMethodCall(Class<T> theGivenClass, Method method)
+            throws IllegalAccessException, InvocationTargetException {
+        val params = getMethodParameters(method);
+        val value = method.invoke(theGivenClass, params);
+        return ((Optional)value).orElse(null);
+    }
+    
+    private <T> Object basicFactoryMethodCall(Class<T> theGivenClass, Method method)
+            throws IllegalAccessException, InvocationTargetException {
+        val params = getMethodParameters(method);
+        val value = method.invoke(theGivenClass, params);
+        return value;
     }
     
     private static Method getGetMethod() {
@@ -273,26 +316,28 @@ public class ObjectCreator {
         }
     }
     
-    @SuppressWarnings("rawtypes")
     private static <T> T findDefaultEnumValue(Class<T> theGivenClass) {
         T[] enumConstants = theGivenClass.getEnumConstants();
         if (enumConstants.length == 0)
             return null;
         return stream(enumConstants)
-                .filter(value->{
-                    val name = ((Enum)value).name();
-                    try {
-                        return ObjectCreator.extensions.hasAnnotation(theGivenClass.getField(name).getAnnotations(), "Default");
-                    } catch (NoSuchFieldException | SecurityException e) {
-                        throw new CreationException(theGivenClass, e);
-                    }
-                })
+                .filter(value->checkDefaultEnumValue(theGivenClass, value))
                 .findAny()
                 .orElse(enumConstants[0]);
     }
     
+    @SuppressWarnings("rawtypes")
+    private static <T> boolean checkDefaultEnumValue(Class<T> theGivenClass, T value) {
+        val name = ((Enum)value).name();
+        try {
+            return ObjectCreator.extensions.hasAnnotation(theGivenClass.getField(name).getAnnotations(), "Default");
+        } catch (NoSuchFieldException | SecurityException e) {
+            throw new CreationException(theGivenClass, e);
+        }
+    }
+    
     @SuppressWarnings({ "rawtypes" })
-    private static Object[] getParameters(Constructor constructor) {
+    private Object[] getParameters(Constructor constructor) {
         val paramsArray = constructor.getParameters();
         val params = new Object[paramsArray.length];
         for (int i = 0; i < paramsArray.length; i++) {
@@ -306,7 +351,7 @@ public class ObjectCreator {
         return params;
     }
     
-    private static Object[] getMethodParameters(Method method) {
+    private Object[] getMethodParameters(Method method) {
         val paramsArray = method.getParameters();
         val params = new Object[paramsArray.length];
         for (int i = 0; i < paramsArray.length; i++) {
@@ -321,16 +366,26 @@ public class ObjectCreator {
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Object getParameterValue(Class paramType, Type type, boolean isNullable) {
+    private Object getParameterValue(Class paramType, Type type, boolean isNullable) {
         if (type instanceof ParameterizedType) {
             val parameterizedType = (ParameterizedType)type;
             val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
             
             if (paramType == Supplier.class)
-                return ((Supplier)()->Get.the(actualType));
+                return new Supplier() {
+                    @Override
+                    public Object get() throws Throwable {
+                        return getValueOf(actualType);
+                    }
+                };
             
             if (paramType == java.util.function.Supplier.class)
-                return ((Supplier)()->Get.the(actualType)).gracefully();
+                return new java.util.function.Supplier() {
+                    @Override
+                    public Object get() {
+                        return getValueOf(actualType);
+                    }
+                };
             
             if (paramType == Optional.class)
                 return getOptionalValueOrNullWhenFailAndNullable(isNullable, actualType);
@@ -339,14 +394,14 @@ public class ObjectCreator {
         if (isNullable)
             return getValueOrNullWhenFail(paramType);
         
-        val paramValue = Get.the(paramType);
+        val paramValue = getValueOf(paramType);
         return paramValue;
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Object getOptionalValueOrNullWhenFailAndNullable(boolean isNullable, Class actualType) {
+    private Object getOptionalValueOrNullWhenFailAndNullable(boolean isNullable, Class actualType) {
         try {
-            val paramValue = Get.the(actualType);
+            val paramValue = getValueOf(actualType);
             return Optional.ofNullable(paramValue);
         } catch (Exception e) {
             return isNullable ? null : Optional.empty();
@@ -354,57 +409,34 @@ public class ObjectCreator {
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Object getValueOrNullWhenFail(Class paramType) {
+    private Object getValueOrNullWhenFail(Class paramType) {
         try {
-            return Get.the(paramType);
+            return getValueOf(paramType);
         } catch (Exception e) {
             return null;
         }
     }
     
     @SuppressWarnings({ "rawtypes" })
-    private static <T> Constructor findConstructor(Class<T> clzz) throws NoSuchMethodException {
-        Constructor foundConstructor = findConstructorWithInject(clzz);
+    private <T> Constructor findConstructor(Class<T> clzz) {
+        Constructor foundConstructor = clzz.findConstructorWithInject();
         if (foundConstructor.isNull()) {
-            if (clzz.hasOnlyOneConsructor())
-                 foundConstructor = getOnlyConstructorOf(clzz);
-            else {
-                try {
-                    foundConstructor = getNoArgConstructorOf(clzz);
-                } catch (NoSuchMethodException e) {
-                    // Do nothing .. let it fall back.
-                }
-            }
+            foundConstructor = clzz.hasOnlyOneConsructor()
+                    ? clzz.getOnlyConstructor()
+                    : clzz.getNoArgConstructor();
         }
         
-        if (foundConstructor.isNull() || !Modifier.isPublic(foundConstructor.getModifiers()))
+        if (foundConstructor.isNull()
+         || !Modifier.isPublic(foundConstructor.getModifiers()))
             return null;
         
         return foundConstructor;
     }
     
-    private static <T> Constructor<T> getNoArgConstructorOf(Class<T> clzz)
-            throws NoSuchMethodException {
-        return clzz.getConstructor();
+    protected <T> T getValueOf(Class<T> clzz) {
+        return Get.the(clzz);
     }
     
-    private static <T> Constructor<?> getOnlyConstructorOf(Class<T> clzz) {
-        return clzz.getConstructors()[0];
-    }
-    
-    @SuppressWarnings("unchecked")
-    private static <T> Constructor<T> findConstructorWithInject(Class<T> clzz) {
-        for(Constructor<?> constructor : clzz.getConstructors()) {
-            if (!Modifier.isPublic(constructor.getModifiers()))
-                continue;
-            
-            if (constructor.getAnnotations().hasAnnotation("Inject"))
-                return (Constructor<T>)constructor;
-        }
-        return null;
-    }
-    
-    @UtilityClass
     static class extensions {
     
         public static <T> boolean hasAnnotation(Annotation[] annotations, String name) {
@@ -414,6 +446,32 @@ public class ObjectCreator {
         
         public static <T> boolean hasOnlyOneConsructor(final java.lang.Class<T> clzz) {
             return clzz.getConstructors().length == 1;
+        }
+        
+        @SuppressWarnings("unchecked")
+        public static <T> Constructor<T> findConstructorWithInject(Class<T> clzz) {
+            for(Constructor<?> constructor : clzz.getConstructors()) {
+                if (!Modifier.isPublic(constructor.getModifiers()))
+                    continue;
+                
+                if (hasAnnotation(constructor.getAnnotations(), INJECT))
+                    return (Constructor<T>)constructor;
+            }
+            return null;
+        }
+        
+        public static <T> Constructor<T> getNoArgConstructor(Class<T> clzz) {
+            try {
+                return clzz.getConstructor();
+            } catch (NoSuchMethodException e) {
+                return null;
+            } catch (SecurityException e) {
+                throw new CreationException(clzz);
+            }
+        }
+        
+        public static <T> Constructor<?> getOnlyConstructor(Class<T> clzz) {
+            return clzz.getConstructors()[0];
         }
         
     }

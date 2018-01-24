@@ -599,7 +599,6 @@ public class DefaultRefTest {
         assertEquals("Secret", With(secretDepartment).run(()->Get.the(Manager.class).departmentName()));
     }
     
-    @ExtensionMethod({ Nulls.class })
     public static class Company {
         private Supplier<Integer> revenueSupplier;
         public Company(Supplier<Integer> revenueSupplier) {

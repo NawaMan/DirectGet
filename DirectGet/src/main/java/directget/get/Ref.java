@@ -27,17 +27,17 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import directget.get.exceptions.CreationException;
 import directget.get.exceptions.DefaultRefException;
 import directget.get.exceptions.GetException;
 import directget.get.run.Named;
 import directget.get.run.Named.RefSupplier;
 import directget.get.supportive.HasProvider;
 import directget.get.supportive.ICanBeSupplier;
-import directget.get.supportive.ObjectCreator;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
+import directget.objectcreator.CreationException;
+import directget.objectcreator.ObjectCreator;
 import dssb.callerid.impl.CallerId;
 import lombok.val;
 
@@ -51,6 +51,7 @@ import lombok.val;
  */
 public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Comparable<Ref<T>> {
     
+    private static final ObjectCreator objectCreator = new ObjectCreator();
     
     private final Class<T> targetClass;
     
@@ -110,7 +111,7 @@ public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Compa
     /** @return the default object. */
     public T getDefaultValue() {
         try {
-            return ObjectCreator.createNew(targetClass);
+            return objectCreator.createNew(targetClass);
         } catch (CreationException cause) {
             throw new GetException(this, cause);
         }

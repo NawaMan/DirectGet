@@ -38,6 +38,7 @@ import directget.get.supportive.RefTo;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
+@SuppressWarnings("unchecked")
 @ExtensionMethod({ Nulls.class })
 public class GetInstanceTest implements Named.User {
     

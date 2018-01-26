@@ -36,8 +36,8 @@ import directget.get.supportive.ICanBeSupplier;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
-import directget.objectcreator.CreationException;
-import directget.objectcreator.ObjectCreator;
+import directget.objectprovider.CreationException;
+import directget.objectprovider.ObjectProvider;
 import dssb.callerid.impl.CallerId;
 import lombok.val;
 
@@ -51,7 +51,7 @@ import lombok.val;
  */
 public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Comparable<Ref<T>> {
     
-    private static final ObjectCreator objectCreator = new ObjectCreator();
+    private static final ObjectProvider objectCreator = new ObjectProvider();
     
     private final Class<T> targetClass;
     
@@ -111,7 +111,7 @@ public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Compa
     /** @return the default object. */
     public T getDefaultValue() {
         try {
-            return objectCreator.createNew(targetClass);
+            return objectCreator.provide(targetClass);
         } catch (CreationException cause) {
             throw new GetException(this, cause);
         }

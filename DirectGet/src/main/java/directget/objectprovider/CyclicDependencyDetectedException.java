@@ -13,14 +13,16 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.exceptions;
+package directget.objectprovider;
+
+import directget.get.exceptions.DirectGetRuntimeException;
 
 /**
  * This exception is thrown when creating an object fail.
  * 
  * @author NawaMan
  */
-public class CyclicDependencyDetectedException extends DirectGetRuntimeException {
+public class CyclicDependencyDetectedException extends CreationException {
     
     private static final long serialVersionUID = -7821227248195126756L;
     
@@ -42,7 +44,7 @@ public class CyclicDependencyDetectedException extends DirectGetRuntimeException
      * @param cause
      **/
     public CyclicDependencyDetectedException(Class<?> clazz, Throwable cause) {
-        super(clazz.getCanonicalName(), cause);
+        super(clazz, cause);
         this.clazz = clazz;
     }
     

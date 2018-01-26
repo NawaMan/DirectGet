@@ -13,41 +13,26 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectcreator;
+package directget.objectprovider.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * This exception is thrown when creating an object fail.
+ * A ready to use annotation to specify a classname for the default implementation.
+ * 
+ * If the class is not found in the classpath or it was found to be uncompatible,
+ *   this annotation will be ignore.
  * 
  * @author NawaMan
  */
-public class CreationException extends RuntimeException {
+@Target(value=ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefaultImplementation {
     
-    private static final long serialVersionUID = 5414890542605369904L;
+    /** The name of the implementation class. */
+    public String value();
     
-    private final Class<?> clazz;
-    
-    /**
-     * Constructor 
-     * 
-     * @param clazz  the class that this fail creation is attempted too.
-     **/
-    public CreationException(Class<?> clazz) {
-        this(clazz, null);
-    }
-    
-    /**
-     * Constructor 
-     * 
-     * @param clazz 
-     * @param cause
-     **/
-    public CreationException(Class<?> clazz, Throwable cause) {
-        super(clazz.getCanonicalName(), cause);
-        this.clazz = clazz;
-    }
-    
-    /** @return the target class with the problem. */
-    public Class<?> getTargetClass() {
-        return clazz;
-    }
 }

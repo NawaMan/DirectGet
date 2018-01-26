@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.annotations;
+package directget.objectprovider.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,12 +21,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to mask that a constructor is the be used to create the object.
+ * A ready to use annotation to mask that a parameter in the default parameter can be null.
  * 
  * @author NawaMan
  */
-@Target(value=ElementType.CONSTRUCTOR)
+@Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Inject {
+public @interface Nullable {
     
 }

@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.annotations;
+package directget.objectprovider.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,15 +21,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to mask that 
- *    an enum value is the default value,
- *    a public field is default instance, or
- *    a public method is a factory method.
+ * A ready to use annotation to the class is in interface will all its method have a default implementation
+ *   and that the author intent to have the interface itself as an implementation to be created.
  * 
  * @author NawaMan
  */
-@Target({ ElementType.METHOD, ElementType.FIELD })
+@Target(value=ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Default {
+public @interface DefaultInterface {
+    
+    /** The name of the implementation class. */
+    public String value();
     
 }

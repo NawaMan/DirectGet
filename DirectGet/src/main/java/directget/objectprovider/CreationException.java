@@ -13,24 +13,41 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package directget.objectprovider;
 
 /**
- * A ready to use annotation to the class is in interface will all its method have a default implementation
- *   and that the author intent to have the interface itself as an implementation to be created.
+ * This exception is thrown when creating an object fail.
  * 
  * @author NawaMan
  */
-@Target(value=ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultInterface {
+public class CreationException extends RuntimeException {
     
-    /** The name of the implementation class. */
-    public String value();
+    private static final long serialVersionUID = 5414890542605369904L;
     
+    private final Class<?> clazz;
+    
+    /**
+     * Constructor 
+     * 
+     * @param clazz  the class that this fail creation is attempted too.
+     **/
+    public CreationException(Class<?> clazz) {
+        this(clazz, null);
+    }
+    
+    /**
+     * Constructor 
+     * 
+     * @param clazz 
+     * @param cause
+     **/
+    public CreationException(Class<?> clazz, Throwable cause) {
+        super(clazz.getCanonicalName(), cause);
+        this.clazz = clazz;
+    }
+    
+    /** @return the target class with the problem. */
+    public Class<?> getTargetClass() {
+        return clazz;
+    }
 }

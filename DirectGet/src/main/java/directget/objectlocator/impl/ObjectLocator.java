@@ -78,15 +78,15 @@ public class ObjectLocator implements ILocateObject {
     private Map<Class, Supplier> suppliers;
     
     public ObjectLocator() {
-        this(null, null, null, true);
+        this(null, true, null, null);
     }
     
     @SuppressWarnings("rawtypes")
     public ObjectLocator(
             ILocateObject        parent,
+            boolean              useShareSupplierCache,
             List<IFindSupplier>  additionalSupplierFinders,
-            IHandleLocateFailure locateFailureHandler,
-            boolean              useShareSupplierCache) {
+            IHandleLocateFailure locateFailureHandler) {
         this.parent               = parent;
         this.finders              = combineFinders(additionalSupplierFinders);
         this.locateFailureHandler = locateFailureHandler;

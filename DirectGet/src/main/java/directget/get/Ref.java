@@ -55,9 +55,9 @@ public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Compa
     private static final ObjectLocator objectCreator
             = new ObjectLocator(
                     GetObjectLocator.instance, 
+                    true,
                     asList(new DefaultRefSupplierFinder()),
-                    null,
-                    true);
+                    null);
     
     private final Class<T> targetClass;
     

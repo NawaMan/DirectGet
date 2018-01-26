@@ -16,7 +16,7 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Nulls.class, extensions.class })
 public class SingletonFieldFinder implements IFindSupplier {
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
             Class<TYPE>   theGivenClass,

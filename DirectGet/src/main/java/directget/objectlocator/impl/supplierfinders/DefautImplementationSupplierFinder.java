@@ -5,7 +5,6 @@ import static java.util.Arrays.stream;
 
 import java.util.Objects;
 
-import directget.get.Get;
 import directget.objectlocator.api.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
@@ -26,7 +25,7 @@ public class DefautImplementationSupplierFinder implements IFindSupplier {
                 return new Supplier() {
                     @Override
                     public Object get() throws Throwable {
-                        return getValueOf(defaultImplementationClass);
+                        return objectLocator.get(defaultImplementationClass);
                     }
                 };
             }
@@ -58,10 +57,6 @@ public class DefautImplementationSupplierFinder implements IFindSupplier {
         } catch (ClassNotFoundException e) {
             return null;
         }
-    }
-    
-    protected <T> T getValueOf(Class<T> clzz) {
-        return Get.the(clzz);
     }
     
 }

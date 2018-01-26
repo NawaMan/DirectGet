@@ -1,22 +1,22 @@
 package directget.objectlocator.impl;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.unmodifiableList;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import directget.get.DefaultRefSupplierFinder;
 import directget.objectlocator.api.ILocateObject;
 import directget.objectlocator.api.LocateObjectException;
 import directget.objectlocator.impl.exception.AbstractClassCreationException;
-import directget.objectlocator.impl.exception.CreationException;
 import directget.objectlocator.impl.exception.CyclicDependencyDetectedException;
+import directget.objectlocator.impl.exception.ObjectCreationException;
 import directget.objectlocator.impl.supplierfinders.ConstructorSupplierFinder;
 import directget.objectlocator.impl.supplierfinders.DefaultInterfaceSupplierFinder;
 import directget.objectlocator.impl.supplierfinders.DefautImplementationSupplierFinder;
@@ -47,18 +47,18 @@ public class ObjectLocator implements ILocateObject {
     @SuppressWarnings("rawtypes")
     private static final Supplier NullSupplier = ()->null;
     
-    private final List<IFindSupplier> finders = Arrays.asList(
+    
+    private final List<IFindSupplier> classLevelfinders = Arrays.asList(
             new DefautImplementationSupplierFinder(),
             new NullSupplierFinder(),
             new EnumValueSupplierFinder(),
-            new DefaultRefSupplierFinder(),
-            new DefaultInterfaceSupplierFinder(),
+            new DefaultInterfaceSupplierFinder()
+    );
+    private final List<IFindSupplier> elementLevelfinders = Arrays.asList(
             new SingletonFieldFinder(),
             new FactoryMethodSupplierFinder(),
             new ConstructorSupplierFinder()
-    ).stream()
-    .filter(Objects::nonNull)
-    .collect(toList());
+    );
     
     @SuppressWarnings("rawtypes")
     private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
@@ -66,13 +66,23 @@ public class ObjectLocator implements ILocateObject {
     @SuppressWarnings("rawtypes")
     private static final ThreadLocal<Set<Class>> beingCreateds = ThreadLocal.withInitial(()->new HashSet<>());
     
-    private ILocateObject parent;
+    @SuppressWarnings("unchecked")
+    private static final List<IFindSupplier> emptyList = (List<IFindSupplier>)EMPTY_LIST;
+    
+    private ILocateObject       parent;
+    private List<IFindSupplier> finders;
     
     public ObjectLocator() {
-        this.parent = null;
+        this(null, null);
     }
-    public ObjectLocator(ILocateObject parent) {
-        this.parent = parent;
+    public ObjectLocator(ILocateObject parent, List<IFindSupplier> additionalSupplierFinders) {
+        this.parent  = parent;
+        
+        val finderList = new ArrayList<IFindSupplier>();
+        finderList.addAll(classLevelfinders);
+        finderList.addAll(additionalSupplierFinders.or(emptyList));
+        finderList.addAll(elementLevelfinders);
+        this.finders = unmodifiableList(finderList);
     }
     
     
@@ -97,10 +107,10 @@ public class ObjectLocator implements ILocateObject {
                 val supplier = getSupplierFor(theGivenClass);
                 val instance = supplier.get();
                 return theGivenClass.cast(instance);
-            } catch (CreationException e) {
+            } catch (ObjectCreationException e) {
                 throw e;
             } catch (Throwable e) {
-                throw new CreationException(theGivenClass, e);
+                throw new ObjectCreationException(theGivenClass, e);
             }
         } finally {
             set.remove(theGivenClass);

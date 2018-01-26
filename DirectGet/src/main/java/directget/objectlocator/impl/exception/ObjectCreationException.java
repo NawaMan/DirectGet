@@ -22,7 +22,7 @@ import directget.objectlocator.api.LocateObjectException;
  * 
  * @author NawaMan
  */
-public class CreationException extends LocateObjectException {
+public class ObjectCreationException extends LocateObjectException {
     
     private static final long serialVersionUID = 5414890542605369904L;
     
@@ -31,7 +31,7 @@ public class CreationException extends LocateObjectException {
      * 
      * @param clazz  the class that this fail creation is attempted too.
      **/
-    public CreationException(Class<?> clazz) {
+    public ObjectCreationException(Class<?> clazz) {
         this(clazz, null);
     }
     
@@ -41,7 +41,7 @@ public class CreationException extends LocateObjectException {
      * @param clazz 
      * @param cause
      **/
-    public CreationException(Class<?> clazz, Throwable cause) {
+    public ObjectCreationException(Class<?> clazz, Throwable cause) {
         super(clazz, cause);
     }
     

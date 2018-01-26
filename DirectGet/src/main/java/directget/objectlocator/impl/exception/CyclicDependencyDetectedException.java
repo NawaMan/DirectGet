@@ -15,7 +15,6 @@
 //  ========================================================================
 package directget.objectlocator.impl.exception;
 
-import directget.get.exceptions.DirectGetRuntimeException;
 import directget.objectlocator.api.LocateObjectException;
 
 /**

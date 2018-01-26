@@ -15,14 +15,12 @@
 //  ========================================================================
 package directget.objectlocator.impl.exception;
 
-import directget.objectlocator.api.LocateObjectException;
-
 /**
  * This exception is thrown when there is an to create an instance of an abstract class .
  * 
  * @author NawaMan
  */
-public class AbstractClassCreationException extends LocateObjectException {
+public class AbstractClassCreationException extends ObjectCreationException {
 
     private static final long serialVersionUID = 5751024581572983499L;
 

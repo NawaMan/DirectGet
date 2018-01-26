@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 
 import directget.objectlocator.api.ILocateObject;
 import directget.objectlocator.impl.annotations.Inject;
-import directget.objectlocator.impl.exception.CreationException;
+import directget.objectlocator.impl.exception.ObjectCreationException;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -96,7 +96,7 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
         } catch (NoSuchMethodException e) {
             return null;
         } catch (SecurityException e) {
-            throw new CreationException(clzz);
+            throw new ObjectCreationException(clzz);
         }
     }
     

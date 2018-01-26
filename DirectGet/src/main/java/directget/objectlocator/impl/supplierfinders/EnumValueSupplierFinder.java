@@ -3,7 +3,7 @@ package directget.objectlocator.impl.supplierfinders;
 import static java.util.Arrays.stream;
 
 import directget.objectlocator.api.ILocateObject;
-import directget.objectlocator.impl.exception.CreationException;
+import directget.objectlocator.impl.exception.ObjectCreationException;
 import dssb.failable.Failable.Supplier;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -38,7 +38,7 @@ public class EnumValueSupplierFinder implements IFindSupplier {
         try {
             return theGivenClass.getField(name).getAnnotations().hasAnnotation("Default");
         } catch (NoSuchFieldException | SecurityException e) {
-            throw new CreationException(theGivenClass, e);
+            throw new ObjectCreationException(theGivenClass, e);
         }
     }
     

@@ -56,7 +56,8 @@ public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Compa
             = new ObjectLocator(
                     GetObjectLocator.instance, 
                     asList(new DefaultRefSupplierFinder()),
-                    null);
+                    null,
+                    true);
     
     private final Class<T> targetClass;
     

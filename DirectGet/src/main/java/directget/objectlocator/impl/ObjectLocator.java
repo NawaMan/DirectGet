@@ -49,20 +49,20 @@ public class ObjectLocator implements ILocateObject {
     private static final Supplier NoSupplier = ()->null;
     
     
-    private final List<IFindSupplier> classLevelfinders = Arrays.asList(
+    private static final List<IFindSupplier> classLevelfinders = Arrays.asList(
             new DefautImplementationSupplierFinder(),
             new NullSupplierFinder(),
             new EnumValueSupplierFinder(),
             new DefaultInterfaceSupplierFinder()
     );
-    private final List<IFindSupplier> elementLevelfinders = Arrays.asList(
+    private static final List<IFindSupplier> elementLevelfinders = Arrays.asList(
             new SingletonFieldFinder(),
             new FactoryMethodSupplierFinder(),
             new ConstructorSupplierFinder()
     );
     
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, Supplier> suppliers = new ConcurrentHashMap<>();
+    private static final Map<Class, Supplier> sharedSuppliers = new ConcurrentHashMap<>();
     
     @SuppressWarnings("rawtypes")
     private static final ThreadLocal<Set<Class>> beingCreateds = ThreadLocal.withInitial(()->new HashSet<>());
@@ -74,21 +74,32 @@ public class ObjectLocator implements ILocateObject {
     private List<IFindSupplier>  finders;
     private IHandleLocateFailure locateFailureHandler;
     
+    @SuppressWarnings("rawtypes")
+    private Map<Class, Supplier> suppliers;
+    
     public ObjectLocator() {
-        this(null, null, null);
+        this(null, null, null, true);
     }
-    public ObjectLocator(ILocateObject parent, List<IFindSupplier> additionalSupplierFinders, IHandleLocateFailure locateFailureHandler) {
-        this.parent  = parent;
-        
+    
+    @SuppressWarnings("rawtypes")
+    public ObjectLocator(
+            ILocateObject        parent,
+            List<IFindSupplier>  additionalSupplierFinders,
+            IHandleLocateFailure locateFailureHandler,
+            boolean              useShareSupplierCache) {
+        this.parent               = parent;
+        this.finders              = combineFinders(additionalSupplierFinders);
+        this.locateFailureHandler = locateFailureHandler;
+        this.suppliers            = useShareSupplierCache ? sharedSuppliers : new ConcurrentHashMap<Class, Supplier>();
+    }
+    
+    private static List<IFindSupplier> combineFinders(List<IFindSupplier> additionalSupplierFinders) {
         val finderList = new ArrayList<IFindSupplier>();
         finderList.addAll(classLevelfinders);
         finderList.addAll(additionalSupplierFinders.or(emptyList));
         finderList.addAll(elementLevelfinders);
-        this.finders = unmodifiableList(finderList);
-        
-        this.locateFailureHandler = locateFailureHandler;
+        return unmodifiableList(finderList);
     }
-    
     
     /**
      * Create an instance of the given class.

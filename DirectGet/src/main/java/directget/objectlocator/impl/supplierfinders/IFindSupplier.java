@@ -1,6 +1,6 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
-import directget.objectlocator.ILocateObject;
+import directget.objectlocator.api.ILocateObject;
 import dssb.failable.Failable.Supplier;
 
 @FunctionalInterface

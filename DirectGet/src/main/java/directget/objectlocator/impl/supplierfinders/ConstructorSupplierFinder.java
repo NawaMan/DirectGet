@@ -1,12 +1,12 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import directget.objectlocator.CreationException;
-import directget.objectlocator.ILocateObject;
-import directget.objectlocator.annotations.Inject;
+import directget.objectlocator.api.ILocateObject;
+import directget.objectlocator.impl.annotations.Inject;
+import directget.objectlocator.impl.exception.CreationException;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -26,7 +26,7 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
         if (constructor.isNotNull()) {
             val supplier = new Supplier() {
                 public Object get() throws Throwable {
-                    return callConstructor(theGivenClass, constructor);
+                    return callConstructor(theGivenClass, constructor, objectLocator);
                 }
             };
             return (Supplier<TYPE, THROWABLE>) supplier;
@@ -51,16 +51,16 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
     }
     
     @SuppressWarnings("rawtypes")
-    private <T> Object callConstructor(Class<T> theGivenClass, Constructor constructor)
+    private <T> Object callConstructor(Class<T> theGivenClass, Constructor constructor, ILocateObject objectLocator)
             throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        val params   = getParameters(constructor);
+        val params   = getParameters(constructor, objectLocator);
         val instance = constructor.newInstance(params);
         // TODO - Change to use method handle later.
         return theGivenClass.cast(instance);
     }
     
     @SuppressWarnings({ "rawtypes" })
-    private Object[] getParameters(Constructor constructor) {
+    private Object[] getParameters(Constructor constructor, ILocateObject objectLocator) {
         val paramsArray = constructor.getParameters();
         val params = new Object[paramsArray.length];
         for (int i = 0; i < paramsArray.length; i++) {
@@ -68,7 +68,7 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
             val paramType         = param.getType();
             val parameterizedType = param.getParameterizedType();
             boolean isNullable    = param.getAnnotations().hasAnnotation("Nullable");
-            Object paramValue     = getParameterValue(paramType, parameterizedType, isNullable);
+            Object paramValue     = getParameterValue(paramType, parameterizedType, isNullable, objectLocator);
             params[i] = paramValue;
         }
         return params;

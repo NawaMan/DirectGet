@@ -1,9 +1,9 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
 import static java.util.Arrays.stream;
 
-import directget.objectlocator.CreationException;
-import directget.objectlocator.ILocateObject;
+import directget.objectlocator.api.ILocateObject;
+import directget.objectlocator.impl.exception.CreationException;
 import dssb.failable.Failable.Supplier;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;

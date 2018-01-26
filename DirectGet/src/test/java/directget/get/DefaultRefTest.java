@@ -18,8 +18,8 @@ import org.junit.Test;
 import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
-import directget.objectlocator.CyclicDependencyDetectedException;
-import directget.objectlocator.ObjectLocator;
+import directget.objectlocator.impl.ObjectLocator;
+import directget.objectlocator.impl.exception.CyclicDependencyDetectedException;
 import dssb.utils.common.Nulls;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -203,8 +203,7 @@ public class DefaultRefTest {
     @Test(expected=CyclicDependencyDetectedException.class)
     public void testThat_whenDefaultConstructorAskForItself_expectCyclicDependencyDetectedException() {
         // TODO - We will get the right answer if we call ObjectProvider.instance.provide(...)
-        //Get.the(Cyclic1.class);
-        ObjectLocator.instance.locate(Cyclic1.class);
+        Get.the(Cyclic1.class);
     }
     
     public static class Cyclic2 {
@@ -220,8 +219,7 @@ public class DefaultRefTest {
     @Test(expected=CyclicDependencyDetectedException.class)
     public void testThat_whenDefaultRefGetValueFromTheClassItSelf_expectCyclicDependencyDetectedException() {
         // TODO - We will get the right answer if we call ObjectProvider.instance.provide(...)
-//        Get.the(Cyclic2.class);
-        ObjectLocator.instance.locate(Cyclic1.class);
+        Get.the(Cyclic2.class);
     }
     
     public static interface TheInterface1 {

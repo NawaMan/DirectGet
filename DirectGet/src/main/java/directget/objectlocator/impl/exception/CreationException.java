@@ -13,27 +13,25 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectlocator;
+package directget.objectlocator.impl.exception;
 
-import directget.get.exceptions.DirectGetRuntimeException;
+import directget.objectlocator.api.LocateObjectException;
 
 /**
  * This exception is thrown when creating an object fail.
  * 
  * @author NawaMan
  */
-public class CyclicDependencyDetectedException extends CreationException {
+public class CreationException extends LocateObjectException {
     
-    private static final long serialVersionUID = -7821227248195126756L;
-    
-    private final Class<?> clazz;
+    private static final long serialVersionUID = 5414890542605369904L;
     
     /**
      * Constructor 
      * 
      * @param clazz  the class that this fail creation is attempted too.
      **/
-    public CyclicDependencyDetectedException(Class<?> clazz) {
+    public CreationException(Class<?> clazz) {
         this(clazz, null);
     }
     
@@ -43,13 +41,8 @@ public class CyclicDependencyDetectedException extends CreationException {
      * @param clazz 
      * @param cause
      **/
-    public CyclicDependencyDetectedException(Class<?> clazz, Throwable cause) {
+    public CreationException(Class<?> clazz, Throwable cause) {
         super(clazz, cause);
-        this.clazz = clazz;
     }
     
-    /** @return the target class with the problem. */
-    public Class<?> getTargetClass() {
-        return clazz;
-    }
 }

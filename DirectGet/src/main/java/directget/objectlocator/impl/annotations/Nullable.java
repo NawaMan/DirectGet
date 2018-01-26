@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectlocator.annotations;
+package directget.objectlocator.impl.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,16 +21,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to the class is in interface will all its method have a default implementation
- *   and that the author intent to have the interface itself as an implementation to be created.
+ * A ready to use annotation to mask that a parameter in the default parameter can be null.
  * 
  * @author NawaMan
  */
-@Target(value=ElementType.TYPE)
+@Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultInterface {
-    
-    /** The name of the implementation class. */
-    public String value();
+public @interface Nullable {
     
 }

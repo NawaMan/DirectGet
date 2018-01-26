@@ -1,12 +1,12 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
-import static directget.objectlocator.supplierfinders.common.NullSupplier;
+import static directget.objectlocator.impl.supplierfinders.common.NullSupplier;
 import static java.util.Arrays.stream;
 
 import java.util.Objects;
 
 import directget.get.Get;
-import directget.objectlocator.ILocateObject;
+import directget.objectlocator.api.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;

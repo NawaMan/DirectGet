@@ -1,9 +1,9 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
-import static directget.objectlocator.supplierfinders.common.NullSupplier;
+import static directget.objectlocator.impl.supplierfinders.common.NullSupplier;
 
-import directget.objectlocator.ILocateObject;
-import directget.objectlocator.annotations.DefaultToNull;
+import directget.objectlocator.api.ILocateObject;
+import directget.objectlocator.impl.annotations.DefaultToNull;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.experimental.ExtensionMethod;

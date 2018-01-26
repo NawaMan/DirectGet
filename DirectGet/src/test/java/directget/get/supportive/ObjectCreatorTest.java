@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import directget.objectlocator.ObjectLocator;
+import directget.objectlocator.impl.ObjectLocator;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
@@ -29,7 +29,7 @@ public class ObjectCreatorTest {
     
     @Test
     public void testClassWithOneConstructor() {
-        Complex complex = new ObjectLocator().locate(Complex.class);
+        Complex complex = new ObjectLocator().get(Complex.class);
         assertTrue(complex          instanceof Complex);
         assertTrue(complex.simple() instanceof Simple);
     }

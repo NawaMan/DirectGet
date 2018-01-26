@@ -1,4 +1,4 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
 import dssb.failable.Failable.Supplier;
 

@@ -1,7 +1,7 @@
 package directget.get;
 
-import directget.objectlocator.ILocateObject;
-import directget.objectlocator.supplierfinders.IFindSupplier;
+import directget.objectlocator.api.ILocateObject;
+import directget.objectlocator.impl.supplierfinders.IFindSupplier;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;

@@ -13,26 +13,20 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.get.exceptions;
+package directget.objectlocator.impl.annotations;
 
-import directget.objectlocator.CreationException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * This exception is thrown when there is an to create an instance of an abstract class .
+ * A ready to use annotation to mask that the class has null as default.
  * 
  * @author NawaMan
  */
-public class AbstractClassCreationException extends CreationException {
-
-    private static final long serialVersionUID = 5751024581572983499L;
-
-    /**
-     * Constructor 
-     * 
-     * @param clazz  the class that this fail creation is attempted too.
-     **/
-    public AbstractClassCreationException(Class<?> clazz) {
-        super(clazz);
-    }
+@Target(value=ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefaultToNull {
     
 }

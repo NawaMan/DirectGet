@@ -1,4 +1,4 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
 import static java.util.Arrays.stream;
 
@@ -7,7 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
 import java.util.Optional;
 
-import directget.objectlocator.ILocateObject;
+import directget.objectlocator.api.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;

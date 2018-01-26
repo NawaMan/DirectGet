@@ -1,4 +1,4 @@
-package directget.objectlocator;
+package directget.objectlocator.impl;
 
 import static java.util.stream.Collectors.toList;
 
@@ -12,15 +12,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import directget.get.DefaultRefSupplierFinder;
-import directget.get.exceptions.AbstractClassCreationException;
-import directget.objectlocator.supplierfinders.ConstructorSupplierFinder;
-import directget.objectlocator.supplierfinders.DefaultInterfaceSupplierFinder;
-import directget.objectlocator.supplierfinders.DefautImplementationSupplierFinder;
-import directget.objectlocator.supplierfinders.EnumValueSupplierFinder;
-import directget.objectlocator.supplierfinders.FactoryMethodSupplierFinder;
-import directget.objectlocator.supplierfinders.IFindSupplier;
-import directget.objectlocator.supplierfinders.NullSupplierFinder;
-import directget.objectlocator.supplierfinders.SingletonFieldFinder;
+import directget.objectlocator.api.ILocateObject;
+import directget.objectlocator.api.LocateObjectException;
+import directget.objectlocator.impl.exception.AbstractClassCreationException;
+import directget.objectlocator.impl.exception.CreationException;
+import directget.objectlocator.impl.exception.CyclicDependencyDetectedException;
+import directget.objectlocator.impl.supplierfinders.ConstructorSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.DefaultInterfaceSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.DefautImplementationSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.EnumValueSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.FactoryMethodSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.IFindSupplier;
+import directget.objectlocator.impl.supplierfinders.NullSupplierFinder;
+import directget.objectlocator.impl.supplierfinders.SingletonFieldFinder;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -35,7 +39,7 @@ import lombok.experimental.ExtensionMethod;
 public class ObjectLocator implements ILocateObject {
     
     // Stepping stone
-    public static final ObjectLocator instance = new ObjectLocator();
+//    public static final ObjectLocator instance = new ObjectLocator();
     
     // TODO - Should create interface with all default method.
     // TODO - Should check for @NotNull
@@ -62,18 +66,26 @@ public class ObjectLocator implements ILocateObject {
     @SuppressWarnings("rawtypes")
     private static final ThreadLocal<Set<Class>> beingCreateds = ThreadLocal.withInitial(()->new HashSet<>());
     
+    private ILocateObject parent;
+    
+    public ObjectLocator() {
+        this.parent = null;
+    }
+    public ObjectLocator(ILocateObject parent) {
+        this.parent = parent;
+    }
+    
     
     /**
      * Create an instance of the given class.
      * 
      * @param theGivenClass
      * @return the created value.
-     * @throws CreationException when there is a problem creating the object.
-     * @throws CyclicDependencyDetectedException when cyclic dependency is detected.
+     * @throws LocateObjectException when there is a problem locating the object.
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public <TYPE> TYPE locate(Class<TYPE> theGivenClass) throws CreationException {
+    public <TYPE> TYPE get(Class<TYPE> theGivenClass) throws LocateObjectException {
         val set = beingCreateds.get();
         if (set.contains(theGivenClass))
             throw new CyclicDependencyDetectedException(theGivenClass);
@@ -109,8 +121,9 @@ public class ObjectLocator implements ILocateObject {
     
     @SuppressWarnings({ "rawtypes" })
     private <T> Supplier newSupplierFor(Class<T> theGivenClass) {
+        val parentLocator = (ILocateObject)this.parent.or(this);
         for (val finder : finders) {
-            val supplier = finder.find(theGivenClass, this);
+            val supplier = finder.find(theGivenClass, parentLocator);
             if (supplier.isNotNull())
                 return supplier;
         }

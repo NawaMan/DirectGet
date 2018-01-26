@@ -1,4 +1,4 @@
-package directget.objectlocator.supplierfinders;
+package directget.objectlocator.impl.supplierfinders;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import directget.get.Get;
+import directget.objectlocator.api.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -16,7 +17,7 @@ import lombok.experimental.ExtensionMethod;
 @ExtensionMethod({ Nulls.class, extensions.class })
 public abstract class MethodSupplierFinder implements IFindSupplier {
     
-    protected Object[] getMethodParameters(Method method) {
+    protected Object[] getMethodParameters(Method method, ILocateObject objectLocator) {
         val paramsArray = method.getParameters();
         val params = new Object[paramsArray.length];
         for (int i = 0; i < paramsArray.length; i++) {
@@ -24,14 +25,14 @@ public abstract class MethodSupplierFinder implements IFindSupplier {
             val paramType         = param.getType();
             val parameterizedType = param.getParameterizedType();
             boolean isNullable    = param.getAnnotations().hasAnnotation("Nullable");
-            Object  paramValue    = getParameterValue(paramType, parameterizedType, isNullable);
+            Object  paramValue    = getParameterValue(paramType, parameterizedType, isNullable, objectLocator);
             params[i] = paramValue;
         }
         return params;
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object getParameterValue(Class paramType, Type type, boolean isNullable) {
+    protected Object getParameterValue(Class paramType, Type type, boolean isNullable, ILocateObject objectLocator) {
         if (type instanceof ParameterizedType) {
             val parameterizedType = (ParameterizedType)type;
             val actualType        = (Class)parameterizedType.getActualTypeArguments()[0];
@@ -40,7 +41,7 @@ public abstract class MethodSupplierFinder implements IFindSupplier {
                 return new Supplier() {
                     @Override
                     public Object get() throws Throwable {
-                        return getValueOf(actualType);
+                        return objectLocator.get(actualType);
                     }
                 };
             
@@ -48,25 +49,25 @@ public abstract class MethodSupplierFinder implements IFindSupplier {
                 return new java.util.function.Supplier() {
                     @Override
                     public Object get() {
-                        return getValueOf(actualType);
+                        return objectLocator.get(actualType);
                     }
                 };
             
             if (paramType == Optional.class)
-                return getOptionalValueOrNullWhenFailAndNullable(isNullable, actualType);
+                return getOptionalValueOrNullWhenFailAndNullable(isNullable, actualType, objectLocator);
         }
         
         if (isNullable)
-            return getValueOrNullWhenFail(paramType);
+            return getValueOrNullWhenFail(paramType, objectLocator);
         
-        val paramValue = getValueOf(paramType);
+        val paramValue = objectLocator.get(paramType);
         return paramValue;
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected Object getOptionalValueOrNullWhenFailAndNullable(boolean isNullable, Class actualType) {
+    protected Object getOptionalValueOrNullWhenFailAndNullable(boolean isNullable, Class actualType, ILocateObject objectLocator) {
         try {
-            val paramValue = getValueOf(actualType);
+            val paramValue = objectLocator.get(actualType);
             return Optional.ofNullable(paramValue);
         } catch (Exception e) {
             return isNullable ? null : Optional.empty();
@@ -74,16 +75,12 @@ public abstract class MethodSupplierFinder implements IFindSupplier {
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected Object getValueOrNullWhenFail(Class paramType) {
+    protected Object getValueOrNullWhenFail(Class paramType, ILocateObject objectLocator) {
         try {
-            return getValueOf(paramType);
+            return objectLocator.get(paramType);
         } catch (Exception e) {
             return null;
         }
-    }
-    
-    protected <T> T getValueOf(Class<T> clzz) {
-        return Get.the(clzz);
     }
     
 }

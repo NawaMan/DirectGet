@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectlocator.annotations;
+package directget.objectlocator.impl.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,12 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to mask that a constructor is the be used to create the object.
+ * A ready to use annotation to mask that 
+ *    an enum value is the default value,
+ *    a public field is default instance, or
+ *    a public method is a factory method.
  * 
  * @author NawaMan
  */
-@Target(value=ElementType.CONSTRUCTOR)
+@Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Inject {
+public @interface Default {
     
 }

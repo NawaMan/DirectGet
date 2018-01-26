@@ -28,10 +28,7 @@ import directget.objectlocator.impl.supplierfinders.SingletonFieldFinder;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Value;
 import lombok.val;
 import lombok.experimental.Accessors;
 import lombok.experimental.ExtensionMethod;
@@ -198,12 +195,18 @@ public class ObjectLocator implements ILocateObject {
         if (binding.isNotNull())
             return ()->binding.get(this);
         
+        if (ObjectLocator.class.isAssignableFrom(theGivenClass))
+            return ()->this;
+        
         val parentLocator = (ILocateObject)this.parent.or(this);
         for (val finder : finders) {
             val supplier = finder.find(theGivenClass, parentLocator);
             if (supplier.isNotNull())
                 return supplier;
         }
+        
+        if (ILocateObject.class.isAssignableFrom(theGivenClass))
+            return ()->this;
         
         return ()->handleLoateFailure(theGivenClass);
     }

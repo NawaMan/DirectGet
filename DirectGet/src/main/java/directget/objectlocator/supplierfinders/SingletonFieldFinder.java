@@ -1,4 +1,4 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
 import static java.util.Arrays.stream;
 
@@ -7,6 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
 import java.util.Optional;
 
+import directget.objectlocator.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -17,7 +18,9 @@ public class SingletonFieldFinder implements IFindSupplier {
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         val fieldValue = findValueFromSingletonField(theGivenClass);
         if (fieldValue.isNotNull())
             return (Supplier<TYPE, THROWABLE>) fieldValue;

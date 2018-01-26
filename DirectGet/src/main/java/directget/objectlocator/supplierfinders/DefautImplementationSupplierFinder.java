@@ -1,11 +1,12 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
-import static directget.objectprovider.ifindsupplier.common.NullSupplier;
+import static directget.objectlocator.supplierfinders.common.NullSupplier;
 import static java.util.Arrays.stream;
 
 import java.util.Objects;
 
 import directget.get.Get;
+import directget.objectlocator.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -16,7 +17,9 @@ public class DefautImplementationSupplierFinder implements IFindSupplier {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         if (theGivenClass.getAnnotations().hasAnnotation("DefaultImplementation")) {
             val defaultImplementationClass = findDefaultImplementation(theGivenClass);
             if (defaultImplementationClass.isNotNull()) {

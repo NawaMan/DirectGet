@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectprovider.annotations;
+package directget.objectlocator.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,12 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to mask that a parameter in the default parameter can be null.
+ * A ready to use annotation to mask that 
+ *    an enum value is the default value,
+ *    a public field is default instance, or
+ *    a public method is a factory method.
  * 
  * @author NawaMan
  */
-@Target(value=ElementType.PARAMETER)
+@Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Nullable {
+public @interface Default {
     
 }

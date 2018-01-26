@@ -15,7 +15,7 @@
 //  ========================================================================
 package directget.get.exceptions;
 
-import directget.objectprovider.CreationException;
+import directget.objectlocator.CreationException;
 
 /**
  * This exception is thrown when there is an to create an instance of an abstract class .

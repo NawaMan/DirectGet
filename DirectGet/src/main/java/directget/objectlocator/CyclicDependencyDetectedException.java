@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectprovider;
+package directget.objectlocator;
 
 import directget.get.exceptions.DirectGetRuntimeException;
 

@@ -1,8 +1,9 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
 import static java.util.Arrays.stream;
 
-import directget.objectprovider.CreationException;
+import directget.objectlocator.CreationException;
+import directget.objectlocator.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
@@ -11,7 +12,9 @@ import lombok.experimental.ExtensionMethod;
 public class EnumValueSupplierFinder implements IFindSupplier {
 
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         if (!theGivenClass.isEnum()) 
             return null;
         

@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectprovider.annotations;
+package directget.objectlocator.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,12 +21,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A ready to use annotation to mask that the class has null as default.
+ * A ready to use annotation to specify a classname for the default implementation.
+ * 
+ * If the class is not found in the classpath or it was found to be uncompatible,
+ *   this annotation will be ignore.
  * 
  * @author NawaMan
  */
 @Target(value=ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultToNull {
+public @interface DefaultImplementation {
+    
+    /** The name of the implementation class. */
+    public String value();
     
 }

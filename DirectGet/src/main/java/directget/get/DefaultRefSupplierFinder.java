@@ -1,6 +1,7 @@
-package directget.objectprovider.ifindsupplier;
+package directget.get;
 
-import directget.get.Ref;
+import directget.objectlocator.ILocateObject;
+import directget.objectlocator.supplierfinders.IFindSupplier;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -10,7 +11,9 @@ import lombok.experimental.ExtensionMethod;
 public class DefaultRefSupplierFinder implements IFindSupplier {
 
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         val defaultRef = Ref.findDefaultRefOf(theGivenClass);
         return defaultRef.isNotNull()
                 ? ()->defaultRef.asSupplier().get()

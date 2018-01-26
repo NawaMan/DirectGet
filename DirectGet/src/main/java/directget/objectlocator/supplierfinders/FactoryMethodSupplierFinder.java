@@ -1,4 +1,4 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
 import static java.util.Arrays.stream;
 
@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 
+import directget.objectlocator.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -18,7 +19,9 @@ public class FactoryMethodSupplierFinder extends MethodSupplierFinder implements
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         val methodValue = findValueFromFactoryMethod(theGivenClass);
         if (methodValue.isNotNull())
             return (Supplier<TYPE, THROWABLE>)methodValue;

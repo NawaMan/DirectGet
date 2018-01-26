@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectprovider.annotations;
+package directget.objectlocator.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

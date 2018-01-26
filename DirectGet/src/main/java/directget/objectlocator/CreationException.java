@@ -13,7 +13,7 @@
 //
 //  You may elect to redistribute this code under either of these licenses.
 //  ========================================================================
-package directget.objectprovider;
+package directget.objectlocator;
 
 /**
  * This exception is thrown when creating an object fail.

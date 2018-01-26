@@ -1,4 +1,4 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;

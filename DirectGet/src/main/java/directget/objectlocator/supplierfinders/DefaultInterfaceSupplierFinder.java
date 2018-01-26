@@ -1,7 +1,8 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
-import static directget.objectprovider.ifindsupplier.common.NullSupplier;
+import static directget.objectlocator.supplierfinders.common.NullSupplier;
 
+import directget.objectlocator.ILocateObject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.experimental.ExtensionMethod;
@@ -11,7 +12,9 @@ public class DefaultInterfaceSupplierFinder implements IFindSupplier {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         boolean isDefaultInterface
                 =  theGivenClass.isInterface()
                 && theGivenClass.getAnnotations().hasAnnotation("DefaultInterface");

@@ -1,11 +1,12 @@
-package directget.objectprovider.ifindsupplier;
+package directget.objectlocator.supplierfinders;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import directget.objectprovider.CreationException;
-import directget.objectprovider.annotations.Inject;
+import directget.objectlocator.CreationException;
+import directget.objectlocator.ILocateObject;
+import directget.objectlocator.annotations.Inject;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -16,13 +17,13 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
     
     public static final String INJECT = Inject.class.getSimpleName();
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(Class<TYPE> theGivenClass) {
-        @SuppressWarnings("rawtypes")
+    public <TYPE, THROWABLE extends Throwable> Supplier<TYPE, THROWABLE> find(
+            Class<TYPE>   theGivenClass,
+            ILocateObject objectLocator) {
         val constructor = findConstructor(theGivenClass);
         if (constructor.isNotNull()) {
-            @SuppressWarnings({"rawtypes" })
             val supplier = new Supplier() {
                 public Object get() throws Throwable {
                     return callConstructor(theGivenClass, constructor);

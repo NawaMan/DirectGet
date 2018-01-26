@@ -1,4 +1,4 @@
-package directget.objectprovider;
+package directget.objectlocator;
 
 import static java.util.stream.Collectors.toList;
 
@@ -11,16 +11,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import directget.get.DefaultRefSupplierFinder;
 import directget.get.exceptions.AbstractClassCreationException;
-import directget.objectprovider.ifindsupplier.ConstructorSupplierFinder;
-import directget.objectprovider.ifindsupplier.DefaultInterfaceSupplierFinder;
-import directget.objectprovider.ifindsupplier.DefaultRefSupplierFinder;
-import directget.objectprovider.ifindsupplier.DefautImplementationSupplierFinder;
-import directget.objectprovider.ifindsupplier.EnumValueSupplierFinder;
-import directget.objectprovider.ifindsupplier.FactoryMethodSupplierFinder;
-import directget.objectprovider.ifindsupplier.IFindSupplier;
-import directget.objectprovider.ifindsupplier.NullSupplierFinder;
-import directget.objectprovider.ifindsupplier.SingletonFieldFinder;
+import directget.objectlocator.supplierfinders.ConstructorSupplierFinder;
+import directget.objectlocator.supplierfinders.DefaultInterfaceSupplierFinder;
+import directget.objectlocator.supplierfinders.DefautImplementationSupplierFinder;
+import directget.objectlocator.supplierfinders.EnumValueSupplierFinder;
+import directget.objectlocator.supplierfinders.FactoryMethodSupplierFinder;
+import directget.objectlocator.supplierfinders.IFindSupplier;
+import directget.objectlocator.supplierfinders.NullSupplierFinder;
+import directget.objectlocator.supplierfinders.SingletonFieldFinder;
 import dssb.failable.Failable.Supplier;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -32,10 +32,10 @@ import lombok.experimental.ExtensionMethod;
  * @author NawaMan
  */
 @ExtensionMethod({ Nulls.class })
-public class ObjectProvider implements IProvideObject {
+public class ObjectLocator implements ILocateObject {
     
     // Stepping stone
-    public static final ObjectProvider instance = new ObjectProvider();
+    public static final ObjectLocator instance = new ObjectLocator();
     
     // TODO - Should create interface with all default method.
     // TODO - Should check for @NotNull
@@ -73,7 +73,7 @@ public class ObjectProvider implements IProvideObject {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public <TYPE> TYPE provide(Class<TYPE> theGivenClass) throws CreationException {
+    public <TYPE> TYPE locate(Class<TYPE> theGivenClass) throws CreationException {
         val set = beingCreateds.get();
         if (set.contains(theGivenClass))
             throw new CyclicDependencyDetectedException(theGivenClass);
@@ -110,7 +110,7 @@ public class ObjectProvider implements IProvideObject {
     @SuppressWarnings({ "rawtypes" })
     private <T> Supplier newSupplierFor(Class<T> theGivenClass) {
         for (val finder : finders) {
-            val supplier = finder.find(theGivenClass);
+            val supplier = finder.find(theGivenClass, this);
             if (supplier.isNotNull())
                 return supplier;
         }

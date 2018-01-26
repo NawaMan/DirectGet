@@ -1,6 +1,6 @@
-package directget.get;
+package directget.objectlocator.impl;
 
-public class TheClass2 implements DefaultRefTest.TheInterface2 {
+public class TheClass2 implements DefaultImplementationTest.TheInterface2 {
     
     public static final String TEXT = "I am class 2.";
     

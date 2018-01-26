@@ -29,6 +29,10 @@ import directget.get.supportive.RefTo;
 import lombok.val;
 import lombok.experimental.ExtensionMethod;
 
+
+
+// TODO - multiple proposals ... combine to map or list
+
 /**
  * This class provide access to the application scope.
  * 

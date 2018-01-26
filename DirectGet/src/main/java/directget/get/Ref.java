@@ -55,7 +55,6 @@ public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Compa
     private static final ObjectLocator objectCreator
             = new ObjectLocator.Builder()
                 .parent(GetObjectLocator.instance)
-                .useShareSupplierCache(true)
                 .additionalSupplierFinders(asList(new DefaultRefSupplierFinder()))
                 .build();
     

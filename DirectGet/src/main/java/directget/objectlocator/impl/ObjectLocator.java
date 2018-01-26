@@ -68,15 +68,11 @@ public class ObjectLocator implements ILocateObject {
     );
     
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, Supplier> sharedSuppliers = new ConcurrentHashMap<>();
-    
-    @SuppressWarnings("rawtypes")
     private static final ThreadLocal<Set<Class>> beingCreateds = ThreadLocal.withInitial(()->new HashSet<>());
     
     @SuppressWarnings("unchecked")
     private static final List<IFindSupplier> noAdditionalSuppliers = (List<IFindSupplier>)EMPTY_LIST;
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static final Bindings noBinding = new Bindings.Builder().build();
     
     private ILocateObject        parent;
@@ -86,30 +82,26 @@ public class ObjectLocator implements ILocateObject {
     private Bindings binidings;
     
     @SuppressWarnings("rawtypes")
-    private Map<Class, Supplier> suppliers;
+    private Map<Class, Supplier> suppliers = new ConcurrentHashMap<Class, Supplier>();
     
-    private boolean              useShareSupplierCache;
     private List<IFindSupplier>  additionalSupplierFinders;
     
     public ObjectLocator() {
-        this(null, true, null, null, null);
+        this(null, null, null, null);
     }
     
     @SuppressWarnings("rawtypes")
     public ObjectLocator(
             ILocateObject        parent,
-            boolean              useShareSupplierCache,
             List<IFindSupplier>  additionalSupplierFinders,
             Bindings             bingings,
             IHandleLocateFailure locateFailureHandler) {
         this.parent               = parent;
         this.finders              = combineFinders(additionalSupplierFinders);
         this.locateFailureHandler = locateFailureHandler;
-        this.suppliers            = useShareSupplierCache ? sharedSuppliers : new ConcurrentHashMap<Class, Supplier>();
         this.binidings            = bingings.or(noBinding);
         
         // Supportive
-        this.useShareSupplierCache     = useShareSupplierCache;
         this.additionalSupplierFinders = additionalSupplierFinders;
     }
     
@@ -119,17 +111,16 @@ public class ObjectLocator implements ILocateObject {
     @Accessors(fluent=true,chain=true)
     public static class Builder {
         private ILocateObject        parent;
-        private boolean              useShareSupplierCache;
         private List<IFindSupplier>  additionalSupplierFinders;
         private Bindings             bingings;
         private IHandleLocateFailure locateFailureHandler;
         
         public Builder() {
-            this(null, true, null, null, null);
+            this(null, null, null, null);
         }
         
         public ObjectLocator build() {
-            return new ObjectLocator(parent, useShareSupplierCache, additionalSupplierFinders, bingings, locateFailureHandler);
+            return new ObjectLocator(parent, additionalSupplierFinders, bingings, locateFailureHandler);
         }
     }
     
@@ -142,19 +133,19 @@ public class ObjectLocator implements ILocateObject {
     }
     
     public ObjectLocator withNewCache() {
-        return new ObjectLocator(parent, false, additionalSupplierFinders, binidings, locateFailureHandler);
+        return new ObjectLocator(parent, additionalSupplierFinders, binidings, locateFailureHandler);
     }
     
     public ObjectLocator withSharedCache() {
-        return new ObjectLocator(parent, true, additionalSupplierFinders, binidings, locateFailureHandler);
+        return new ObjectLocator(parent, additionalSupplierFinders, binidings, locateFailureHandler);
     }
     
     public ObjectLocator wihtLocateFailureHandler(IHandleLocateFailure locateFailureHandler) {
-        return new ObjectLocator(parent, useShareSupplierCache, additionalSupplierFinders, binidings, locateFailureHandler);
+        return new ObjectLocator(parent, additionalSupplierFinders, binidings, locateFailureHandler);
     }
     
     public ObjectLocator wihtBindings(Bindings binidings) {
-        return new ObjectLocator(parent, useShareSupplierCache, additionalSupplierFinders, binidings, locateFailureHandler);
+        return new ObjectLocator(parent, additionalSupplierFinders, binidings, locateFailureHandler);
     }
     
     /**

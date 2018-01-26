@@ -19,6 +19,9 @@ import directget.get.exceptions.FactoryException;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
 import directget.objectlocator.impl.ObjectLocator;
+import directget.objectlocator.impl.ConstructorTest.Car;
+import directget.objectlocator.impl.ConstructorTest.Driver;
+import directget.objectlocator.impl.ConstructorTest.SuperCar;
 import directget.objectlocator.impl.exception.CyclicDependencyDetectedException;
 import dssb.utils.common.Nulls;
 import lombok.val;
@@ -37,11 +40,6 @@ public class DefaultRefTest {
     @Test
     public void testThat_theOfClassRefIsTheDefaultRef() {
         assertEquals(Ref.of(Car.class), Ref.defaultOf(Car.class));
-    }
-    
-    @Test
-    public void testThat_useDefaultConstructorToProvideTheValue() {
-        assertEquals("FLASH!", Get.the(Car.class).zoom());
     }
     
     public static class Driver {
@@ -76,6 +74,11 @@ public class DefaultRefTest {
         );
     }
     
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Inject {
+        
+    }
+    
     public static class Person {
         private Car car;
         public Person() {
@@ -87,16 +90,6 @@ public class DefaultRefTest {
         public String zoom() {
             return (car != null) ? car.zoom() : "Meh";
         }
-    }
-    
-    @Test
-    public void testDefaultConstructor() {
-        assertEquals("Meh", Get.the(Person.class).zoom());
-    }
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Inject {
-        
     }
     
     public static class AnotherPerson {
@@ -111,16 +104,6 @@ public class DefaultRefTest {
         public String zoom() {
             return (car != null) ? car.zoom() : "Meh";
         }
-    }
-    
-    @Test
-    public void testInjectConstructor() {
-        assertEquals("FLASH!", Get.the(AnotherPerson.class).zoom());
-    }
-    
-    @Test
-    public void testThe_ofClass_useObjectFactory() {
-        assertNotNull(Get.the(Person.class));
     }
     
     @Test
@@ -193,19 +176,6 @@ public class DefaultRefTest {
         assertNull(Get.the(GreetingWithRefNoValue.instance));
     }
     
-    public static class Cyclic1 {
-        
-        public Cyclic1(Cyclic1 another) {
-        }
-    }
-    
-    @Ignore("Entanglement")
-    @Test(expected=CyclicDependencyDetectedException.class)
-    public void testThat_whenDefaultConstructorAskForItself_expectCyclicDependencyDetectedException() {
-        // TODO - We will get the right answer if we call ObjectProvider.instance.provide(...)
-        Get.the(Cyclic1.class);
-    }
-    
     public static class Cyclic2 {
         
         @Ref.DefaultRef
@@ -238,73 +208,6 @@ public class DefaultRefTest {
         assertTrue(Get.the(TheInterface1.class) instanceof TheClass1);
     }
     
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface DefaultImplementation {
-        
-        public String value();
-        
-    }
-    
-    
-    @DefaultImplementation("directget.get.TheClass2")
-    public static interface TheInterface2 {
-        
-        public String getText();
-        
-    }
-    
-    public static class TheInterface2User {
-        
-        private TheInterface2 i2;
-        
-        public TheInterface2User(TheInterface2 i2) {
-            this.i2 = i2;
-        }
-        
-        public String getText() {
-            return this.i2.whenNotNull().map(TheInterface2::getText).orElse("I am TheInterface2User.");
-        }
-        
-    }
-    
-    @Test
-    public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis() {
-        assertTrue(Get.the(TheInterface2.class) instanceof TheClass2);
-        assertEquals(TheClass2.TEXT, Get.the(TheInterface2User.class).getText());
-    }
-    
-    
-    @DefaultImplementation("directget.get.TheClassThatDoesNotExist")
-    public static interface TheInterface3 {
-        
-        public String getText();
-        
-    }
-    
-    public static class TheInterface3User {
-        
-        public static final String TEXT = "I am TheInterface3User.";
-        
-        private TheInterface3 i3;
-        
-        public TheInterface3User(TheInterface3 i3) {
-            this.i3 = i3;
-        }
-        
-        public String getText() {
-            return this.i3.whenNotNull().map(TheInterface3::getText).orElse(TEXT);
-        }
-        
-    }
-    
-    @Test
-    public void testThat_whenAnnotatedWithDefaultImplementation_findTheClassAndUseItsDefaultAsThis_nullWhenNotExist() {
-        assertEquals(TheInterface3User.TEXT, Get.the(TheInterface3User.class).getText());
-    }
-    // TODO - multiple proposals ... cmbine to map or list
-    
-    
     public static class SuperClass {
         
         @Ref.DefaultRef
@@ -325,214 +228,9 @@ public class DefaultRefTest {
         assertTrue(Get.the(SuperClass.class) instanceof SubClass);
     }
     
-    
-    public static enum MyEnum1 { Value1, Value2; }
-    
-    @Test
-    public void testThat_enumValue_isTheFirstValue() {
-        assertEquals(MyEnum1.Value1, Get.the(MyEnum1.class));
-    }
-    
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Default {
-        
-    }
-    
-    public static enum MyEnum2 { Value1, @Default Value2; }
-    
-    @Test
-    public void testThat_enumValueWithDefaultAnnotation() {
-        assertEquals(MyEnum2.Value2, Get.the(MyEnum2.class));
-    }
-    
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface DefaultToNull {
-        
-    }
-    
-    @DefaultToNull
-    public static class NullValue {
-        
-    }
-    
-    @Test
-    public void testThat_classAnnotatedWithDefaultToNull_hasDefaultValueOfNull() {
-        assertNull(Get.the(NullValue.class));
-    }
-    
-    
-    public static class BasicSingleton {
-        @Default
-        public static final BasicSingleton instance = new BasicSingleton("instance");
-        
-        private String string;
-        
-        private BasicSingleton(String string) {
-            this.string = string;
-        }
-        
-        @Default
-        public static BasicSingleton newInstance() {
-            return new BasicSingleton("factory");
-        }
-    }
-    
-    @Test
-    public void testThat_singletonClassWithDefaultAnnotationHasTheInstanceAsTheValue_withFieldMorePreferThanFactory() {
-        assertEquals(BasicSingleton.instance, Get.the(BasicSingleton.class));
-        assertEquals("instance", Get.the(BasicSingleton.class).string);
-    }
-    
-    
-    public static class OptionalSingleton {
-        @Default
-        public static final Optional<OptionalSingleton> instance = Optional.of(new OptionalSingleton());
-        
-        private OptionalSingleton() {}
-    }
-    
-    @Test
-    public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue() {
-        OptionalSingleton value = Get.the(OptionalSingleton.class);
-        assertEquals(OptionalSingleton.instance.get(), value);
-    }
-    
-    
-    public static class EmptyOptionalSingleton {
-        @Default
-        public static final Optional<EmptyOptionalSingleton> instance = Optional.empty();
-        
-        private EmptyOptionalSingleton() {}
-    }
-    
-    @Test
-    public void testThat_optionalSingletonClassWithDefaultAnnotationHasTheInstanceAsTheValue_empty() {
-        EmptyOptionalSingleton value = Get.the(EmptyOptionalSingleton.class);
-        assertEquals(EmptyOptionalSingleton.instance.orElse(null), value);
-        assertNull(value);
-    }
-    
-    
-    public static class SupplierSingleton {
-        
-        private static int counter = 0;
-        
-        private static final SupplierSingleton secretInstance = new SupplierSingleton();
-        
-        @Default
-        public static final Supplier<SupplierSingleton> instance = ()->{
-            counter++;
-            return secretInstance;
-        };
-        
-        private SupplierSingleton() {}
-    }
-    
-    @Test
-    public void testThat_supplierSingletonClassWithDefaultAnnotationHasResultOfThatInstanceAsValue() {
-        int prevCounter = SupplierSingleton.counter;
-        
-        assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
-        assertEquals(prevCounter + 1, SupplierSingleton.counter);
-        
-        assertEquals(SupplierSingleton.secretInstance, Get.the(SupplierSingleton.class));
-        assertEquals(prevCounter + 2, SupplierSingleton.counter);
-    }
-    
-    
-    public static class BasicFactoryMethod {
-        
-        private static int counter = 0;
-        
-        public static final BasicFactoryMethod instance = new BasicFactoryMethod("instance");
-        
-        private String string;
-        
-        private BasicFactoryMethod(String string) {
-            this.string = string;
-        }
-        
-        @Default
-        public static BasicFactoryMethod newInstance() {
-            counter++;
-            return new BasicFactoryMethod("factory");
-        }
-    }
-    
-    @Test
-    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheInstanceAsTheValue() {
-        int prevCounter = BasicFactoryMethod.counter;
-        
-        assertEquals("factory", Get.the(BasicFactoryMethod.class).string);
-        assertEquals(prevCounter + 1, BasicFactoryMethod.counter);
-        
-        assertEquals("factory", Get.the(BasicFactoryMethod.class).string);
-        assertEquals(prevCounter + 2, BasicFactoryMethod.counter);
-    }
-    
-    public static class OptionalFactoryMethodFactoryMethod {
-        
-        private static int counter = 0;
-        private String string;
-        
-        private OptionalFactoryMethodFactoryMethod(String string) {
-            this.string = string;
-        }
-        
-        @Default
-        public static Optional<OptionalFactoryMethodFactoryMethod> newInstance() {
-            counter++;
-            return Optional.of(new OptionalFactoryMethodFactoryMethod("factory"));
-        }
-    }
-    
-    @Test
-    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_optonal() {
-        int prevCounter = OptionalFactoryMethodFactoryMethod.counter;
-        
-        assertEquals("factory", Get.the(OptionalFactoryMethodFactoryMethod.class).string);
-        assertEquals(prevCounter + 1, OptionalFactoryMethodFactoryMethod.counter);
-        
-        assertEquals("factory", Get.the(OptionalFactoryMethodFactoryMethod.class).string);
-        assertEquals(prevCounter + 2, OptionalFactoryMethodFactoryMethod.counter);
-    }
-    
-    public static class SupplierFactoryMethodFactoryMethod {
-        
-        private static int counter = 0;
-        private String string;
-        
-        private SupplierFactoryMethodFactoryMethod(String string) {
-            this.string = string;
-        }
-        
-        @Default
-        public static Supplier<SupplierFactoryMethodFactoryMethod> newInstance() {
-            return ()->{
-                counter++;
-                return new SupplierFactoryMethodFactoryMethod("factory");
-            };
-        }
-    }
-    
-    @Test
-    public void testThat_classWithFactoryMethodDefaultAnnotationHasTheResultAsTheValue_supplier() {
-        int prevCounter = SupplierFactoryMethodFactoryMethod.counter;
-        
-        assertEquals("factory", Get.the(SupplierFactoryMethodFactoryMethod.class).string);
-        assertEquals(prevCounter + 1, SupplierFactoryMethodFactoryMethod.counter);
-        
-        assertEquals("factory", Get.the(SupplierFactoryMethodFactoryMethod.class).string);
-        assertEquals(prevCounter + 2, SupplierFactoryMethodFactoryMethod.counter);
-    }
-    
-    
     public static interface Department {
         public String name();
     }
-    
     @ExtensionMethod({ Nulls.class })
     public static class Employee {
         private Department department;
@@ -542,16 +240,6 @@ public class DefaultRefTest {
         public String departmentName() {
             return department.whenNotNull().map(Department::name).orElse(null);
         }
-    }
-    
-    @Test
-    public void testThat_OptionalEmptyIsGivenIfTheValueCannotBeObtained() {
-        // Since Department is an interface an no default is given, so its value can't be found.
-        assertNull(Get.the(Employee.class).departmentName());
-        
-        // With default given, now we can get the value.
-        val mainDepartment = Ref.of(Department.class).butDefaultedTo((Department)()->"Main");
-        assertEquals("Main", With(mainDepartment).run(()->Get.the(Employee.class).departmentName()));
     }
     
     @Retention(RetentionPolicy.RUNTIME)
@@ -591,6 +279,7 @@ public class DefaultRefTest {
         }
     }
     
+    // TODO - Check if the test is lieing.
     @Test
     public void testThat_nullIsGivenToNullableOptionalParameterIfTheValueCannotBeObtainedDueToException() {
         // Since Department is an interface an no default is given, so its value can't be found.
@@ -605,26 +294,4 @@ public class DefaultRefTest {
         assertEquals("Secret", With(secretDepartment).run(()->Get.the(Manager.class).departmentName()));
     }
     
-    public static class Company {
-        private Supplier<Integer> revenueSupplier;
-        public Company(Supplier<Integer> revenueSupplier) {
-            this.revenueSupplier = revenueSupplier;
-        }
-        public int revenue() {
-            return revenueSupplier.get();
-        }
-    }
-    
-    @Test
-    public void testThat_withSupplierAsParameter_aSupplierToGetIsGiven() {
-        val company = Get.the(Company.class);
-        
-        assertEquals(0, company.revenue());
-        
-        // Notice that company is created once but the revenue returns different value as it is substitue.
-        val revenueCalculator = Ref.of(Integer.class).butDefaultedTo(10000);
-        assertEquals(10000, With(revenueCalculator).run(()->company.revenue()).intValue());
-        
-        assertEquals(0, company.revenue());
-    }
 }

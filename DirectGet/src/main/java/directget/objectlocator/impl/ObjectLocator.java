@@ -77,6 +77,9 @@ public class ObjectLocator implements ILocateObject {
     @SuppressWarnings("rawtypes")
     private Map<Class, Supplier> suppliers;
     
+    private boolean              useShareSupplierCache;
+    private List<IFindSupplier>  additionalSupplierFinders;
+    
     public ObjectLocator() {
         this(null, true, null, null);
     }
@@ -91,6 +94,10 @@ public class ObjectLocator implements ILocateObject {
         this.finders              = combineFinders(additionalSupplierFinders);
         this.locateFailureHandler = locateFailureHandler;
         this.suppliers            = useShareSupplierCache ? sharedSuppliers : new ConcurrentHashMap<Class, Supplier>();
+        
+        // Supportive
+        this.useShareSupplierCache     = useShareSupplierCache;
+        this.additionalSupplierFinders = additionalSupplierFinders;
     }
     
     private static List<IFindSupplier> combineFinders(List<IFindSupplier> additionalSupplierFinders) {
@@ -99,6 +106,18 @@ public class ObjectLocator implements ILocateObject {
         finderList.addAll(additionalSupplierFinders.or(emptyList));
         finderList.addAll(elementLevelfinders);
         return unmodifiableList(finderList);
+    }
+    
+    public ObjectLocator withNewCache() {
+        return new ObjectLocator(parent, false, additionalSupplierFinders, locateFailureHandler);
+    }
+    
+    public ObjectLocator withSharedCache() {
+        return new ObjectLocator(parent, true, additionalSupplierFinders, locateFailureHandler);
+    }
+    
+    public ObjectLocator wihtLocateFailureHandler(IHandleLocateFailure locateFailureHandler) {
+        return new ObjectLocator(parent, useShareSupplierCache, additionalSupplierFinders, locateFailureHandler);
     }
     
     /**

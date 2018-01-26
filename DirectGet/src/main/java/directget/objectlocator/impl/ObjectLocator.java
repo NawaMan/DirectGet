@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import directget.objectlocator.api.ILocateObject;
 import directget.objectlocator.api.LocateObjectException;
@@ -45,7 +46,7 @@ public class ObjectLocator implements ILocateObject {
     // TODO - Should check for @NotNull
     
     @SuppressWarnings("rawtypes")
-    private static final Supplier NullSupplier = ()->null;
+    private static final Supplier NoSupplier = ()->null;
     
     
     private final List<IFindSupplier> classLevelfinders = Arrays.asList(
@@ -69,13 +70,14 @@ public class ObjectLocator implements ILocateObject {
     @SuppressWarnings("unchecked")
     private static final List<IFindSupplier> emptyList = (List<IFindSupplier>)EMPTY_LIST;
     
-    private ILocateObject       parent;
-    private List<IFindSupplier> finders;
+    private ILocateObject        parent;
+    private List<IFindSupplier>  finders;
+    private IHandleLocateFailure locateFailureHandler;
     
     public ObjectLocator() {
-        this(null, null);
+        this(null, null, null);
     }
-    public ObjectLocator(ILocateObject parent, List<IFindSupplier> additionalSupplierFinders) {
+    public ObjectLocator(ILocateObject parent, List<IFindSupplier> additionalSupplierFinders, IHandleLocateFailure locateFailureHandler) {
         this.parent  = parent;
         
         val finderList = new ArrayList<IFindSupplier>();
@@ -83,6 +85,8 @@ public class ObjectLocator implements ILocateObject {
         finderList.addAll(additionalSupplierFinders.or(emptyList));
         finderList.addAll(elementLevelfinders);
         this.finders = unmodifiableList(finderList);
+        
+        this.locateFailureHandler = locateFailureHandler;
     }
     
     
@@ -123,7 +127,7 @@ public class ObjectLocator implements ILocateObject {
         Supplier supplier = suppliers.get(theGivenClass);
         if (supplier.isNull()) {
             supplier = newSupplierFor(theGivenClass);
-            supplier = supplier.or(NullSupplier);
+            supplier = supplier.or(NoSupplier);
             suppliers.put(theGivenClass, supplier);
         }
         return supplier;
@@ -138,10 +142,25 @@ public class ObjectLocator implements ILocateObject {
                 return supplier;
         }
         
-        if (Modifier.isAbstract(theGivenClass.getModifiers()))
+        return ()->handleLoateFailure(theGivenClass);
+    }
+    
+    private <T> Object handleLoateFailure(Class<T> theGivenClass) {
+        if (this.locateFailureHandler.isNotNull()) {
+            return callHandler(theGivenClass);
+        } else {
+            return defaultHandling(theGivenClass);
+        }
+    }
+    private <T> Object callHandler(Class<T> theGivenClass) {
+        T value = this.locateFailureHandler.handle(theGivenClass);
+        return value;
+    }
+    private <T> Object defaultHandling(Class<T> theGivenClass) {
+        if (theGivenClass.isInterface()
+         || Modifier.isAbstract(theGivenClass.getModifiers()))
             throw new AbstractClassCreationException(theGivenClass);
         
-        // TODO - Should allow this to be configurable.
         return null;
     }
     

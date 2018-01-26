@@ -24,7 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -38,7 +37,6 @@ import directget.get.supportive.ICanBeSupplier;
 import directget.get.supportive.Provider;
 import directget.get.supportive.RefOf;
 import directget.get.supportive.RefTo;
-import directget.objectlocator.api.ILocateObject;
 import directget.objectlocator.impl.ObjectLocator;
 import directget.objectlocator.impl.exception.ObjectCreationException;
 import dssb.callerid.impl.CallerId;
@@ -54,7 +52,11 @@ import lombok.val;
  */
 public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Comparable<Ref<T>> {
     
-    private static final ObjectLocator objectCreator = new ObjectLocator(GetObjectLocator.instance, asList(new DefaultRefSupplierFinder()));
+    private static final ObjectLocator objectCreator
+            = new ObjectLocator(
+                    GetObjectLocator.instance, 
+                    asList(new DefaultRefSupplierFinder()),
+                    null);
     
     private final Class<T> targetClass;
     

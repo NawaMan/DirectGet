@@ -53,11 +53,11 @@ import lombok.val;
 public abstract class Ref<T> implements ICanBeSupplier<T>, HasProvider<T>, Comparable<Ref<T>> {
     
     private static final ObjectLocator objectCreator
-            = new ObjectLocator(
-                    GetObjectLocator.instance, 
-                    true,
-                    asList(new DefaultRefSupplierFinder()),
-                    null);
+            = new ObjectLocator.Builder()
+                .parent(GetObjectLocator.instance)
+                .useShareSupplierCache(true)
+                .additionalSupplierFinders(asList(new DefaultRefSupplierFinder()))
+                .build();
     
     private final Class<T> targetClass;
     

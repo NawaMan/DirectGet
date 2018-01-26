@@ -92,7 +92,7 @@ public class ConstructorSupplierFinder extends MethodSupplierFinder implements I
     
     public static <T> Constructor<T> getNoArgConstructor(Class<T> clzz) {
         try {
-            return clzz.getConstructor();
+            return clzz.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             return null;
         } catch (SecurityException e) {
